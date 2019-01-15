@@ -1,20 +1,20 @@
-﻿using Shared;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shared;
 
-namespace TestANDGate
+namespace ComponentLibrary
 {
-    public class GenericValue<T> : IValueGeneric<T>
+    public class BooleanValue : IValueGeneric<bool>
     {
-        public GenericValue(T value)
+        public BooleanValue(bool value)
         {
             this.Value = value;
         }
 
-        public T Value
+        public bool Value
         {
             get;
             set;
@@ -26,9 +26,10 @@ namespace TestANDGate
             {
                 return this.Value;
             }
+
             set
             {
-                this.Value = (T)value;
+                this.Value = (bool)value;
             }
         }
     }

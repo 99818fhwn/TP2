@@ -7,28 +7,36 @@ using Shared;
 
 namespace ComponentLibrary
 {
-    public class GenericValue<T> : IValueGeneric<T>
+    public class BooleanPin : IPinGeneric<bool>
     {
-        public GenericValue(T value)
+        public BooleanPin(IValueGeneric<bool> value, string label)
         {
             this.Value = value;
+            this.Label = label;
         }
 
-        public T Value
+        public IValueGeneric<bool> Value
         {
             get;
             set;
         }
 
-        object IValue.Value
+        public string Label
+        {
+            get;
+            set;
+        }
+
+        IValue IPin.Value
         {
             get
             {
                 return this.Value;
             }
+
             set
             {
-                this.Value = (T)value;
+                this.Value.Value = (bool)value.Value;
             }
         }
     }
