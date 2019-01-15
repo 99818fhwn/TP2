@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ComponentLibrary
+namespace TestANDGate
 {
     public class GenericPin<T> : IPinGeneric<T>
     {

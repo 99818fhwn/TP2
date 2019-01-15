@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Shared
+namespace ProgramMngWpfProj.VM
 {
-    public interface IPinGeneric<T> : IPinGeneric
+    public class ProgramMngVM
     {
-        new IValueGeneric<T> Value { get; set; }
     }
 }

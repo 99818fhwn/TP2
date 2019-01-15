@@ -29,6 +29,11 @@ namespace LogicDesigner.Model
             get;
         }
 
+        public void Activate()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Execute()
         {
             throw new NotImplementedException();

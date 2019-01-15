@@ -49,6 +49,11 @@ namespace ComponentLibrary
 
         public event EventHandler PictureChanged;
 
+        public void Activate()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Execute()
         {
             if (!this.Inputs.Any(x => (bool)x.Value.Value == false))

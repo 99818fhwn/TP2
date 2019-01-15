@@ -31,7 +31,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Shared">
+    <Reference Include="Shared, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\LogicDesigner\Shared.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -46,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ANDGate.cs" />
+    <Compile Include="BoolANDGate.cs" />
+    <Compile Include="BooleanPin.cs" />
+    <Compile Include="BooleanValue.cs" />
     <Compile Include="GenericPin.cs" />
     <Compile Include="GenericValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

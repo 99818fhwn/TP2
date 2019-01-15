@@ -4,11 +4,12 @@ namespace Shared
 {
     public interface INode
     {
-        ICollection<IPin> Inputs { get; }
+        ICollection<IPinGeneric> Inputs { get; }
 
-        ICollection<IPin> Outputs { get; }
+        ICollection<IPinGeneric> Outputs { get; }
 
         void Execute();
+        void Activate();
 
         string Label { get; }
 
