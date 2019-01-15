@@ -28,6 +28,8 @@
         public MainWindow()
         {
             InitializeComponent();
+
+            // New comment
         }
     }
 }
