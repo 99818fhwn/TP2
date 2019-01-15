@@ -23,6 +23,7 @@ namespace LogicDesigner
         public MainWindow()
         {
             InitializeComponent();
+
         }
     }
 }
