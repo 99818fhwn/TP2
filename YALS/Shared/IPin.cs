@@ -1,6 +1,6 @@
 ﻿namespace Shared
 {
-    public interface IPin
+    public interface IPinGeneric
     {
         string Label { get; set; }
 
