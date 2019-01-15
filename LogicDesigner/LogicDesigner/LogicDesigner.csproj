@@ -99,5 +99,8 @@
     <Folder Include="Command\" />
     <Folder Include="ViewModel\" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\And.jpg" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

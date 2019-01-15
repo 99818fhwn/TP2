@@ -6,7 +6,35 @@
         xmlns:local="clr-namespace:LogicDesigner"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
+    <Window.Resources>
+        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border" 
+                            BorderThickness="1"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}">
+                            <ContentPresenter Margin="2"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    RecognizesAccessKey="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Name="ComponentGrid">
+        <Button Name="SampleComponent"
+            PreviewMouseDown="ComponentMouseDown"
+            PreviewMouseUp="ComponentMouseUp"
+            PreviewMouseMove="ComponentMouseMove"
+            Width="50" Height="50">
+            <Button.Background>
+                <ImageBrush ImageSource="/Images/And.jpg" Stretch="Fill"/>
+            </Button.Background>
+        </Button>
     </Grid>
 </Window>
