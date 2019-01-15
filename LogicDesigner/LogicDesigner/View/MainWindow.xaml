@@ -27,14 +27,17 @@
     </Window.Resources>
     
     <Grid Name="ComponentGrid">
-        <Button Name="SampleComponent"
+        <Grid Name="SampleComponent" Height="Auto" Width="Auto">
+            <Button
             PreviewMouseDown="ComponentMouseDown"
             PreviewMouseUp="ComponentMouseUp"
             PreviewMouseMove="ComponentMouseMove"
             Width="50" Height="50">
-            <Button.Background>
-                <ImageBrush ImageSource="/Images/And.jpg" Stretch="Fill"/>
-            </Button.Background>
-        </Button>
+                <Button.Background>
+                    <ImageBrush ImageSource="/Images/And.jpg" Stretch="Fill"/>
+                </Button.Background>
+            </Button>
+            <TextBlock Height="30" Width="20" Margin = "0 0 0 100" Background="Red"/>
+        </Grid>        
     </Grid>
 </Window>
