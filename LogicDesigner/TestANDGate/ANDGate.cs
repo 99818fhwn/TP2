@@ -16,7 +16,7 @@ namespace ComponentLibrary
             this.Outputs = new List<IPin>();
             this.Label = "AND";
             this.Description = "If all inputs are true, the output is true";
-            this.Picture = Properties.Resources.ANDGate;
+            this.Picture = null;
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin2"));
             this.Outputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin3"));
@@ -55,7 +55,7 @@ namespace ComponentLibrary
             {
                 foreach (var o in this.Outputs)
                 {
-                    o.Value.Value = false;
+                    o.Value.Value = true;
                 }
             }
         }

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogicDesigner", "LogicDesig
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComponentLibrary", "ComponentLibrary\ComponentLibrary.csproj", "{88D86433-5071-48F7-8073-5EC1F12DE4B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestANDGate", "TestANDGate\TestANDGate.csproj", "{36F024FA-6833-4771-87BB-3E9DD576ADEC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{88D86433-5071-48F7-8073-5EC1F12DE4B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{88D86433-5071-48F7-8073-5EC1F12DE4B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{88D86433-5071-48F7-8073-5EC1F12DE4B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{36F024FA-6833-4771-87BB-3E9DD576ADEC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{36F024FA-6833-4771-87BB-3E9DD576ADEC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{36F024FA-6833-4771-87BB-3E9DD576ADEC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{36F024FA-6833-4771-87BB-3E9DD576ADEC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
