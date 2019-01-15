@@ -16,13 +16,17 @@ using System.Windows.Shapes;
 namespace LogicDesigner
 {
     /// <summary>
-    /// Interaktionslogik für MainWindow.xaml
+    /// WPF Logic
     /// </summary>
+    /// <seealso cref="System.Windows.Window" />
+    /// <seealso cref="System.Windows.Markup.IComponentConnector" />
     public partial class MainWindow : Window
     {
         public MainWindow()
         {
             InitializeComponent();
+
+
         }
     }
 }
