@@ -65,6 +65,7 @@
     </Page>
     <Compile Include="Model\Component.cs" />
     <Compile Include="Model\ComponentLoader.cs" />
+    <Compile Include="Model\SerializationLogic.cs" />
     <Compile Include="View\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
