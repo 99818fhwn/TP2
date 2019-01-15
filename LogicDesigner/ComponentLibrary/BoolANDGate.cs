@@ -1,25 +1,25 @@
-﻿using Shared;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Shared;
 
-namespace TestANDGate
+namespace ComponentLibrary
 {
-    public class ANDGate : IDisplayableNode
+    public class BoolANDGate : IDisplayableNode
     {
-        public ANDGate()
+        public BoolANDGate()
         {
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
             this.Label = "AND";
             this.Description = "If all inputs are true, the output is true";
-            this.Picture = null;
-            this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
-            this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin2"));
-            this.Outputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin3"));
+            this.Picture = Properties.Resources.ANDGate;
+            this.Inputs.Add(new BooleanPin(new BooleanValue(false), "Pin1"));
+            this.Inputs.Add(new BooleanPin(new BooleanValue(false), "Pin2"));
+            this.Outputs.Add(new BooleanPin(new BooleanValue(false), "Pin3"));
         }
 
         public ICollection<IPin> Inputs
@@ -60,7 +60,7 @@ namespace TestANDGate
             {
                 foreach (var o in this.Outputs)
                 {
-                    o.Value.Value = true;
+                    o.Value.Value = false;
                 }
             }
         }

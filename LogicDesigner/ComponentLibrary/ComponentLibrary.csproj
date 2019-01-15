@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ANDGate.cs" />
+    <Compile Include="BoolANDGate.cs" />
+    <Compile Include="BooleanPin.cs" />
+    <Compile Include="BooleanValue.cs" />
     <Compile Include="GenericPin.cs" />
     <Compile Include="GenericValue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
