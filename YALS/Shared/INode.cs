@@ -9,6 +9,7 @@ namespace Shared
         ICollection<IPin> Outputs { get; }
 
         void Execute();
+        void Activate();
 
         string Label { get; }
 
