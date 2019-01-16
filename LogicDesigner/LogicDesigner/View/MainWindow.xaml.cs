@@ -1,5 +1,6 @@
 ﻿namespace LogicDesigner
 {
+    using LogicDesigner.ViewModel;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -10,6 +11,7 @@
     using System.Windows.Data;
     using System.Windows.Documents;
     using System.Windows.Input;
+    using System.Windows.Interop;
     using System.Windows.Media;
     using System.Windows.Media.Imaging;
     using System.Windows.Navigation;
@@ -53,6 +55,30 @@
         public MainWindow()
         {
             InitializeComponent();
+
+            this.DataContext = new WindowVM();
+
+            // New component
+            Grid sampleComponent = new Grid();
+
+            // Component Body
+            Button sampleBody = new Button();
+
+            sampleBody.Name = "NewComponent";
+            sampleBody.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
+            sampleBody.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
+            sampleBody.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMove);
+            sampleBody.Height = 50;
+            sampleBody.Width = 50;
+
+            ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+            imageBrush.Stretch = Stretch.Fill;
+
+            sampleBody.Background = imageBrush;
+
+            sampleComponent.Children.Add(sampleBody);
+
+            ComponentGrid.Children.Add(sampleComponent);
         }
 
         /// <summary>
