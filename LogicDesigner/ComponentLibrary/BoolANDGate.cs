@@ -57,7 +57,7 @@ namespace ComponentLibrary
 
         public void Activate()
         {
-            throw new NotImplementedException();
+            return;
         }
 
         public void Execute()
