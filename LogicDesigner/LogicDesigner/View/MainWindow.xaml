@@ -28,6 +28,8 @@
     
     <Grid Name="ComponentGrid">
         <Grid Name="SampleComponent" Height="Auto" Width="Auto">
+            <Rectangle Height="10" Width="20" Margin = "60 -20 0 0" Fill="Gray"/>
+            <Rectangle Height="10" Width="20" Margin = "60 20 0 0" Fill="Gray"/>
             <Button
             PreviewMouseDown="ComponentMouseDown"
             PreviewMouseUp="ComponentMouseUp"
@@ -37,7 +39,6 @@
                     <ImageBrush ImageSource="/Images/And.jpg" Stretch="Fill"/>
                 </Button.Background>
             </Button>
-            <TextBlock Height="30" Width="20" Margin = "0 0 0 100" Background="Red"/>
         </Grid>        
     </Grid>
 </Window>
