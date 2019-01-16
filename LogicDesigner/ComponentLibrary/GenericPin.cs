@@ -35,7 +35,7 @@ namespace ComponentLibrary
             }
             set
             {
-                this.Value.Value = (T)value;
+                this.Value.Current = (T)value;
             }
         }
     }

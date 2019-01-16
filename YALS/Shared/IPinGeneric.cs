@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shared
 {
-    public interface IPinGeneric<T> : IPinGeneric
+    public interface IPinGeneric<T> : IPin
     {
         new IValueGeneric<T> Value { get; set; }
     }
