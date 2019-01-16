@@ -1,7 +1,9 @@
-﻿using Shared;
+﻿using Microsoft.Extensions.Configuration;
+using Shared;
 using SharedClasses;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +14,7 @@ namespace StringDisplayComponent
     {
         public StringDisplay()
         {
+            this.SetValuesByConfig();
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
             this.Label = "StringDisplay";
@@ -25,6 +28,22 @@ namespace StringDisplayComponent
             this.Pin2 = new GenericPin<int>(new GenericValue<int>(-1), "Pin2");
             this.Inputs.Add(this.Pin2);
             this.Outputs.Add(new GenericPin<string>(new GenericValue<string>(""), "Pin3"));
+        }
+
+        public void SetValuesByConfig()
+        {
+            var conf = new ConfigurationBuilder()
+                .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("stringdisplay_config.json")
+                .Build();
+            int offsetValue = 0;
+            var valid = int.TryParse(conf.GetSection("Offset")["Number"], out offsetValue);
+            this.Offset = offsetValue;
+        }
+
+        public int Offset
+        {
+            get; set;
         }
 
         public IPin Pin1
@@ -80,7 +99,7 @@ namespace StringDisplayComponent
             {
                 foreach (var p in this.Outputs)
                 {
-                    p.Value.Current = ((char)(int)this.Pin2.Value.Current).ToString();
+                    p.Value.Current = ((char)(int)this.Pin2.Value.Current + this.Offset).ToString();
                 }
             }
             else
