@@ -36,7 +36,7 @@ namespace ComponentLibrary
 
             set
             {
-                this.Value.Value = (bool)value.Value;
+                this.Value.Current = (bool)value.Current;
             }
         }
     }

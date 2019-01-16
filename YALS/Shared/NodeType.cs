@@ -6,8 +6,11 @@ using System.Threading.Tasks;
 
 namespace Shared
 {
-    public interface IValue
+    public enum NodeType
     {
-        object Current { get; set; }
+        Logic,
+        Display,
+        Source,
+        Switch
     }
 }

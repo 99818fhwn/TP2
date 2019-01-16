@@ -15,7 +15,7 @@ namespace TestANDGate
 
             foreach (var i in andG.Inputs)
             {
-                i.Value.Value = true;
+                i.Value.Current = true;
             }
 
             andG.Execute();

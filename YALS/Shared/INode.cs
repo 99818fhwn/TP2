@@ -4,15 +4,18 @@ namespace Shared
 {
     public interface INode
     {
-        ICollection<IPinGeneric> Inputs { get; }
+        ICollection<IPin> Inputs { get; }
 
-        ICollection<IPinGeneric> Outputs { get; }
-
-        void Execute();
-        void Activate();
+        ICollection<IPin> Outputs { get; }
 
         string Label { get; }
 
         string Description { get; }
+
+        NodeType Type { get; }
+
+        void Execute();
+        
+        void Activate();
     }
 }

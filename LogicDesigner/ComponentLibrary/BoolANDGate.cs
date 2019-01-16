@@ -17,6 +17,7 @@ namespace ComponentLibrary
             this.Label = "AND";
             this.Description = "If all inputs are true, the output is true";
             this.Picture = Properties.Resources.ANDGate;
+            this.Type = NodeType.Logic;
             this.Inputs.Add(new BooleanPin(new BooleanValue(false), "Pin1"));
             this.Inputs.Add(new BooleanPin(new BooleanValue(false), "Pin2"));
             this.Outputs.Add(new BooleanPin(new BooleanValue(false), "Pin3"));
@@ -47,6 +48,11 @@ namespace ComponentLibrary
             get;
         }
 
+        public NodeType Type
+        {
+            get;
+        }
+
         public event EventHandler PictureChanged;
 
         public void Activate()
@@ -56,11 +62,11 @@ namespace ComponentLibrary
 
         public void Execute()
         {
-            if (!this.Inputs.Any(x => (bool)x.Value.Value == false))
+            if (!this.Inputs.Any(x => (bool)x.Value.Current == false))
             {
                 foreach (var o in this.Outputs)
                 {
-                    o.Value.Value = false;
+                    o.Value.Current = false;
                 }
             }
         }

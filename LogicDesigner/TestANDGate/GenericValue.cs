@@ -11,24 +11,24 @@ namespace TestANDGate
     {
         public GenericValue(T value)
         {
-            this.Value = value;
+            this.Current = value;
         }
 
-        public T Value
+        public T Current
         {
             get;
             set;
         }
 
-        object IValue.Value
+        object IValue.Current
         {
             get
             {
-                return this.Value;
+                return this.Current;
             }
             set
             {
-                this.Value = (T)value;
+                this.Current = (T)value;
             }
         }
     }

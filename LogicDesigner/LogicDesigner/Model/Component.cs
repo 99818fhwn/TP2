@@ -29,6 +29,11 @@ namespace LogicDesigner.Model
             get;
         }
 
+        public NodeType Type
+        {
+            get;
+        }
+
         public void Activate()
         {
             throw new NotImplementedException();

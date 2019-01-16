@@ -17,6 +17,7 @@ namespace TestANDGate
             this.Label = "AND";
             this.Description = "If all inputs are true, the output is true";
             this.Picture = null;
+            this.Type = NodeType.Logic;
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin2"));
             this.Outputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin3"));
@@ -47,6 +48,11 @@ namespace TestANDGate
             get;
         }
 
+        public NodeType Type
+        {
+            get;
+        }
+
         public event EventHandler PictureChanged;
 
         public void Activate()
@@ -56,11 +62,11 @@ namespace TestANDGate
 
         public void Execute()
         {
-            if (!this.Inputs.Any(x => (bool)x.Value.Value == false))
+            if (!this.Inputs.Any(x => (bool)x.Value.Current == false))
             {
                 foreach (var o in this.Outputs)
                 {
-                    o.Value.Value = true;
+                    o.Value.Current = true;
                 }
             }
         }

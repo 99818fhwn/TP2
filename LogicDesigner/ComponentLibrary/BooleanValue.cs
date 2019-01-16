@@ -11,25 +11,25 @@ namespace ComponentLibrary
     {
         public BooleanValue(bool value)
         {
-            this.Value = value;
+            this.Current = value;
         }
 
-        public bool Value
+        public bool Current
         {
             get;
             set;
         }
 
-        object IValue.Value
+        object IValue.Current
         {
             get
             {
-                return this.Value;
+                return this.Current;
             }
 
             set
             {
-                this.Value = (bool)value;
+                this.Current = (bool)value;
             }
         }
     }
