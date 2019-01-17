@@ -60,7 +60,6 @@
 
             this.DrawNewComponent(null);
             this.DrawNewComponent(null);
-
         }
 
         /// <summary>
@@ -71,7 +70,7 @@
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
             var pressedComponent = (Visual)e.Source;
-
+            
             if (this.componentPosition == null)
             {
                 this.componentPosition = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
