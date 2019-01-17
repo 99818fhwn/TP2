@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace LogicDesigner.ViewModel
 {
-    public class ComponentVM: INotifyPropertyChanged
+    public class ComponentVM : INotifyPropertyChanged
     {
         private IDisplayableNode node;
         private int xCoord;

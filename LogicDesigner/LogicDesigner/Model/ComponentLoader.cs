@@ -21,7 +21,9 @@ namespace LogicDesigner.Model
                     {
                         var asm = Assembly.LoadFrom(path);
 
-                        var asmItems = asm.GetExportedTypes().Where(a => a.GetInterfaces().Any(b => b.IsGenericType == true && b.GetGenericTypeDefinition() == typeof(IDisplayableNode)));
+                        var asmItems = asm.GetExportedTypes().Where(
+                            a => a.GetInterfaces().Any(b => b.IsGenericType == true && 
+                            b.GetGenericTypeDefinition() == typeof(IDisplayableNode)));
 
                         foreach (var item in asmItems)
                         {
