@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogicDesigner"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800" WindowState="Maximized">
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Template">
@@ -25,20 +25,42 @@
             </Setter>
         </Style>
     </Window.Resources>
-    
-    <Grid Name="ComponentGrid">
-        <Grid Name="SampleComponent" Height="Auto" Width="Auto">
-            <Rectangle Height="10" Width="20" Margin = "60 -20 0 0" Fill="Gray"/>
-            <Rectangle Height="10" Width="20" Margin = "60 20 0 0" Fill="Gray"/>
-            <Button
-            PreviewMouseDown="ComponentMouseDown"
-            PreviewMouseUp="ComponentMouseUp"
-            PreviewMouseMove="ComponentMouseMove"
-            Width="50" Height="50">
-                <Button.Background>
-                    <ImageBrush ImageSource="/Images/And.jpg" Stretch="Fill"/>
-                </Button.Background>
-            </Button>
-        </Grid>        
+
+    <Grid Name="MainGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="8*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Column="1" Grid.Row="1" Name="LogicWindow" Height="Auto" Width="Auto">
+            <ItemsControl Name="ComponentWindow"/>
+        </Grid>
+        <DockPanel Grid.ColumnSpan="2">
+            <Menu DockPanel.Dock="Top">
+                <MenuItem Header="_File">
+                    <MenuItem Header="_Open"/>
+                    <MenuItem Header="_Save"/>
+                </MenuItem>
+            </Menu>
+            <StackPanel></StackPanel>
+        </DockPanel>
+        <ListView Grid.Row="1" ItemsSource="{Binding PossibleComponents}">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Component">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding Label}"/>
+                                </Grid>
+                            </DataTemplate>  
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </Window>
