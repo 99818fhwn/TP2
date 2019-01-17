@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SwitchComponent", "SwitchCo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LEDComponent", "LEDComponent\LEDComponent.csproj", "{678996D1-E953-48FB-A1BD-92790F72F181}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ANDComponent", "ANDComponent\ANDComponent.csproj", "{457E554C-E36C-414A-A243-E2A7EE50E91D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{678996D1-E953-48FB-A1BD-92790F72F181}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{678996D1-E953-48FB-A1BD-92790F72F181}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{678996D1-E953-48FB-A1BD-92790F72F181}.Release|Any CPU.Build.0 = Release|Any CPU
+		{457E554C-E36C-414A-A243-E2A7EE50E91D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{457E554C-E36C-414A-A243-E2A7EE50E91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{457E554C-E36C-414A-A243-E2A7EE50E91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{457E554C-E36C-414A-A243-E2A7EE50E91D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

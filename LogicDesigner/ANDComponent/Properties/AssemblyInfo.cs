@@ -2,7 +2,7 @@
 // <copyright file="AssemblyInfo.cs" company="FHWN">    
 // Copyright (c) FHWN. All rights reserved.    
 // </copyright>    
-// <summary>The LEDComponent for logic designers that implements IDisplayableNode</summary>    
+// <summary>The ANDGateComponent for logic designers that implements IDisplayableNode</summary>    
 // <author>Fabian Weisser</author>    
 // -----------------------------------------------------------------------
 using System.Reflection;
@@ -12,11 +12,11 @@ using System.Runtime.InteropServices;
 // Allgemeine Informationen über eine Assembly werden über die folgenden
 // Attribute gesteuert. Ändern Sie diese Attributwerte, um die Informationen zu ändern,
 // die einer Assembly zugeordnet sind.
-[assembly: AssemblyTitle("LEDComponent")]
+[assembly: AssemblyTitle("ANDComponent")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("LEDComponent")]
+[assembly: AssemblyProduct("ANDComponent")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -27,7 +27,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // Die folgende GUID bestimmt die ID der Typbibliothek, wenn dieses Projekt für COM verfügbar gemacht wird
-[assembly: Guid("678996d1-e953-48fb-a1bd-92790f72f181")]
+[assembly: Guid("457e554c-e36c-414a-a243-e2a7ee50e91d")]
 
 // Versionsinformationen für eine Assembly bestehen aus den folgenden vier Werten:
 //

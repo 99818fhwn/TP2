@@ -1,11 +1,11 @@
 ﻿// -----------------------------------------------------------------------     
-// <copyright file="LED.cs" company="FHWN">    
+// <copyright file="ANDGate.cs" company="FHWN">    
 // Copyright (c) FHWN. All rights reserved.    
 // </copyright>    
 // <summary>The ANDGateComponent for logic designers that implements IDisplayableNode</summary>    
 // <author>Fabian Weisser</author>    
 // -----------------------------------------------------------------------
-namespace LEDComponent
+namespace ANDComponent
 {
     using System;
     using System.Collections.Generic;
@@ -16,24 +16,25 @@ namespace LEDComponent
     using SharedClasses;
 
     /// <summary>
-    /// The class that represents a LED.
+    /// This class represent the ANDGate.
     /// </summary>
     /// <seealso cref="Shared.IDisplayableNode" />
-    public class LED : IDisplayableNode
+    public class ANDGate : IDisplayableNode
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LED"/> class.
+        /// Initializes a new instance of the <see cref="ANDGate"/> class.
         /// </summary>
-        public LED()
+        public ANDGate()
         {
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
-            this.IsOn = false;
-            this.Label = "LED";
-            this.Description = "If input is true, the LED is on";
-            this.Picture = Properties.Resources.LEDOff;
+            this.Label = "AND";
+            this.Description = "If all inputs are true, the output is true";
+            this.Picture = Properties.Resources.ANDGate;
             this.Type = NodeType.Logic;
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
+            this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin2"));
+            this.Outputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin3"));
         }
 
         /// <summary>
@@ -42,22 +43,10 @@ namespace LEDComponent
         public event EventHandler PictureChanged;
 
         /// <summary>
-        /// Gets or sets a value indicating whether the LED is on.
-        /// </summary>
-        /// <value>
-        ///   <c>true</c> if this LED is on; otherwise, <c>false</c>.
-        /// </value>
-        public bool IsOn
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Gets the inputs.
         /// </summary>
         /// <value>
-        /// The inputs.
+        /// The input pins.
         /// </value>
         public ICollection<IPin> Inputs
         {
@@ -68,7 +57,7 @@ namespace LEDComponent
         /// Gets the outputs.
         /// </summary>
         /// <value>
-        /// The outputs.
+        /// The output pins.
         /// </value>
         public ICollection<IPin> Outputs
         {
@@ -79,7 +68,7 @@ namespace LEDComponent
         /// Gets the label.
         /// </summary>
         /// <value>
-        /// The label.
+        /// The label of the component.
         /// </value>
         public string Label
         {
@@ -90,7 +79,7 @@ namespace LEDComponent
         /// Gets the description.
         /// </summary>
         /// <value>
-        /// The description of the LED.
+        /// The description of the component.
         /// </value>
         public string Description
         {
@@ -101,19 +90,18 @@ namespace LEDComponent
         /// Gets the picture.
         /// </summary>
         /// <value>
-        /// The picture of the LED.
+        /// The picture that represents the component.
         /// </value>
         public System.Drawing.Bitmap Picture
         {
             get;
-            private set;
         }
 
         /// <summary>
         /// Gets the type.
         /// </summary>
         /// <value>
-        /// The type of the component.
+        /// The component type.
         /// </value>
         public NodeType Type
         {
@@ -121,43 +109,25 @@ namespace LEDComponent
         }
 
         /// <summary>
-        /// Activates this instance.
+        /// Activates this instances features.
         /// </summary>
         public void Activate()
         {
+            return;
         }
 
         /// <summary>
-        /// Executes the logic of the LED and if one input is active the LED is on.
+        /// Executes this instance.
         /// </summary>
         public void Execute()
         {
-            if (this.Inputs.Any(x => (bool)x.Value.Current == true))
+            if (!this.Inputs.Any(x => (bool)x.Value.Current == false))
             {
-                if (!this.IsOn)
+                foreach (var o in this.Outputs)
                 {
-                    this.IsOn = true;
-                    this.Picture = Properties.Resources.LEDOn;
-                    this.FireOnPictureChanged();
+                    o.Value.Current = false;
                 }
             }
-            else
-            {
-                if (this.IsOn)
-                {
-                    this.IsOn = false;
-                    this.Picture = Properties.Resources.LEDOff;
-                    this.FireOnPictureChanged();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Fires the on picture changed.
-        /// </summary>
-        protected virtual void FireOnPictureChanged()
-        {
-            this.PictureChanged?.Invoke(this, new EventArgs());
         }
     }
 }
