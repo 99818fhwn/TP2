@@ -36,7 +36,7 @@ namespace StringDisplayComponent
                              "writen in the output, the integer will be prefered in case of int and string input are active";
             this.Description = V;
             this.Picture = Properties.Resources.StringDisplay;
-            this.Type = NodeType.Logic;
+            this.Type = NodeType.Display;
             this.Pin1 = new GenericPin<string>(new GenericValue<string>(string.Empty), "Pin1");
             this.Inputs.Add(this.Pin1);
             this.Pin2 = new GenericPin<int>(new GenericValue<int>(-1), "Pin2");

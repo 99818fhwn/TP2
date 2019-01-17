@@ -18,7 +18,7 @@ namespace ORGateComponent
     /// <summary>
     /// The class that represents logic of an ORGate.
     /// </summary>
-    /// <seealso cref="Shared.IDisplayableNode" />
+    /// <seealso cref="Shared.IDisplayableNode"/>
     public class ORGate : IDisplayableNode
     {
         /// <summary>
