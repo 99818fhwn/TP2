@@ -29,7 +29,7 @@
         /// <summary>
         /// Serializes the given object.
         /// </summary>
-        /// <param name="path"> Path for the binary file output. </param>
+        /// <param name="path"> Path for the binary file output (without extension). </param>
         /// <param name="serializableObject"> Object to be serialized. </param>
         public void SerializeObject(string path, object serializableObject)
         {
@@ -44,9 +44,16 @@
                 throw new ArgumentException("Path not found.");
             }
 
-            using (Stream writer = new FileStream(path, FileMode.Create))
+            using (Stream writer = new FileStream(path + ".ldf", FileMode.Create))
             {
-                this.formatter.Serialize(writer, serializableObject);
+                try
+                {
+                    this.formatter.Serialize(writer, serializableObject);
+                }
+                catch (SerializationException ex)
+                {
+                    throw new SerializationException("Object could not be deserialized", ex);
+                }
             }
         }
         #endregion
@@ -62,6 +69,11 @@
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException($"File not found at {path}.");
+            }
+
+            if (Path.GetExtension(path) != ".ldf")
+            {
+                throw new FileLoadException("File has wrong extension.");
             }
 
             using (Stream reader = new FileStream(path, FileMode.Open))
