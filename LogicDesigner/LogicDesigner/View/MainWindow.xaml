@@ -36,13 +36,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Name="LogicWindow" Height="Auto" Width="Auto">
-            <ItemsControl Name="ComponentWindow"/>
+            <Grid Name="ComponentWindow"/>
         </Grid>
         <DockPanel Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_Open"/>
+                    <MenuItem Header="_Load"/>
                     <MenuItem Header="_Save"/>
+                    <MenuItem Header="_Open Config ..."/>
                 </MenuItem>
             </Menu>
             <StackPanel></StackPanel>

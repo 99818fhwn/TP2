@@ -57,29 +57,10 @@
             InitializeComponent();
 
             this.DataContext = new WindowVM();
-            
 
-            // New component
-            Grid sampleComponent = new Grid();
-            
-            // Component Body
-            Button sampleBody = new Button();
+            this.DrawNewComponent();
+            this.DrawNewComponent();
 
-            sampleBody.Name = "NewComponent";
-            sampleBody.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
-            sampleBody.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
-            sampleBody.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMove);
-            sampleBody.Height = 50;
-            sampleBody.Width = 50;
-
-            ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
-            imageBrush.Stretch = Stretch.Fill;
-            sampleBody.Background = imageBrush;
-
-            sampleComponent.Children.Add(sampleBody);
-            ComponentWindow.Items.Add(sampleComponent);
-            
-            sampleComponent.RenderTransform = new TranslateTransform(100, 100);
         }
 
         /// <summary>
@@ -137,6 +118,54 @@
             var offsetY = (translateTransform == null ? componentPosition.Value.Y : componentPosition.Value.Y - translateTransform.Y) + deltaY - mousePosition.Y;
 
             pressedComponent.RenderTransform = new TranslateTransform(-offsetX, -offsetY);
+        }
+
+        /// <summary>
+        /// Called when when a component is added.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void OnComponentAdded(object sender, EventArgs e)
+        {
+            // Add a component.
+        }
+
+        /// <summary>
+        /// Called when a component is deleted.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void OnComponentDeleted(object sender, EventArgs e)
+        {
+            // Delete component.
+        }
+
+        /// <summary>
+        /// Draws a new component.
+        /// </summary>
+        private void DrawNewComponent()
+        {
+            // New component
+            Grid sampleComponent = new Grid();
+
+            // Component Body
+            Button sampleBody = new Button();
+
+            sampleBody.Name = "NewComponent";
+            sampleBody.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
+            sampleBody.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
+            sampleBody.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMove);
+            sampleBody.Height = 50;
+            sampleBody.Width = 50;
+
+            ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+            imageBrush.Stretch = Stretch.Fill;
+            sampleBody.Background = imageBrush;
+
+            sampleComponent.Children.Add(sampleBody);
+            ComponentWindow.Children.Add(sampleComponent);
+
+            sampleComponent.RenderTransform = new TranslateTransform(100, 100);
         }
     }
 }
