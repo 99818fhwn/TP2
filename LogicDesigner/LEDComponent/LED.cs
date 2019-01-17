@@ -6,21 +6,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SwitchComponent
+namespace LEDComponent
 {
-    public class Switch : IDisplayableNode
+    public class LED : IDisplayableNode
     {
-        public Switch()
+        public LED()
         {
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
-            this.Label = "OR";
-            this.Description = "If one or more inputs are true, the output is true";
-            this.Picture = Properties.Resources.SwitchOpen;
+            this.Label = "LED";
+            this.Description = "If input is true, the LED is on";
+            this.Picture = Properties.Resources.LEDOff;
             this.Type = NodeType.Logic;
             this.IsClosed = false;
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
-            this.Outputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin2"));
         }
 
         public bool IsClosed
