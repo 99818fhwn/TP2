@@ -32,7 +32,7 @@ namespace LEDComponent
             this.Label = "LED";
             this.Description = "If input is true, the LED is on";
             this.Picture = Properties.Resources.LEDOff;
-            this.Type = NodeType.Logic;
+            this.Type = NodeType.Display;
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
         }
 
