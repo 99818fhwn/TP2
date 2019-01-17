@@ -20,7 +20,7 @@ namespace SharedClasses
     /// </summary>
     /// <typeparam name="T">The generic type.</typeparam>
     /// <seealso cref="Shared.IValueGeneric{T}" />
-    [Serializable()]
+    [Serializable]
     public class GenericValue<T> : IValueGeneric<T>, ISerializable
     {
         /// <summary>
@@ -30,6 +30,16 @@ namespace SharedClasses
         public GenericValue(T value)
         {
             this.Current = value;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GenericValue{T}"/> class.
+        /// </summary>
+        /// <param name="info"> Serialization info used for parameterisation. </param>
+        /// <param name="context"> StreamingContext of serialization stream. </param>
+        internal GenericValue(SerializationInfo info, StreamingContext context)
+        {
+            this.Current = (T)info.GetValue(nameof(this.Current), typeof(T));
         }
 
         /// <summary>
@@ -63,26 +73,14 @@ namespace SharedClasses
             }
         }
 
-        #region Serialization
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GenericValue{T}"/> class.
-        /// </summary>
-        /// <param name="info"> Serialization info userd for parametrization. </param>
-        /// <param name="context"> StreamingContext of serialization stream. </param>
-        internal GenericValue(SerializationInfo info, StreamingContext context)
-        {
-            this.Current = (T)info.GetValue(nameof(Current), typeof(T));
-        }
-
         /// <summary>
         /// Manages the serialization procedure for <see cref="GenericValue{T}"/>.
         /// </summary>
-        /// <param name="info"> Serialization info userd for parametrization. </param>
+        /// <param name="info"> Serialization info used for parameterisation. </param>
         /// <param name="context"> StreamingContext of serialization stream. </param>
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(nameof(Current), Current, typeof(T));
+            info.AddValue(nameof(this.Current), this.Current, typeof(T));
         }
-        #endregion
     }
 }
