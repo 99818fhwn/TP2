@@ -58,9 +58,8 @@
 
             this.DataContext = new WindowVM();
 
-            this.DrawNewComponent();
-            this.DrawNewComponent();
-
+            this.DrawNewComponent(null);
+            this.DrawNewComponent(null);
         }
 
         /// <summary>
@@ -71,7 +70,7 @@
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
             var pressedComponent = (Visual)e.Source;
-
+            
             if (this.componentPosition == null)
             {
                 this.componentPosition = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
@@ -143,7 +142,7 @@
         /// <summary>
         /// Draws a new component.
         /// </summary>
-        private void DrawNewComponent()
+        private void DrawNewComponent(ComponentVM componentVM)
         {
             // New component
             Grid sampleComponent = new Grid();
@@ -155,8 +154,8 @@
             sampleBody.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             sampleBody.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             sampleBody.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMove);
-            sampleBody.Height = 50;
-            sampleBody.Width = 50;
+            sampleBody.Height = Properties.Resources.And.Height;
+            sampleBody.Width = Properties.Resources.And.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
