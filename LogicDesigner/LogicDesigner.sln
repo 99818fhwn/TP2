@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LEDComponent", "LEDComponen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ANDComponent", "ANDComponent\ANDComponent.csproj", "{457E554C-E36C-414A-A243-E2A7EE50E91D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SourceComponent", "SourceComponent\SourceComponent.csproj", "{5E24A05D-64BA-4356-959A-1645D3399D92}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InverterComponent", "InverterComponent\InverterComponent.csproj", "{14B723AC-0CA1-4980-AF16-A2E3EC13F008}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +67,14 @@ Global
 		{457E554C-E36C-414A-A243-E2A7EE50E91D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{457E554C-E36C-414A-A243-E2A7EE50E91D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{457E554C-E36C-414A-A243-E2A7EE50E91D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E24A05D-64BA-4356-959A-1645D3399D92}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E24A05D-64BA-4356-959A-1645D3399D92}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E24A05D-64BA-4356-959A-1645D3399D92}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E24A05D-64BA-4356-959A-1645D3399D92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{14B723AC-0CA1-4980-AF16-A2E3EC13F008}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{14B723AC-0CA1-4980-AF16-A2E3EC13F008}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{14B723AC-0CA1-4980-AF16-A2E3EC13F008}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{14B723AC-0CA1-4980-AF16-A2E3EC13F008}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
