@@ -48,20 +48,20 @@ namespace LogicDesigner.Model
 
         internal Component(SerializationInfo info, StreamingContext context)
         {
-            this.Label = info.GetString(nameof(Label));
-            this.Description = info.GetString(nameof(Description));
-            this.Type = (NodeType) info.GetValue(nameof(Type), typeof(NodeType));
-            this.Inputs = (List<IPin>)info.GetValue(nameof(Inputs), typeof(List<IPin>));
-            this.Outputs = (List<IPin>)info.GetValue(nameof(Outputs), typeof(List<IPin>));
+            this.Label = info.GetString(nameof(this.Label));
+            this.Description = info.GetString(nameof(this.Description));
+            this.Type = (NodeType) info.GetValue(nameof(this.Type), typeof(NodeType));
+            this.Inputs = (List<IPin>)info.GetValue(nameof(this.Inputs), typeof(List<IPin>));
+            this.Outputs = (List<IPin>)info.GetValue(nameof(this.Outputs), typeof(List<IPin>));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue(nameof(Inputs), Inputs, Inputs.GetType());
-            info.AddValue(nameof(Outputs), Outputs, Outputs.GetType());
-            info.AddValue(nameof(Label), Label, Label.GetType());
-            info.AddValue(nameof(Description), Description, Description.GetType());
-            info.AddValue(nameof(Type), Type, Type.GetType());
+            info.AddValue(nameof(this.Inputs), this.Inputs, this.Inputs.GetType());
+            info.AddValue(nameof(this.Outputs), this.Outputs, this.Outputs.GetType());
+            info.AddValue(nameof(this.Label), this.Label, this.Label.GetType());
+            info.AddValue(nameof(this.Description), this.Description, this.Description.GetType());
+            info.AddValue(nameof(this.Type), this.Type, this.Type.GetType());
         }
     }
 }

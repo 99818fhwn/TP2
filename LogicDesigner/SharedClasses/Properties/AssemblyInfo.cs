@@ -1,4 +1,11 @@
-﻿using System.Reflection;
+﻿// -----------------------------------------------------------------------     
+// <copyright file="AssemblyInfo.cs" company="FHWN">    
+// Copyright (c) FHWN. All rights reserved.    
+// </copyright>    
+// <summary>The SharedClass library holds the concrete implementation of Shared interfaces</summary>    
+// <author>Fabian Weisser</author>    
+// -----------------------------------------------------------------------
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
