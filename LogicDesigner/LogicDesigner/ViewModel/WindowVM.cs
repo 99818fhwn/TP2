@@ -1,5 +1,4 @@
-﻿using Shared;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Drawing;
@@ -9,6 +8,8 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using LogicDesigner.Commands;
+using Shared;
 
 namespace LogicDesigner.ViewModel
 {
@@ -38,20 +39,25 @@ namespace LogicDesigner.ViewModel
         /// The translated transform.
         /// </summary>
         private TranslateTransform translateTransform;
-        
+
         public WindowVM()
         {
-            this.PossibleComponents = new ObservableCollection<IDisplayableNode>();
+            this.Manager = new ProgramMngVM();
         }
+
+        private ProgramMngVM Manager { get; set; }
 
         public void GenerateComponents()
         {
 
         }
 
-        public ObservableCollection<IDisplayableNode> PossibleComponents { get; set; }
-
-
+        // Changed Type from IDisplayableNode to ComponentVM - Moe
+        public ObservableCollection<ComponentVM> PossibleComponents
+        {
+            get => this.Manager.PossibleComponentsToChooseFrom;
+            set => this.Manager.PossibleComponentsToChooseFrom = value;
+        }
     }
 }
 

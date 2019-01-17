@@ -14,7 +14,7 @@ namespace TestANDGate
         {
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
-            this.Label = "AND";
+            this.Label = "AND - Test";
             this.Description = "If all inputs are true, the output is true";
             this.Picture = null;
             this.Type = NodeType.Logic;

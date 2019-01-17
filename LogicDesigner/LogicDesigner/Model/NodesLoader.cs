@@ -63,6 +63,10 @@ namespace LogicDesigner.Model
                 }
 
             }
+            else
+            {
+                Directory.CreateDirectory(filePath);
+            }
 
             return nodes;
         }

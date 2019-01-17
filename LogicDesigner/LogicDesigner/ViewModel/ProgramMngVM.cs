@@ -36,10 +36,25 @@ namespace LogicDesigner.ViewModel
             {
                 return this.possibleComponentsToChooseFrom;
             }
+            set
+            {
+                this.possibleComponentsToChooseFrom = value;
+            }
         }
 
         public ProgramMngVM()
         {
+            // Added by Moe
+            this.programManager = new ProgramManager();
+
+            var observableNodes = new ObservableCollection<ComponentVM>();
+            foreach(IDisplayableNode comp in this.programManager.PossibleNodesToChooseFrom)
+            {
+                // Null definitely needs to be replaced here - Moe
+                observableNodes.Add(new ComponentVM(comp, null));
+            }
+            this.PossibleComponentsToChooseFrom = observableNodes;
+
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node, 
                 new Command(obj => {
                     var nodeInFieldVM = obj as ComponentVM;
@@ -53,6 +68,17 @@ namespace LogicDesigner.ViewModel
                 new Command(obj => {
                     var nodeToChooseVM = obj as ComponentVM;
                     // find instance in the collection ?
+                    // -> Found instance in the collection? (Not sure about which collection though ¯\_(ツ)_/¯ ) LG Moe
+                    ComponentVM instance = PossibleComponentsToChooseFrom.Where((current) =>
+                    {
+                        if (current.Node == nodeToChooseVM.Node)
+                        {
+                            return true;
+                        }
+                        return false;
+                    }).First();
+                    // End of Moes code
+
                     nodeToChooseVM.Activate();
                 })));
 

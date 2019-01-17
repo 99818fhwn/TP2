@@ -28,8 +28,8 @@ namespace InverterComponent
         {
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
-            this.Label = "+5V";
-            this.Description = "Invertes the incoming signal";
+            this.Label = "NOT";
+            this.Description = "Inverts the incoming signal";
             this.Picture = Properties.Resources.Inverter;
             this.Type = NodeType.Logic;
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));

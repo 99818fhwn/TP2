@@ -22,30 +22,43 @@ namespace LogicDesigner.Model
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
-            // test
-            for(int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
-            {
-                for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
-                {
-                    this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
-                    this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
-                }
-            }
+            // test -- hab ich deswegen auskommentiert - Moe
+            //for(int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
+            //{
+            //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
+            //    {
+            //        this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
+            //        this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
+            //    }
+            //}
 
-            this.ConnectPins(this.possibleNodesToChooseFrom.Last().Outputs.ElementAt(0),
-                    this.possibleNodesToChooseFrom.Last().Inputs.ElementAt(0));
+            //this.ConnectPins(this.possibleNodesToChooseFrom.Last().Outputs.ElementAt(0),
+            //        this.possibleNodesToChooseFrom.Last().Inputs.ElementAt(0));
         }
 
         public ICollection<IDisplayableNode> FieldNodes
         {
-            get;
-            private set;
+            get
+            {
+                return this.fieldNodes;
+            }
+            private set
+            {
+                this.fieldNodes = value;
+            }
         }
 
         public ICollection<IDisplayableNode> PossibleNodesToChooseFrom
         {
-            get;
-            private set;
+            get
+            {
+                return this.possibleNodesToChooseFrom;
+            }
+            // Note: Can't be set because of readonly - Moe
+            //private set
+            //{
+            //    this.possibleNodesToChooseFrom = value;
+            //}
         }
 
         public int Delay

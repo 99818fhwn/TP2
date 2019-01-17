@@ -1,6 +1,5 @@
 ﻿namespace LogicDesigner
 {
-    using LogicDesigner.ViewModel;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -16,6 +15,8 @@
     using System.Windows.Media.Imaging;
     using System.Windows.Navigation;
     using System.Windows.Shapes;
+    using LogicDesigner.Commands;
+    using LogicDesigner.ViewModel;
 
     /// <summary>
     /// WPF Logic
@@ -55,11 +56,19 @@
         public MainWindow()
         {
             InitializeComponent();
+            this.UndoHistory = new Stack<WindowVM>();
+            this.RedoHistory = new Stack<WindowVM>();
 
-            this.DataContext = new WindowVM();
+            this.DataContext = this;
+            // Set datacontext specifically to MainGrid, else Undo/Redo wouldn't work in current structure - Moe
+            this.MainGrid.DataContext = new WindowVM();
 
-            this.DrawNewComponent(null);
-            this.DrawNewComponent(null);
+            this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
+            ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
+            ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
+
+            DrawNewComponent(null, 150);
+            DrawNewComponent(null);
         }
 
         /// <summary>
@@ -69,18 +78,7 @@
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
-            var pressedComponent = (Visual)e.Source;
-            
-            if (this.componentPosition == null)
-            {
-                this.componentPosition = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
-            }
-
-            Point mousePosition = Mouse.GetPosition(ComponentWindow);
-
-            this.deltaX = mousePosition.X - this.componentPosition.Value.X;
-            this.deltaY = mousePosition.Y - this.componentPosition.Value.Y;
-
+            var pressedComponent = (UIElement)e.Source;
             this.isMoving = true;
         }
 
@@ -92,31 +90,40 @@
         private void ComponentMouseUp(object sender, MouseButtonEventArgs e)
         {
             var pressedComponent = (UIElement)e.Source;
-
-            this.translateTransform = pressedComponent.RenderTransform as TranslateTransform;
-            isMoving = false;
+            this.isMoving = false;
+            CurrentMove = new Point(0, 0);
+            CurrentMouse = new Point(0, 0);
         }
 
+        // needed for translation calculation - Moe
+        private Point CurrentMouse { get; set; }
+        private Point CurrentMove { get; set; }
         /// <summary>
         /// Called when the button is moved.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-        private void ComponentMouseMove(object sender, MouseEventArgs e)
+        private void ComponentMouseMovePre(object sender, MouseEventArgs e)
         {
+            // Components are being reset, because their translation is not persistent and the temp variables are reset after letting the mouse go
             var pressedComponent = (UIElement)e.Source;
 
             if (!this.isMoving)
             {
                 return;
             }
-
-            var mousePosition = Mouse.GetPosition(ComponentWindow);
-
-            var offsetX = (translateTransform == null ? componentPosition.Value.X : componentPosition.Value.X - translateTransform.X) + deltaX - mousePosition.X;
-            var offsetY = (translateTransform == null ? componentPosition.Value.Y : componentPosition.Value.Y - translateTransform.Y) + deltaY - mousePosition.Y;
-
-            pressedComponent.RenderTransform = new TranslateTransform(-offsetX, -offsetY);
+            else
+            {
+                var previousMouse = CurrentMouse;
+                CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
+                //Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
+                if (previousMouse != new Point(0, 0) && CurrentMouse != previousMouse)
+                {
+                    Point movepoint = new Point(CurrentMouse.X - previousMouse.X, CurrentMouse.Y - previousMouse.Y);
+                    CurrentMove = new Point(CurrentMove.X + movepoint.X, CurrentMove.Y + movepoint.Y);
+                    pressedComponent.RenderTransform = new TranslateTransform(CurrentMove.X,CurrentMove.Y);
+                }
+            }
         }
 
         /// <summary>
@@ -142,7 +149,7 @@
         /// <summary>
         /// Draws a new component.
         /// </summary>
-        private void DrawNewComponent(ComponentVM componentVM)
+        private void DrawNewComponent(ComponentVM componentVM, int debugShift = 0)
         {
             // New component
             Grid sampleComponent = new Grid();
@@ -151,9 +158,6 @@
             Button sampleBody = new Button();
 
             sampleBody.Name = "NewComponent";
-            sampleBody.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
-            sampleBody.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
-            sampleBody.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMove);
             sampleBody.Height = Properties.Resources.And.Height;
             sampleBody.Width = Properties.Resources.And.Width;
 
@@ -161,10 +165,54 @@
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
 
-            sampleComponent.Children.Add(sampleBody);
-            ComponentWindow.Children.Add(sampleComponent);
+            Button middle = new Button();
+            middle.Height = 5;
+            middle.Width = 5;
+            this.ComponentWindow.Children.Add(middle);
 
-            sampleComponent.RenderTransform = new TranslateTransform(100, 100);
+            sampleComponent.Children.Add(sampleBody);
+            this.ComponentWindow.Children.Add(sampleComponent);
+
+            sampleComponent.RenderTransform = new TranslateTransform(debugShift, debugShift);
+        }
+
+
+        // Undo and Redo functionality -> to be tested
+        private Stack<WindowVM> UndoHistory { get; set; }
+        private Stack<WindowVM> RedoHistory { get; set; }
+        public Command UndoCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (this.UndoHistory.Count > 0)
+                {
+                    WindowVM history = this.UndoHistory.Pop();
+                    this.MainGrid.DataContext = history;
+                    this.RedoHistory.Push(history);
+                }
+            }));
+        }
+
+        public Command RedoCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (this.RedoHistory.Count > 0)
+                {
+                    WindowVM history = this.RedoHistory.Pop();
+                    this.MainGrid.DataContext = history;
+                    this.UndoHistory.Push(history);
+                }
+
+            }));
+        }
+
+        private void ScrollViewer_Loaded(object sender, RoutedEventArgs e)
+        {
+            var scrollbar = (ScrollViewer)e.Source;
+            scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
+            scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
         }
     }
+
 }

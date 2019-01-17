@@ -26,6 +26,38 @@
         </Style>
     </Window.Resources>
 
+    <!--KeyboardShortcuts-->
+    <Window.InputBindings>
+        <!--Save-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="S"                 
+                    Command="{Binding SaveProjectCommand}"/>
+        <!--Load-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="L"
+                    Command="{Binding LoadProjectCommand}" />
+
+        <!--Copy-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="C"
+                    Command="{Binding CopyCommand}" />
+
+        <!--Paste-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="V"
+                    Command="{Binding PasteCommand}" />
+
+        <!--Undo-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="Z"
+                    Command="{Binding UndoCommand}" />
+
+        <!--Redo-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="Y"
+                    Command="{Binding RedoCommand}" />
+    </Window.InputBindings>
+
     <Grid Name="MainGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -36,7 +68,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Name="LogicWindow" Height="Auto" Width="Auto">
-            <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
+            <ScrollViewer Loaded="ScrollViewer_Loaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
                 <Grid Name="ComponentWindow" Height="10000" Width="10000"/>
             </ScrollViewer>            
         </Grid>
