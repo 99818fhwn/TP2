@@ -14,17 +14,18 @@ namespace LEDComponent
         {
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
+            this.IsOn = false;
             this.Label = "LED";
             this.Description = "If input is true, the LED is on";
             this.Picture = Properties.Resources.LEDOff;
             this.Type = NodeType.Logic;
-            this.IsClosed = false;
             this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
         }
 
-        public bool IsClosed
+        public bool IsOn
         {
-            get; set;
+            get;
+            set;
         }
 
         public ICollection<IPin> Inputs
@@ -62,15 +63,15 @@ namespace LEDComponent
 
         public void Activate()
         {
-            if (this.IsClosed)
+            if (this.IsOn)
             {
-                this.IsClosed = false;
+                this.IsOn = false;
                 this.Picture = Properties.Resources.SwitchClosed;
                 this.FireOnPictureChanged();
             }
             else
             {
-                this.IsClosed = true;
+                this.IsOn = true;
                 this.Picture = Properties.Resources.SwitchOpen;
                 this.FireOnPictureChanged();
             }
@@ -83,22 +84,15 @@ namespace LEDComponent
 
         public void Execute()
         {
-            if (this.IsClosed)
+            if (this.Inputs.Any(x => (bool)x.Value.Current == true))
             {
-                if (this.Inputs.Any(x => (bool)x.Value.Current == true))
-                {
-                    foreach (var o in this.Outputs)
-                    {
-                        o.Value.Current = true;
-                    }
-                }
+                this.IsOn = true;
+                this.Picture = Properties.Resources.SwitchOpen;
+                this.FireOnPictureChanged();
             }
             else
             {
-                foreach (var o in this.Outputs)
-                {
-                    o.Value.Current = false;
-                }
+
             }
         }
     }
