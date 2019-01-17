@@ -36,9 +36,16 @@ namespace LogicDesigner.Model
                     this.possibleNodesToChooseFrom.Last().Inputs.ElementAt(0));
         }
 
-        private ICollection<IDisplayableNode> InitializeNodesToChooseFrom()
+        public ICollection<IDisplayableNode> FieldNodes
         {
-            return new NodesLoader().GetNodes("Components");
+            get;
+            private set;
+        }
+
+        public ICollection<IDisplayableNode> PossibleNodesToChooseFrom
+        {
+            get;
+            private set;
         }
 
         public int Delay
@@ -50,6 +57,11 @@ namespace LogicDesigner.Model
         {
             get;
             private set;
+        }
+
+        private ICollection<IDisplayableNode> InitializeNodesToChooseFrom()
+        {
+            return new NodesLoader().GetNodes("Components");
         }
 
         public void Run()

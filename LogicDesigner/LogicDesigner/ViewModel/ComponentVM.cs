@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using LogicDesigner.Commands;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,12 +13,16 @@ namespace LogicDesigner.ViewModel
     public class ComponentVM : INotifyPropertyChanged
     {
         private IDisplayableNode node;
+        private Command activateCommand;
         private int xCoord;
         private int yCoord;
 
-        public ComponentVM(IDisplayableNode node)
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public ComponentVM(IDisplayableNode node, Command activateCommand)
         {
             this.node = node;
+            this.activateCommand = activateCommand;
         }
 
         public string Label
@@ -56,11 +61,25 @@ namespace LogicDesigner.ViewModel
             set;
         }
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public object Node
+        {
+            get
+            {
+                return this.node;
+            }
+        }
+
+        public void Activate()
+        {
+            this.node.Activate();
+            this.FireOnPropertyChanged();
+            // clicked -> changed -> should be actualized
+        }
 
         protected void FireOnPropertyChanged([CallerMemberName]string name = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
     }
 }
