@@ -4,10 +4,10 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{36F024FA-6833-4771-87BB-3E9DD576ADEC}</ProjectGuid>
+    <ProjectGuid>{CB0CD508-9175-493D-8530-A10B15316700}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>TestANDGate</RootNamespace>
-    <AssemblyName>TestANDGate</AssemblyName>
+    <RootNamespace>SwitchComponent</RootNamespace>
+    <AssemblyName>SwitchComponent</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -36,8 +36,13 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Shared">
+    <Reference Include="Shared, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\LogicDesigner\Shared.dll</HintPath>
+    </Reference>
+    <Reference Include="SharedClasses, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\LogicDesigner\SharedClasses.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -50,20 +55,29 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ANDGate.cs" />
-    <Compile Include="GenericPin.cs" />
-    <Compile Include="GenericValue.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Switch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ComponentLibrary\ComponentLibrary.csproj">
-      <Project>{88D86433-5071-48F7-8073-5EC1F12DE4B0}</Project>
-      <Name>ComponentLibrary</Name>
-    </ProjectReference>
+    <Content Include="Resourcen\SwitchClosed.bmp" />
+    <Content Include="Resourcen\SwitchOpen.bmp" />
+    <Content Include="Shared.dll" />
+    <Content Include="SharedClasses.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

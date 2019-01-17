@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProgramMngWpfProj.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +24,8 @@ namespace ProgramMngWpfProj
         public MainWindow()
         {
             InitializeComponent();
+            ProgramManager pM= new ProgramManager();
+            this.DataContext = pM;
         }
     }
 }

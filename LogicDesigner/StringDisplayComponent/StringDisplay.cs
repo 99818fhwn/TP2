@@ -32,12 +32,17 @@ namespace StringDisplayComponent
 
         public void SetValuesByConfig()
         {
-            var conf = new ConfigurationBuilder()
+            int offsetValue = 0;
+
+            if (File.Exists("stringdisplay_config.json"))
+            {
+                var conf = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("stringdisplay_config.json")
                 .Build();
-            int offsetValue = 0;
-            var valid = int.TryParse(conf.GetSection("Offset")["Number"], out offsetValue);
+                var valid = int.TryParse(conf.GetSection("Offset")["Number"], out offsetValue);
+            }
+            
             this.Offset = offsetValue;
         }
 

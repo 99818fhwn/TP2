@@ -12,44 +12,47 @@ namespace ProgramMngWpfProj.Model
     public class NodesLoader
     {
         // all nodes in components folder user to choose from
-        public List<INode> GetNodes(string filePath)
+        public List<IDisplayableNode> GetNodes(string filePath)
         {
-            List<INode> nodes = new List<INode>();
+            List<IDisplayableNode> nodes = new List<IDisplayableNode>();
 
-            DirectoryInfo dI = new DirectoryInfo(filePath);
-            FileInfo[] files = dI.GetFiles();
-
-            foreach (var file in files)
+            if (Directory.Exists(filePath))
             {
-                try
+                DirectoryInfo dI = new DirectoryInfo(filePath);
+                FileInfo[] files = dI.GetFiles();
+
+                foreach (var file in files)
                 {
-                    Assembly ass = Assembly.LoadFrom(file.FullName);
-
-                    foreach (var type in ass.GetExportedTypes())
+                    try
                     {
-                        foreach (var interfc in type.GetInterfaces())
-                        {
-                            if ((interfc) == typeof(INode))
-                            {
-                                try
-                                {
-                                    INode node = (INode)Activator.CreateInstance(type);
-                                    nodes.Add(node);
-                                }
-                                catch (Exception)
-                                {
+                        Assembly ass = Assembly.LoadFrom(file.FullName);
 
+                        foreach (var type in ass.GetExportedTypes())
+                        {
+                            foreach (var interfc in type.GetInterfaces())
+                            {
+                                if ((interfc) == typeof(IDisplayableNode))
+                                {
+                                    try
+                                    {
+                                        IDisplayableNode node = (IDisplayableNode)Activator.CreateInstance(type);
+                                        nodes.Add(node);
+                                    }
+                                    catch (Exception)
+                                    {
+
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                catch (Exception)
-                {
+                    catch (Exception)
+                    {
 
+                    }
                 }
+
             }
-
 
             return nodes;
         }

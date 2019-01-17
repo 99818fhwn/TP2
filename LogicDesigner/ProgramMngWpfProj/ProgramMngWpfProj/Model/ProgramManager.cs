@@ -12,15 +12,22 @@ namespace ProgramMngWpfProj.Model
 {
     public class ProgramManager
     {
-        private ICollection<INode> fieldNodes;
-        private readonly ICollection<INode> possibleNodesToChooseFrom;
+        private ICollection<IDisplayableNode> fieldNodes;
+        private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
 
         public ProgramManager()
         {
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
-            this.fieldNodes = new List<INode>();
+            this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
+
+            // test
+            for(int i = 0; i < this.possibleNodesToChooseFrom.Count() - 1; i++)
+            {
+                this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
+                    this.possibleNodesToChooseFrom.ElementAt(i).Inputs.ElementAt(1));
+            }
         }
 
         private ICollection<INode> InitializeNodesToChooseFrom()
@@ -61,33 +68,38 @@ namespace ProgramMngWpfProj.Model
             this.Stop = true;
         }
 
-        public bool ConnectPines(IPinGeneric output, IPinGeneric input)
+        public bool ConnectPins(IPin output, IPin input)
         {
-            var outputType = output.Value.Value.GetType().GetGenericTypeDefinition();
-            var inputType = input.Value.Value.GetType().GetGenericTypeDefinition();
+            var outputType = output.Value.Current.GetType();
+            //var outputType = output.Value.Current.GetType().GetGenericTypeDefinition();
+            var inputType = input.Value.Current.GetType();
 
             if(outputType != inputType)
             {
                 return false;
             }
             
-                // if no value in both nodes - new value reference
-            if(output.Value.Value == null && input.Value.Value == null)
+             // if no value in both nodes - new value reference
+             // not null - int bool no null value 
+            if(output.Value.Current == null && input.Value.Current == null)
             {
                 IValue instance = (IValue)Activator.CreateInstance(outputType);
 
-                output.Value.Value = instance;
-                input.Value.Value = output.Value.Value; // value or value value
-                
+                output.Value.Current = instance;
+                input.Value.Current = output.Value.Current;
+                return true;
             }
-            else if(output.Value.Value == null && input.Value.Value != null)
-            {
-                output.Value.Value = input.Value.Value;
-            }
-            else if (input.Value.Value != null && output.Value.Value == null)
-            {
-                input.Value.Value = output.Value.Value;
-            }
+
+            input.Value.Current = output.Value.Current;
+
+            //else if(output.Value.Current == null && input.Value.Current != null)
+            //{
+            //    output.Value.Current = input.Value.Current;
+            //}
+            //else if (input.Value.Current != null && output.Value.Current == null)
+            //{
+            //    input.Value.Current = output.Value.Current;
+            //}
 
             return true;
         }
