@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProgramMngWpfProj.Model
+namespace LogicDesigner.Model
 {
     public class NodesLoader
     {
