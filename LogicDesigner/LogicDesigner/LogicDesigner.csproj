@@ -64,14 +64,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Command\Command.cs" />
     <Compile Include="Model\Component.cs" />
     <Compile Include="Model\ComponentLoader.cs" />
+    <Compile Include="Model\NodesLoader.cs" />
+    <Compile Include="Model\ProgramManager.cs" />
     <Compile Include="Model\SerializationLogic.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ViewModel\ComponentVM.cs" />
+    <Compile Include="ViewModel\ProgramMngVM.cs" />
     <Compile Include="ViewModel\WindowVM.cs" />
     <Compile Include="View\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -104,9 +109,7 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Command\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="Images\And.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
