@@ -57,10 +57,11 @@
             InitializeComponent();
 
             this.DataContext = new WindowVM();
+            
 
             // New component
             Grid sampleComponent = new Grid();
-
+            
             // Component Body
             Button sampleBody = new Button();
 
@@ -73,12 +74,12 @@
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
-
             sampleBody.Background = imageBrush;
 
             sampleComponent.Children.Add(sampleBody);
-
-            ComponentGrid.Children.Add(sampleComponent);
+            ComponentWindow.Items.Add(sampleComponent);
+            
+            sampleComponent.RenderTransform = new TranslateTransform(100, 100);
         }
 
         /// <summary>
@@ -88,12 +89,14 @@
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
+            var pressedComponent = (Visual)e.Source;
+
             if (this.componentPosition == null)
             {
-                this.componentPosition = SampleComponent.TransformToAncestor(ComponentGrid).Transform(new Point(0, 0));
+                this.componentPosition = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
             }
 
-            Point mousePosition = Mouse.GetPosition(ComponentGrid);
+            Point mousePosition = Mouse.GetPosition(ComponentWindow);
 
             this.deltaX = mousePosition.X - this.componentPosition.Value.X;
             this.deltaY = mousePosition.Y - this.componentPosition.Value.Y;
@@ -108,7 +111,9 @@
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseUp(object sender, MouseButtonEventArgs e)
         {
-            this.translateTransform = SampleComponent.RenderTransform as TranslateTransform;
+            var pressedComponent = (UIElement)e.Source;
+
+            this.translateTransform = pressedComponent.RenderTransform as TranslateTransform;
             isMoving = false;
         }
 
@@ -119,17 +124,19 @@
         /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseMove(object sender, MouseEventArgs e)
         {
+            var pressedComponent = (UIElement)e.Source;
+
             if (!this.isMoving)
             {
                 return;
             }
 
-            var mousePosition = Mouse.GetPosition(ComponentGrid);
+            var mousePosition = Mouse.GetPosition(ComponentWindow);
 
             var offsetX = (translateTransform == null ? componentPosition.Value.X : componentPosition.Value.X - translateTransform.X) + deltaX - mousePosition.X;
             var offsetY = (translateTransform == null ? componentPosition.Value.Y : componentPosition.Value.Y - translateTransform.Y) + deltaY - mousePosition.Y;
 
-            this.SampleComponent.RenderTransform = new TranslateTransform(-offsetX, -offsetY);
+            pressedComponent.RenderTransform = new TranslateTransform(-offsetX, -offsetY);
         }
     }
 }

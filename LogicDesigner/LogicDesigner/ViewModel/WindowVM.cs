@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Shared;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -36,11 +38,10 @@ namespace LogicDesigner.ViewModel
         /// The translated transform.
         /// </summary>
         private TranslateTransform translateTransform;
-
-        public object ComponentGrid { get; private set; }
-
+        
         public WindowVM()
         {
+            this.PossibleComponents = new ObservableCollection<IDisplayableNode>();
         }
 
         public void GenerateComponents()
@@ -48,58 +49,9 @@ namespace LogicDesigner.ViewModel
 
         }
 
-        ///// <summary>
-        ///// Called when the button is pressed down.
-        ///// </summary>
-        ///// <param name="sender">The sender.</param>
-        ///// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        //private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
-        //{
-        //    Button button = (Button)sender;
+        public ObservableCollection<IDisplayableNode> PossibleComponents { get; set; }
 
-        //    if (this.componentPosition == null)
-        //    {
-        //        this.componentPosition = button.TransformToAncestor(VisualTreeHelper.GetParent(button)).Transform(new Point(0, 0));
-        //    }
 
-        //    Point mousePosition = Mouse.GetPosition(ComponentGrid);
-
-        //    this.deltaX = mousePosition.X - this.componentPosition.Value.X;
-        //    this.deltaY = mousePosition.Y - this.componentPosition.Value.Y;
-
-        //    this.isMoving = true;
-        //}
-
-        ///// <summary>
-        ///// Called when the button is pressed up.
-        ///// </summary>
-        ///// <param name="sender">The sender.</param>
-        ///// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        //private void ComponentMouseUp(object sender, MouseButtonEventArgs e)
-        //{
-        //    this.translateTransform = SampleComponent.RenderTransform as TranslateTransform;
-        //    isMoving = false;
-        //}
-
-        ///// <summary>
-        ///// Called when the button is moved.
-        ///// </summary>
-        ///// <param name="sender">The sender.</param>
-        ///// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
-        //private void ComponentMouseMove(object sender, MouseEventArgs e)
-        //{
-        //    if (!this.isMoving)
-        //    {
-        //        return;
-        //    }
-
-        //    var mousePosition = Mouse.GetPosition(ComponentGrid);
-
-        //    var offsetX = (translateTransform == null ? componentPosition.Value.X : componentPosition.Value.X - translateTransform.X) + deltaX - mousePosition.X;
-        //    var offsetY = (translateTransform == null ? componentPosition.Value.Y : componentPosition.Value.Y - translateTransform.Y) + deltaY - mousePosition.Y;
-
-        //    this.SampleComponent.RenderTransform = new TranslateTransform(-offsetX, -offsetY);
-        //}
     }
 }
 
