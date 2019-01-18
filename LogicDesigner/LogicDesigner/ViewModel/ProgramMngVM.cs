@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LogicDesigner.Commands;
 using LogicDesigner.Model;
@@ -73,6 +74,18 @@ namespace LogicDesigner.ViewModel
             this.possibleComponentsVMToChooseFrom = new ObservableCollection<ComponentVM>(nodesToChoose);
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
+        }
+
+
+        /// <summary>
+        /// Creates the name tag from Labe and can add additional string to the end, it removes all chars except the letters.
+        /// </summary>
+        /// <param name="preName">Name of the element.</param>
+        /// <param name="additional">The additional string ending.</param>
+        /// <returns></returns>
+        public string CreateNameTag(string preName,string additional)
+        {
+            return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
         }
 
         public ObservableCollection<ComponentVM> NodesVMInField
