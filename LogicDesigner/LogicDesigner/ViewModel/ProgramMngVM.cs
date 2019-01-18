@@ -12,13 +12,9 @@ namespace LogicDesigner.ViewModel
 {
     public class ProgramMngVM
     {
-        // A random comment appeared
         private ProgramManager programManager;
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentVM> possibleComponentsVMToChooseFrom;
-
-        //private Command addComponentToFieldCommand;
-        //private Command removeComponentFromFieldCommand;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
@@ -29,22 +25,28 @@ namespace LogicDesigner.ViewModel
 
             var addCommand = new Command(obj =>
             {
+                // null reference exception
                 var nodeInFieldVM = obj as ComponentVM;
 
                 this.programManager.FieldNodes.Add(
                     (IDisplayableNode)Activator.CreateInstance(nodeInFieldVM.Node.GetType()));
+
+                this.nodesVMInField.Add(nodeInFieldVM);
 
                 this.OnFieldComponentCreated(this, new FieldComponentEventArgs(nodeInFieldVM));
             });
 
             var removeCommand = new Command(obj =>
             {
+                // null reference exception
                 var nodeInFieldVM = obj as ComponentVM;
                 foreach (var n in this.programManager.FieldNodes)
                 {
                     if (nodeInFieldVM.Node == n)
                     {
                         this.programManager.FieldNodes.Remove(n);
+                        this.nodesVMInField.Remove(nodeInFieldVM);
+
                         this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
 
                         break;
@@ -72,7 +74,6 @@ namespace LogicDesigner.ViewModel
 
             this.possibleComponentsVMToChooseFrom = new ObservableCollection<ComponentVM>(nodesToChoose);
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
-
         }
 
         public ObservableCollection<ComponentVM> NodesVMInField
