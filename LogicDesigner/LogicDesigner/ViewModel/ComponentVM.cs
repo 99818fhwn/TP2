@@ -15,15 +15,19 @@ namespace LogicDesigner.ViewModel
     {
         private IDisplayableNode node;
         private Command activateCommand;
+        private Command addCommand;
+        private Command removeCommand;
         private int xCoord;
         private int yCoord;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ComponentVM(IDisplayableNode node, Command activateCommand)
+        public ComponentVM(IDisplayableNode node, Command activateCommand, Command addCommand, Command removeCommand)
         {
             this.node = node;
             this.activateCommand = activateCommand;
+            this.activateCommand = addCommand;
+            this.removeCommand = removeCommand;
         }
 
         public string Label
