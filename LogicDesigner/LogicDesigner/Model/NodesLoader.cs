@@ -53,7 +53,7 @@ namespace LogicDesigner.Model
                                         IDisplayableNode node = (IDisplayableNode)Activator.CreateInstance(type);
                                         nodes.Add(node);
                                     }
-                                    catch (Exception e)
+                                    catch (Exception)
                                     {
 
                                     }
