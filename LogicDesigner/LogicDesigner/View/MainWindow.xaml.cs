@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -60,19 +61,15 @@
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            // Set datacontext specifically to MainGrid, else Undo/Redo wouldn't work in current structure - Moe
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
-            programMngVM.FieldComponentAdded += this.OnComponentAdded;
-            programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            programMngVM.FieldComponentAdded += OnComponentAdded;
+            programMngVM.FieldComponentRemoved += OnComponentDeleted;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
-
-            //this.DrawNewComponent(null);
-            //this.DrawNewComponent(null);
         }
 
         /// <summary>
@@ -83,7 +80,24 @@
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
             var pressedComponent = (UIElement)e.Source;
-            this.isMoving = true;
+            var parentType = VisualTreeHelper.GetParent(pressedComponent).GetType();
+
+            if (parentType == typeof(Grid))
+            {
+                var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
+
+                if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
+                {
+                    var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
+                    var componentToActivate = dataContext.NodesVMInField.First(x => x.Name == parent.Name);
+
+                    componentToActivate.Activate();
+
+                    return;
+                }
+
+                this.isMoving = true;
+            }            
         }
 
         /// <summary>
@@ -95,8 +109,8 @@
         {
             var pressedComponent = (UIElement)e.Source;
             this.isMoving = false;
-            CurrentMove = new Point(0, 0);
-            CurrentMouse = new Point(0, 0);
+            this.CurrentMove = new Point(0, 0);
+            this.CurrentMouse = new Point(0, 0);
         }
 
         /// <summary>
@@ -109,20 +123,22 @@
             // Components are being reset, because their translation is not persistent and the temp variables are reset after letting the mouse go
             var pressedComponent = (UIElement)e.Source;
 
+            var parent = (UIElement)VisualTreeHelper.GetParent(pressedComponent);
+
             if (!this.isMoving)
             {
                 return;
             }
             else
             {
-                var previousMouse = CurrentMouse;
-                CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
+                var previousMouse = this.CurrentMouse;
+                this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
                 //Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
-                if (previousMouse != new Point(0, 0) && CurrentMouse != previousMouse)
+                if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
                 {
-                    Point movepoint = new Point(CurrentMouse.X - previousMouse.X, CurrentMouse.Y - previousMouse.Y);
-                    CurrentMove = new Point(CurrentMove.X + movepoint.X, CurrentMove.Y + movepoint.Y);
-                    pressedComponent.RenderTransform = new TranslateTransform(CurrentMove.X,CurrentMove.Y);
+                    Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
+                    this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
+                    pressedComponent.RenderTransform = new TranslateTransform(this.CurrentMove.X, this.CurrentMove.Y);
                 }
             }
         }
@@ -134,7 +150,12 @@
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
-            this.DrawNewComponent(e.Component);
+            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.UndoHistory.Push(currentMan);
+            this.RedoHistory.Clear();
+            DrawNewComponent(e.Component);
+            var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
@@ -144,6 +165,9 @@
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
+            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.UndoHistory.Push(currentMan);
+            this.RedoHistory.Clear();
             // Delete component.
         }
 
@@ -154,11 +178,11 @@
         {
             // New component
             Grid sampleComponent = new Grid();
-
+            
             // Component Body
             Button sampleBody = new Button();
 
-            sampleBody.Name = componentVM.Label;
+            sampleComponent.Name = componentVM.Name;
             sampleBody.Height = componentVM.Picture.Height;
             sampleBody.Width = componentVM.Picture.Width;
 
@@ -166,15 +190,25 @@
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
 
-            //TextBlock label = new TextBlock
-            //{
-            //    Width = 100,
-            //    Height = 100,
-            //    Text = componentVM.Label
-            //};
+            // Add the label
+            string text = componentVM.Label;
+            Typeface myTypeface = new Typeface("Helvetica");
+            FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight, myTypeface, 16, Brushes.Red);
+
+            TextBlock label = new TextBlock
+            {
+                Width = ft.Width,
+                Height = ft.Height,
+                Text = componentVM.Label
+            };
+
+            label.TextAlignment = TextAlignment.Center;
+
+            label.RenderTransform = new TranslateTransform(0, -componentVM.Picture.Height / 2 - 10);
 
             sampleComponent.Children.Add(sampleBody);
-            //sampleComponent.Children.Add(label);
+            sampleComponent.Children.Add(label);
 
             this.ComponentWindow.Children.Add(sampleComponent);
 
@@ -222,7 +256,15 @@
                 if (this.UndoHistory.Count > 0)
                 {
                     ProgramMngVM history = this.UndoHistory.Pop();
+                    this.UndoHistory.Push(history);
+
+                    history = this.UndoHistory.Pop();
+                    this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
                     this.RedoHistory.Push(history);
                 }
             }));
@@ -241,7 +283,13 @@
                 if (this.RedoHistory.Count > 0)
                 {
                     ProgramMngVM history = this.RedoHistory.Pop();
+
+                    this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
                     this.UndoHistory.Push(history);
                 }
 
