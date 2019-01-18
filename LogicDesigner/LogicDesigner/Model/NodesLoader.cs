@@ -24,7 +24,7 @@ namespace LogicDesigner.Model
 
                 foreach(var dir in dirs)
                 {
-                    foreach (var f in dir.GetFiles())
+                    foreach (var f in dir.GetFiles("*.dll"))
                     {
                         files.Add(f);
                     }
