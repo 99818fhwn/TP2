@@ -19,7 +19,7 @@ namespace LogicDesigner.ViewModel
         private Command addComponentToFieldCommand;
         private Command removeComponentFromFieldCommand;
 
-        public event EventHandler<FieldComponentEventArgs> FieldComponentCreated;
+        public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
 
         public ObservableCollection<ComponentVM> NodesVMInField
@@ -118,12 +118,28 @@ namespace LogicDesigner.ViewModel
 
         public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
         {
-            this.FieldComponentCreated?.Invoke(this, e);
+            this.FieldComponentAdded?.Invoke(this, e);
         }
 
         public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentRemoved?.Invoke(this, e);
+        }
+
+        public Command AddComponentCommand
+        {
+            get
+            {
+                return this.addComponentToFieldCommand;
+            }
+        }
+
+        public Command RemoveComponentCommand
+        {
+            get
+            {
+                return this.removeComponentFromFieldCommand;
+            }
         }
     }
 }

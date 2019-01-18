@@ -89,7 +89,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <TextBlock Text="{Binding Label}"/>
+                                    <Button Content="{Binding Label}"/>
                                 </Grid>
                             </DataTemplate>  
                         </GridViewColumn.CellTemplate>
