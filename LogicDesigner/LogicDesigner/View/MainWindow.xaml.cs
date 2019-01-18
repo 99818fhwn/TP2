@@ -64,8 +64,8 @@
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
-            //programMngVM.FieldComponentAdded += this.OnComponentAdded;
-            //programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            programMngVM.FieldComponentAdded += this.OnComponentAdded;
+            programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
@@ -162,7 +162,7 @@
             sampleBody.Height = componentVM.Picture.Height;
             sampleBody.Width = componentVM.Picture.Width;
 
-            ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+            ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
             
