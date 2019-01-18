@@ -44,6 +44,11 @@ namespace BinaryConverterComponent
         }
 
         /// <summary>
+        /// Occurs when [picture changed].
+        /// </summary>
+        public event EventHandler PictureChanged;
+
+        /// <summary>
         /// Gets or sets the pin1.
         /// </summary>
         /// <value>
@@ -90,11 +95,6 @@ namespace BinaryConverterComponent
             get;
             set;
         }
-
-        /// <summary>
-        /// Occurs when [picture changed].
-        /// </summary>
-        public event EventHandler PictureChanged;
 
         /// <summary>
         /// Gets the inputs.
@@ -189,7 +189,6 @@ namespace BinaryConverterComponent
                     bitRepres += 0;
                 }
             }
-
 
             int resultNumber = Convert.ToInt32(bitRepres, 2);
 

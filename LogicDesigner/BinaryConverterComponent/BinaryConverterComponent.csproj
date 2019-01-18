@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{F8E716AF-A166-4547-8595-EF7E02A3AA6B}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <RootNamespace>BinaryConverterComponent</RootNamespace>
     <AssemblyName>BinaryConverterComponent</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
@@ -31,6 +31,9 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Shared">
@@ -76,4 +79,8 @@
     <Content Include="Resources\BinrayConverter.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>mkdir  "$(SolutionDir)\LogicDesigner\bin\Debug\Components\$(ProjectName)"
+XCOPY "$(TargetDir)*" "$(SolutionDir)\LogicDesigner\bin\Debug\Components\$(ProjectName)" /S /Y</PostBuildEvent>
+  </PropertyGroup>
 </Project>

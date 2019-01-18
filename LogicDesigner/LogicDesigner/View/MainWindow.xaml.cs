@@ -225,9 +225,42 @@ namespace LogicDesigner
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
+            e.Component.SpeacialPropertyChanged += this.OnComponentChanged;
             this.DrawNewComponent(e.Component);
             var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
             this.RedoHistory.Push(updatedCurrentMan);
+        }
+
+
+        /// <summary>
+        /// Called when [component changed] and chages the visual of the component.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
+        private void OnComponentChanged(object sender, FieldComponentEventArgs e)
+        {
+            var compOld = this.ComponentWindow.Children;//FindName(e.Component.Name);
+            foreach (var child in compOld)
+            {
+                if (child.GetType() == typeof(Grid))
+                {
+                    var grids = (Grid)child;
+                    if (grids.Name == e.Component.Name)
+                    {
+                        foreach (var item in grids.Children)
+                        {
+                            if (item.GetType() == typeof(Button))
+                            {
+                                ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+                                imageBrush.Stretch = Stretch.Fill;
+                                var compToChange = (Button)item;
+                                compToChange.Background = imageBrush;
+                                compToChange.UpdateLayout();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -238,6 +271,7 @@ namespace LogicDesigner
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; ////Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
         }

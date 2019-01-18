@@ -35,7 +35,6 @@ namespace LogicDesigner.ViewModel
                     (IDisplayableNode)Activator.CreateInstance(nodeInFieldVM.Node.GetType()));
 
                 this.nodesVMInField.Add(nodeInFieldVM);
-
                 this.OnFieldComponentCreated(this, new FieldComponentEventArgs(nodeInFieldVM));
             });
 
@@ -49,7 +48,6 @@ namespace LogicDesigner.ViewModel
                     {
                         this.programManager.FieldNodes.Remove(n);
                         this.nodesVMInField.Remove(nodeInFieldVM);
-
                         this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
 
                         break;
@@ -152,7 +150,13 @@ namespace LogicDesigner.ViewModel
             this.FieldComponentRemoved?.Invoke(this, e);
         }
 
-        protected virtual void FireOnComponenVMChanged(object sender, FieldComponentEventArgs e)
+
+        /// <summary>
+        /// Fires the on component vm changed, this seemes obsolete because the event when fired already contains the entire component.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
+        protected virtual void FireOnComponentVMChanged(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentChanged?.Invoke(this, e);
         }
