@@ -20,6 +20,7 @@ namespace LogicDesigner.ViewModel
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
+        public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
 
         public ProgramMngVM()
         {
@@ -111,8 +112,8 @@ namespace LogicDesigner.ViewModel
         /// <param name="old"> The ProgramMngVM which values should be copied. </param>
         public ProgramMngVM(ProgramMngVM old)
         {
-            this.nodesVMInField = new ObservableCollection<ComponentVM>();
-            foreach(var node in old.nodesVMInField)
+            this.nodesVMInField = new ObservableCollection<ComponentVM>(); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
+            foreach (var node in old.nodesVMInField) ////Will be obsolete.
             {
                 this.nodesVMInField.Add(node);
             }
@@ -149,6 +150,11 @@ namespace LogicDesigner.ViewModel
         public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentRemoved?.Invoke(this, e);
+        }
+
+        protected virtual void FireOnComponenVMChanged(object sender, FieldComponentEventArgs e)
+        {
+            this.FieldComponentChanged?.Invoke(this, e);
         }
     }
 }

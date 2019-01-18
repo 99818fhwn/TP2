@@ -24,6 +24,8 @@ namespace LogicDesigner.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public event EventHandler<FieldComponentEventArgs> SpeacialPropertyChanged;
+
         public ComponentVM(IDisplayableNode node, Command activateCommand, Command addCommand, 
             Command executeCommand, Command removeCommand, string uniqueName)
         {
@@ -37,9 +39,15 @@ namespace LogicDesigner.ViewModel
             node.PictureChanged += this.OnPictureChanged;
         }
 
+        protected virtual void FireOnComponentPropertyChanged(ComponentVM componentVM)
+        {
+            this.SpeacialPropertyChanged?.Invoke(this, new FieldComponentEventArgs(componentVM));
+        }
+
         internal void OnPictureChanged(object sender, EventArgs e)
         {
             this.FireOnPropertyChanged(nameof(this.Picture));
+            this.FireOnComponentPropertyChanged(this);
         }
 
         public string Label
