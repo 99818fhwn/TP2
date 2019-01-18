@@ -52,6 +52,14 @@ namespace LogicDesigner.Model
             //        this.possibleNodesToChooseFrom.Last().Inputs.ElementAt(0));
         }
 
+        public ProgramManager (ProgramManager old)
+        {
+            this.Delay = old.Delay;
+            this.FieldNodes = old.FieldNodes;
+            possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
+            this.Stop = old.Stop;
+        }
+
         public ICollection<IDisplayableNode> FieldNodes
         {
             get
