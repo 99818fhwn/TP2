@@ -77,6 +77,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ViewModel\ComponentRepresentationVM.cs" />
     <Compile Include="ViewModel\ComponentVM.cs" />
     <Compile Include="ViewModel\FieldComponentEventArgs.cs" />
     <Compile Include="ViewModel\ProgramMngVM.cs" />

@@ -15,7 +15,6 @@ namespace LogicDesigner.ViewModel
     {
         private IDisplayableNode node;
         private readonly Command activateCommand;
-        private readonly Command addCommand;
         private readonly Command removeCommand;
         private readonly Command executeCommand;
         private int xCoord;
@@ -26,17 +25,27 @@ namespace LogicDesigner.ViewModel
 
         public event EventHandler<FieldComponentEventArgs> SpeacialPropertyChanged;
 
-        public ComponentVM(IDisplayableNode node, Command activateCommand, Command addCommand, 
-            Command executeCommand, Command removeCommand, string uniqueName)
-        {
-            this.node = node;
-            this.activateCommand = activateCommand;
-            this.addCommand = addCommand;
-            this.executeCommand = executeCommand;
-            this.removeCommand = removeCommand;
-            this.uniqueName = uniqueName;
+        //public ComponentVM(IDisplayableNode node, Command activateCommand, 
+        //    Command executeCommand, Command removeCommand, string uniqueName)
+        //{
+        //    this.node = node;
+        //    this.activateCommand = activateCommand;
+        //    this.executeCommand = executeCommand;
+        //    this.removeCommand = removeCommand;
+        //    this.uniqueName = uniqueName;
 
-            node.PictureChanged += this.OnPictureChanged;
+        //    node.PictureChanged += this.OnPictureChanged;
+        //}
+
+        public ComponentVM(IDisplayableNode realComponent, string uniqueName, Command executeCommand, Command activateCommand, Command removeCommand)
+        {
+            this.node = realComponent;
+            this.uniqueName = uniqueName;
+            this.executeCommand = executeCommand;
+            this.activateCommand = activateCommand;
+            this.removeCommand = removeCommand;
+
+            this.node.PictureChanged += this.OnPictureChanged;
         }
 
         protected virtual void FireOnComponentPropertyChanged(ComponentVM componentVM)
@@ -101,14 +110,6 @@ namespace LogicDesigner.ViewModel
             get
             {
                 return this.node;
-            }
-        }
-
-        public Command AddComponentCommand
-        {
-            get
-            {
-                return this.addCommand;
             }
         }
 
