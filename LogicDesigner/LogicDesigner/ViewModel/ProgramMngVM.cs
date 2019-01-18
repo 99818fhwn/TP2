@@ -75,6 +75,21 @@ namespace LogicDesigner.ViewModel
 
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
+        /// </summary>
+        /// <param name="old"> The ProgramMngVM which values should be copied. </param>
+        public ProgramMngVM(ProgramMngVM old)
+        {
+            this.nodesVMInField = new ObservableCollection<ComponentVM>();
+            foreach(var node in old.nodesVMInField)
+            {
+                this.nodesVMInField.Add(node);
+            }
+            this.PossibleComponentsToChooseFrom = old.PossibleComponentsToChooseFrom;
+            this.programManager = new ProgramManager(old.programManager);
+        }
+
         public ObservableCollection<ComponentVM> NodesVMInField
         {
             get

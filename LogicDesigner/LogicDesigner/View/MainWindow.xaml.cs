@@ -64,8 +64,8 @@
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
-            programMngVM.FieldComponentAdded += this.OnComponentAdded;
-            programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            programMngVM.FieldComponentAdded += OnComponentAdded;
+            programMngVM.FieldComponentRemoved += OnComponentDeleted;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
@@ -95,8 +95,8 @@
         {
             var pressedComponent = (UIElement)e.Source;
             this.isMoving = false;
-            CurrentMove = new Point(0, 0);
-            CurrentMouse = new Point(0, 0);
+            this.CurrentMove = new Point(0, 0);
+            this.CurrentMouse = new Point(0, 0);
         }
 
         /// <summary>
@@ -115,14 +115,14 @@
             }
             else
             {
-                var previousMouse = CurrentMouse;
-                CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
+                var previousMouse = this.CurrentMouse;
+                this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
                 //Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
-                if (previousMouse != new Point(0, 0) && CurrentMouse != previousMouse)
+                if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
                 {
-                    Point movepoint = new Point(CurrentMouse.X - previousMouse.X, CurrentMouse.Y - previousMouse.Y);
-                    CurrentMove = new Point(CurrentMove.X + movepoint.X, CurrentMove.Y + movepoint.Y);
-                    pressedComponent.RenderTransform = new TranslateTransform(CurrentMove.X,CurrentMove.Y);
+                    Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
+                    this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
+                    pressedComponent.RenderTransform = new TranslateTransform(this.CurrentMove.X, this.CurrentMove.Y);
                 }
             }
         }
@@ -134,7 +134,12 @@
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
-            this.DrawNewComponent(e.Component);
+            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.UndoHistory.Push(currentMan);
+            this.RedoHistory.Clear();
+            DrawNewComponent(e.Component);
+            var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
@@ -144,6 +149,9 @@
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
+            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.UndoHistory.Push(currentMan);
+            this.RedoHistory.Clear();
             // Delete component.
         }
 
@@ -165,6 +173,12 @@
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
+
+            var currentMan = (ProgramMngVM)this.ComponentWindow.DataContext;
+            if (!currentMan.NodesVMInField.Contains(componentVM))
+            {
+                currentMan.NodesVMInField.Add(componentVM);
+            }
 
             //TextBlock label = new TextBlock
             //{
@@ -222,7 +236,15 @@
                 if (this.UndoHistory.Count > 0)
                 {
                     ProgramMngVM history = this.UndoHistory.Pop();
+                    this.UndoHistory.Push(history);
+
+                    history = this.UndoHistory.Pop();
+                    this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
                     this.RedoHistory.Push(history);
                 }
             }));
@@ -241,7 +263,13 @@
                 if (this.RedoHistory.Count > 0)
                 {
                     ProgramMngVM history = this.RedoHistory.Pop();
+
+                    this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
                     this.UndoHistory.Push(history);
                 }
 
