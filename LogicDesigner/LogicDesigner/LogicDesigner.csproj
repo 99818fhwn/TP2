@@ -78,7 +78,6 @@
     <Compile Include="ViewModel\ComponentVM.cs" />
     <Compile Include="ViewModel\FieldComponentEventArgs.cs" />
     <Compile Include="ViewModel\ProgramMngVM.cs" />
-    <Compile Include="ViewModel\WindowVM.cs" />
     <Compile Include="View\App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>

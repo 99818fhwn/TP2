@@ -56,12 +56,12 @@
         public MainWindow()
         {
             InitializeComponent();
-            this.UndoHistory = new Stack<WindowVM>();
-            this.RedoHistory = new Stack<WindowVM>();
+            this.UndoHistory = new Stack<ProgramMngVM>();
+            this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
             // Set datacontext specifically to MainGrid, else Undo/Redo wouldn't work in current structure - Moe
-            this.MainGrid.DataContext = new WindowVM();
+            this.MainGrid.DataContext = new ProgramMngVM();
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
@@ -178,15 +178,15 @@
 
 
         // Undo and Redo functionality -> to be tested
-        private Stack<WindowVM> UndoHistory { get; set; }
-        private Stack<WindowVM> RedoHistory { get; set; }
+        private Stack<ProgramMngVM> UndoHistory { get; set; }
+        private Stack<ProgramMngVM> RedoHistory { get; set; }
         public Command UndoCommand
         {
             get => new Command(new Action<object>((input) =>
             {
                 if (this.UndoHistory.Count > 0)
                 {
-                    WindowVM history = this.UndoHistory.Pop();
+                    ProgramMngVM history = this.UndoHistory.Pop();
                     this.MainGrid.DataContext = history;
                     this.RedoHistory.Push(history);
                 }
@@ -199,7 +199,7 @@
             {
                 if (this.RedoHistory.Count > 0)
                 {
-                    WindowVM history = this.RedoHistory.Pop();
+                    ProgramMngVM history = this.RedoHistory.Pop();
                     this.MainGrid.DataContext = history;
                     this.UndoHistory.Push(history);
                 }

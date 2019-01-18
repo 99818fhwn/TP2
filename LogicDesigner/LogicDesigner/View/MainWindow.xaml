@@ -82,7 +82,7 @@
             </Menu>
             <StackPanel></StackPanel>
         </DockPanel>
-        <ListView Grid.Row="1" ItemsSource="{Binding PossibleComponents}">
+        <ListView Grid.Row="1" ItemsSource="{Binding PossibleComponentsToChooseFrom}">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Component">

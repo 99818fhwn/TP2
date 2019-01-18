@@ -23,7 +23,7 @@ namespace LogicDesigner.Model
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
             // test -- hab ich deswegen auskommentiert - Moe
-            //for(int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
+            //for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
             //{
             //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
             //    {
