@@ -125,6 +125,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy /Y "$(TargetPath)" "$(SolutionDir)\LogicDesigner\bin\Debug\Components\$(ProjectName).dll"</PostBuildEvent>
+    <PostBuildEvent>mkdir  "$(SolutionDir)\LogicDesigner\bin\Debug\Components\$(ProjectName)"
+XCOPY "$(TargetDir)*" "$(SolutionDir)\LogicDesigner\bin\Debug\Components\$(ProjectName)" /S /Y</PostBuildEvent>
   </PropertyGroup>
 </Project>
