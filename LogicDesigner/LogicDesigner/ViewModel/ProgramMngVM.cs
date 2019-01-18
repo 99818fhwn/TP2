@@ -96,6 +96,7 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+
         public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentAdded?.Invoke(this, e);
