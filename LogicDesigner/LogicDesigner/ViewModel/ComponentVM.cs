@@ -19,15 +19,19 @@ namespace LogicDesigner.ViewModel
         private Command removeCommand;
         private int xCoord;
         private int yCoord;
+        private readonly string uniqueName;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ComponentVM(IDisplayableNode node, Command activateCommand, Command addCommand, Command removeCommand)
+        public ComponentVM(IDisplayableNode node, Command activateCommand, Command addCommand, 
+            Command removeCommand, string uniqueName)
         {
             this.node = node;
             this.activateCommand = activateCommand;
             this.addCommand = addCommand;
             this.removeCommand = removeCommand;
+            this.uniqueName = uniqueName;
+
             node.PictureChanged += this.OnPictureChanged;
         }
 
@@ -39,6 +43,11 @@ namespace LogicDesigner.ViewModel
         public string Label
         {
             get { return this.node.Label; }
+        }
+
+        public string Name
+        {
+            get { return this.uniqueName; }
         }
 
         public string TextValue
