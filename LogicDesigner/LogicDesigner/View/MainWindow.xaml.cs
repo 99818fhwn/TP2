@@ -138,7 +138,7 @@
                 {
                     Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
                     this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
-                    pressedComponent.RenderTransform = new TranslateTransform(this.CurrentMove.X, this.CurrentMove.Y);
+                    parent.RenderTransform = new TranslateTransform(this.CurrentMove.X, this.CurrentMove.Y);
                 }
             }
         }
