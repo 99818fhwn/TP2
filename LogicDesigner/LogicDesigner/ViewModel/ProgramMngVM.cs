@@ -14,10 +14,10 @@ namespace LogicDesigner.ViewModel
     {
         private ProgramManager programManager;
         private ObservableCollection<ComponentVM> nodesVMInField;
-        private ObservableCollection<ComponentVM> possibleComponentsToChooseFrom;
+        private ObservableCollection<ComponentVM> possibleComponentsVMToChooseFrom;
 
-        private Command addComponentToField;
-        private Command removeComponentFromField;
+        private Command addComponentToFieldCommand;
+        private Command removeComponentFromFieldCommand;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentCreated;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
@@ -34,11 +34,11 @@ namespace LogicDesigner.ViewModel
         {
             get
             {
-                return this.possibleComponentsToChooseFrom;
+                return this.possibleComponentsVMToChooseFrom;
             }
             set
             {
-                this.possibleComponentsToChooseFrom = value;
+                this.possibleComponentsVMToChooseFrom = value;
             }
         }
 
@@ -47,13 +47,15 @@ namespace LogicDesigner.ViewModel
             // Added by Moe
             this.programManager = new ProgramManager();
 
-            var observableNodes = new ObservableCollection<ComponentVM>();
-            foreach(IDisplayableNode comp in this.programManager.PossibleNodesToChooseFrom)
-            {
-                // Null definitely needs to be replaced here - Moe
-                observableNodes.Add(new ComponentVM(comp, null));
-            }
-            this.PossibleComponentsToChooseFrom = observableNodes;
+            //var observableNodes = new ObservableCollection<ComponentVM>();
+
+            //foreach(IDisplayableNode comp in this.programManager.PossibleNodesToChooseFrom)
+            //{
+            //    // Null definitely needs to be replaced here - Moe
+            //    observableNodes.Add(new ComponentVM(comp, null));
+            //}
+
+            //this.PossibleComponentsToChooseFrom = observableNodes;
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node, 
                 new Command(obj => {
@@ -69,22 +71,23 @@ namespace LogicDesigner.ViewModel
                     var nodeToChooseVM = obj as ComponentVM;
                     // find instance in the collection ?
                     // -> Found instance in the collection? (Not sure about which collection though ¯\_(ツ)_/¯ ) LG Moe
-                    ComponentVM instance = PossibleComponentsToChooseFrom.Where((current) =>
-                    {
-                        if (current.Node == nodeToChooseVM.Node)
-                        {
-                            return true;
-                        }
-                        return false;
-                    }).First();
-                    // End of Moes code
+                    //ComponentVM instance = PossibleComponentsToChooseFrom.Where((current) =>
+                    //{
+                    //    if (current.Node == nodeToChooseVM.Node)
+                    //    {
+                    //        return true;
+                    //    }
+                    //    return false;
+                    //}).First();
+                    //// End of Moes code
 
                     nodeToChooseVM.Activate();
                 })));
 
+            this.possibleComponentsVMToChooseFrom = new ObservableCollection<ComponentVM>(nodesToChoose);
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
-            this.addComponentToField = new Command(obj =>
+            this.addComponentToFieldCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
 
@@ -94,7 +97,7 @@ namespace LogicDesigner.ViewModel
                 this.OnFieldComponentCreated(this, new FieldComponentEventArgs(this.nodesVMInField.Last()));
             });
 
-            this.addComponentToField = new Command(obj =>
+            this.removeComponentFromFieldCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
                 foreach (var n in this.programManager.FieldNodes)

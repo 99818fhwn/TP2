@@ -22,15 +22,22 @@ namespace LogicDesigner.Model
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
-            // test -- hab ich deswegen auskommentiert - Moe
-            //for(int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
-            //{
-            //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
-            //    {
-            //        this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
-            //        this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
-            //    }
-            //}
+            // test - connect pins
+            for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
+            {
+                for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
+                {
+                    try
+                    {
+                        this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
+                        this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
+                    }
+                    catch(ArgumentOutOfRangeException)
+                    {
+
+                    }
+                }
+            }
 
             //this.ConnectPins(this.possibleNodesToChooseFrom.Last().Outputs.ElementAt(0),
             //        this.possibleNodesToChooseFrom.Last().Inputs.ElementAt(0));
@@ -54,11 +61,6 @@ namespace LogicDesigner.Model
             {
                 return this.possibleNodesToChooseFrom;
             }
-            // Note: Can't be set because of readonly - Moe
-            //private set
-            //{
-            //    this.possibleNodesToChooseFrom = value;
-            //}
         }
 
         public int Delay

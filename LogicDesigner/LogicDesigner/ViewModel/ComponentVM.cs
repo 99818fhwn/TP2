@@ -3,6 +3,7 @@ using Shared;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -55,13 +56,18 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        public Bitmap Picture
+        {
+            get { return this.node.Picture; }
+        }
+
         public bool IsInField
         {
             get;
             set;
         }
 
-        public object Node
+        public IDisplayableNode Node
         {
             get
             {
