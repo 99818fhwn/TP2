@@ -28,6 +28,12 @@ namespace LogicDesigner.ViewModel
             this.activateCommand = activateCommand;
             this.addCommand = addCommand;
             this.removeCommand = removeCommand;
+            node.PictureChanged += this.OnPictureChanged;
+        }
+
+        internal void OnPictureChanged(object sender, EventArgs e)
+        {
+            this.FireOnPropertyChanged(nameof(this.Picture));
         }
 
         public string Label
