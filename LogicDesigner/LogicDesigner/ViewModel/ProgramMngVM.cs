@@ -45,7 +45,7 @@ namespace LogicDesigner.ViewModel
                 this.programManager.FieldNodes.Add(
                     (IDisplayableNode)Activator.CreateInstance(nodeInFieldVM.Node.GetType()));
 
-                this.OnFieldComponentCreated(this, new FieldComponentEventArgs(this.nodesVMInField.Last()));
+                this.OnFieldComponentCreated(this, new FieldComponentEventArgs(nodeInFieldVM));
             });
 
             var removeCommand = new Command(obj =>
