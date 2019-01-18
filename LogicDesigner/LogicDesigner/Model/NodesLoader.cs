@@ -41,7 +41,7 @@ namespace LogicDesigner.Model
                         {
                             foreach (var interfc in type.GetInterfaces())
                             {
-                                if ((interfc) == typeof(IDisplayableNode))
+                                if (interfc == typeof(IDisplayableNode))
                                 {
                                     try
                                     {
