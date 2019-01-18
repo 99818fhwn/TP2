@@ -56,19 +56,19 @@
         public MainWindow()
         {
             InitializeComponent();
-            this.UndoHistory = new Stack<WindowVM>();
-            this.RedoHistory = new Stack<WindowVM>();
+            this.UndoHistory = new Stack<ProgramMngVM>();
+            this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
             // Set datacontext specifically to MainGrid, else Undo/Redo wouldn't work in current structure - Moe
-            this.MainGrid.DataContext = new WindowVM();
+            this.MainGrid.DataContext = new ProgramMngVM();
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
-            ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
-            ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
+            this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
+            this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
 
-            DrawNewComponent(null, 150);
-            DrawNewComponent(null);
+            this.DrawNewComponent(null);
+            this.DrawNewComponent(null);
         }
 
         /// <summary>
@@ -95,9 +95,6 @@
             CurrentMouse = new Point(0, 0);
         }
 
-        // needed for translation calculation - Moe
-        private Point CurrentMouse { get; set; }
-        private Point CurrentMove { get; set; }
         /// <summary>
         /// Called when the button is moved.
         /// </summary>
@@ -130,18 +127,18 @@
         /// Called when when a component is added.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void OnComponentAdded(object sender, EventArgs e)
+        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
+        private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
-            // Add a component.
+            this.DrawNewComponent(e.Component);
         }
 
         /// <summary>
         /// Called when a component is deleted.
         /// </summary>
         /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void OnComponentDeleted(object sender, EventArgs e)
+        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
+        private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             // Delete component.
         }
@@ -149,7 +146,7 @@
         /// <summary>
         /// Draws a new component.
         /// </summary>
-        private void DrawNewComponent(ComponentVM componentVM, int debugShift = 0)
+        private void DrawNewComponent(ComponentVM componentVM)
         {
             // New component
             Grid sampleComponent = new Grid();
@@ -157,49 +154,80 @@
             // Component Body
             Button sampleBody = new Button();
 
-            sampleBody.Name = "NewComponent";
+            sampleBody.Name = componentVM.Label;
             sampleBody.Height = Properties.Resources.And.Height;
             sampleBody.Width = Properties.Resources.And.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
-
-            Button middle = new Button();
-            middle.Height = 5;
-            middle.Width = 5;
-            this.ComponentWindow.Children.Add(middle);
-
+            
             sampleComponent.Children.Add(sampleBody);
             this.ComponentWindow.Children.Add(sampleComponent);
 
-            sampleComponent.RenderTransform = new TranslateTransform(debugShift, debugShift);
+            sampleComponent.RenderTransform = new TranslateTransform(0, 100);
         }
 
+        /// <summary>
+        /// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs" /> instance containing the event data.</param>
+        private void ScrollViewerLoaded(object sender, RoutedEventArgs e)
+        {
+            var scrollbar = (ScrollViewer)e.Source;
+            scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
+            scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
+        }
 
-        // Undo and Redo functionality -> to be tested
-        private Stack<WindowVM> UndoHistory { get; set; }
-        private Stack<WindowVM> RedoHistory { get; set; }
+        /// <summary>
+        /// Gets or sets the undo history.
+        /// </summary>
+        /// <value>
+        /// The undo history.
+        /// </value>
+        public Stack<ProgramMngVM> UndoHistory { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the redo history.
+        /// </summary>
+        /// <value>
+        /// The redo history.
+        /// </value>
+        public Stack<ProgramMngVM> RedoHistory { get; private set; }
+
+        /// <summary>
+        /// Gets the undo command.
+        /// </summary>
+        /// <value>
+        /// The undo command.
+        /// </value>
         public Command UndoCommand
         {
             get => new Command(new Action<object>((input) =>
             {
                 if (this.UndoHistory.Count > 0)
                 {
-                    WindowVM history = this.UndoHistory.Pop();
+                    ProgramMngVM history = this.UndoHistory.Pop();
                     this.MainGrid.DataContext = history;
                     this.RedoHistory.Push(history);
                 }
             }));
         }
 
+        /// <summary>
+        /// Gets the redo command.
+        /// </summary>
+        /// <value>
+        /// The redo command.
+        /// </value>
         public Command RedoCommand
         {
             get => new Command(new Action<object>((input) =>
             {
                 if (this.RedoHistory.Count > 0)
                 {
-                    WindowVM history = this.RedoHistory.Pop();
+                    ProgramMngVM history = this.RedoHistory.Pop();
                     this.MainGrid.DataContext = history;
                     this.UndoHistory.Push(history);
                 }
@@ -207,12 +235,21 @@
             }));
         }
 
-        private void ScrollViewer_Loaded(object sender, RoutedEventArgs e)
-        {
-            var scrollbar = (ScrollViewer)e.Source;
-            scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
-            scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
-        }
+        /// <summary>
+        /// Gets or sets the current mouse.
+        /// </summary>
+        /// <value>
+        /// The current mouse.
+        /// </value>
+        public Point CurrentMouse { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the current move.
+        /// </summary>
+        /// <value>
+        /// The current move.
+        /// </value>
+        public Point CurrentMove { get; private set; }
     }
 
 }

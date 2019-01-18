@@ -38,6 +38,15 @@ namespace LogicDesigner.Model
                     }
                 }
             }
+            // test -- hab ich deswegen auskommentiert - Moe
+            //for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
+            //{
+            //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
+            //    {
+            //        this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
+            //        this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
+            //    }
+            //}
 
             //this.ConnectPins(this.possibleNodesToChooseFrom.Last().Outputs.ElementAt(0),
             //        this.possibleNodesToChooseFrom.Last().Inputs.ElementAt(0));
