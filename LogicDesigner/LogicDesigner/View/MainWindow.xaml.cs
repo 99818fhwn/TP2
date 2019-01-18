@@ -174,7 +174,7 @@
             //};
 
             sampleComponent.Children.Add(sampleBody);
-            sampleComponent.Children.Add(label);
+            //sampleComponent.Children.Add(label);
 
             this.ComponentWindow.Children.Add(sampleComponent);
 
