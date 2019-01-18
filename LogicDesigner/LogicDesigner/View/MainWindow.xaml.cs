@@ -60,7 +60,6 @@
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            // Set datacontext specifically to MainGrid, else Undo/Redo wouldn't work in current structure - Moe
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
@@ -70,9 +69,6 @@
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
-
-            //this.DrawNewComponent(null);
-            //this.DrawNewComponent(null);
         }
 
         /// <summary>
@@ -82,7 +78,6 @@
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
-            var pressedComponent = (UIElement)e.Source;
             this.isMoving = true;
         }
 
@@ -166,15 +161,21 @@
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
 
-            //TextBlock label = new TextBlock
-            //{
-            //    Width = 100,
-            //    Height = 100,
-            //    Text = componentVM.Label
-            //};
+            TextBlock label = new TextBlock
+            {
+                Width = 100,
+                Height = 100,
+                Text = componentVM.Label
+            };
+
+            Ellipse ellipse = new Ellipse();
+            ellipse.Width = 100;
+            ellipse.Height = 100;
+            ellipse.Fill = new SolidColorBrush(Color.FromRgb(100,100,100));
+            sampleComponent.Children.Add(ellipse);
 
             sampleComponent.Children.Add(sampleBody);
-            //sampleComponent.Children.Add(label);
+            sampleComponent.Children.Add(label);
 
             this.ComponentWindow.Children.Add(sampleComponent);
 
