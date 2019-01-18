@@ -19,12 +19,17 @@ namespace LogicDesigner.Model
             if (Directory.Exists(filePath))
             {
                 DirectoryInfo dI = new DirectoryInfo(filePath);
-                DirectoryInfo[] dirs = dI.GetDirectories();
-                List<FileInfo> files = dI.GetFiles().ToList();
+                List<DirectoryInfo> dirs = dI.GetDirectories().ToList();
+                dirs.Add(dI);
+                List<FileInfo> files = new List<FileInfo>();
 
                 foreach(var dir in dirs)
                 {
-                    foreach (var f in dir.GetFiles("*.dll | *.exe"))
+                    foreach (var f in dir.GetFiles("*.dll"))
+                    {
+                        files.Add(f);
+                    }
+                    foreach (var f in dir.GetFiles("*.exe"))
                     {
                         files.Add(f);
                     }
