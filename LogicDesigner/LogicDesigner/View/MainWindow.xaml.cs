@@ -165,8 +165,17 @@
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
-            
+
+            //TextBlock label = new TextBlock
+            //{
+            //    Width = 100,
+            //    Height = 100,
+            //    Text = componentVM.Label
+            //};
+
             sampleComponent.Children.Add(sampleBody);
+            sampleComponent.Children.Add(label);
+
             this.ComponentWindow.Children.Add(sampleComponent);
 
             sampleComponent.RenderTransform = new TranslateTransform(0, 100);
