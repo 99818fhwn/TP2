@@ -69,17 +69,6 @@ namespace LogicDesigner.ViewModel
                 node => new ComponentVM(node,
                 new Command(obj => {
                     var nodeToChooseVM = obj as ComponentVM;
-                    // find instance in the collection ?
-                    // -> Found instance in the collection? (Not sure about which collection though ¯\_(ツ)_/¯ ) LG Moe
-                    //ComponentVM instance = PossibleComponentsToChooseFrom.Where((current) =>
-                    //{
-                    //    if (current.Node == nodeToChooseVM.Node)
-                    //    {
-                    //        return true;
-                    //    }
-                    //    return false;
-                    //}).First();
-                    //// End of Moes code
 
                     nodeToChooseVM.Activate();
                 })));

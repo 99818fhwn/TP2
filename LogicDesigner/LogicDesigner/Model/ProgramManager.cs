@@ -77,6 +77,7 @@ namespace LogicDesigner.Model
             get;
             private set;
         }
+
         public bool Stop
         {
             get;
