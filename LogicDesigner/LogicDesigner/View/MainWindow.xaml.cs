@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -104,6 +105,8 @@
             // Components are being reset, because their translation is not persistent and the temp variables are reset after letting the mouse go
             var pressedComponent = (UIElement)e.Source;
 
+            var parent = (UIElement)VisualTreeHelper.GetParent(pressedComponent);
+
             if (!this.isMoving)
             {
                 return;
@@ -117,7 +120,7 @@
                 {
                     Point movepoint = new Point(CurrentMouse.X - previousMouse.X, CurrentMouse.Y - previousMouse.Y);
                     CurrentMove = new Point(CurrentMove.X + movepoint.X, CurrentMove.Y + movepoint.Y);
-                    pressedComponent.RenderTransform = new TranslateTransform(CurrentMove.X,CurrentMove.Y);
+                    parent.RenderTransform = new TranslateTransform(CurrentMove.X, CurrentMove.Y);
                 }
             }
         }
@@ -161,18 +164,22 @@
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
 
+            // Add the label
+            string text = componentVM.Label;
+            Typeface myTypeface = new Typeface("Helvetica");
+            FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight, myTypeface, 16, Brushes.Red);
+
             TextBlock label = new TextBlock
             {
-                Width = 100,
-                Height = 100,
+                Width = ft.Width,
+                Height = ft.Height,
                 Text = componentVM.Label
             };
 
-            Ellipse ellipse = new Ellipse();
-            ellipse.Width = 100;
-            ellipse.Height = 100;
-            ellipse.Fill = new SolidColorBrush(Color.FromRgb(100,100,100));
-            sampleComponent.Children.Add(ellipse);
+            label.TextAlignment = TextAlignment.Center;
+
+            label.RenderTransform = new TranslateTransform(0, -componentVM.Picture.Height / 2 - 10);
 
             sampleComponent.Children.Add(sampleBody);
             sampleComponent.Children.Add(label);
