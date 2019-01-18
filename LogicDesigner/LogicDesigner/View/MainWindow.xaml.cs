@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -60,7 +61,6 @@
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            // Set datacontext specifically to MainGrid, else Undo/Redo wouldn't work in current structure - Moe
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
@@ -70,9 +70,6 @@
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
-
-            //this.DrawNewComponent(null);
-            //this.DrawNewComponent(null);
         }
 
         /// <summary>
@@ -82,7 +79,6 @@
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
-            var pressedComponent = (UIElement)e.Source;
             this.isMoving = true;
         }
 
@@ -108,6 +104,8 @@
         {
             // Components are being reset, because their translation is not persistent and the temp variables are reset after letting the mouse go
             var pressedComponent = (UIElement)e.Source;
+
+            var parent = (UIElement)VisualTreeHelper.GetParent(pressedComponent);
 
             if (!this.isMoving)
             {
@@ -174,21 +172,25 @@
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
 
-            var currentMan = (ProgramMngVM)this.ComponentWindow.DataContext;
-            if (!currentMan.NodesVMInField.Contains(componentVM))
-            {
-                currentMan.NodesVMInField.Add(componentVM);
-            }
+            // Add the label
+            string text = componentVM.Label;
+            Typeface myTypeface = new Typeface("Helvetica");
+            FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture,
+                    FlowDirection.LeftToRight, myTypeface, 16, Brushes.Red);
 
-            //TextBlock label = new TextBlock
-            //{
-            //    Width = 100,
-            //    Height = 100,
-            //    Text = componentVM.Label
-            //};
+            TextBlock label = new TextBlock
+            {
+                Width = ft.Width,
+                Height = ft.Height,
+                Text = componentVM.Label
+            };
+
+            label.TextAlignment = TextAlignment.Center;
+
+            label.RenderTransform = new TranslateTransform(0, -componentVM.Picture.Height / 2 - 10);
 
             sampleComponent.Children.Add(sampleBody);
-            //sampleComponent.Children.Add(label);
+            sampleComponent.Children.Add(label);
 
             this.ComponentWindow.Children.Add(sampleComponent);
 

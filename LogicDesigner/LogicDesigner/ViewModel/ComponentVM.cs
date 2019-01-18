@@ -14,25 +14,42 @@ namespace LogicDesigner.ViewModel
     public class ComponentVM : INotifyPropertyChanged
     {
         private IDisplayableNode node;
-        private Command activateCommand;
-        private Command addCommand;
-        private Command removeCommand;
+        private readonly Command activateCommand;
+        private readonly Command addCommand;
+        private readonly Command removeCommand;
+        private readonly Command executeCommand;
         private int xCoord;
         private int yCoord;
+        private readonly string uniqueName;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ComponentVM(IDisplayableNode node, Command activateCommand, Command addCommand, Command removeCommand)
+        public ComponentVM(IDisplayableNode node, Command activateCommand, Command addCommand, 
+            Command executeCommand, Command removeCommand, string uniqueName)
         {
             this.node = node;
             this.activateCommand = activateCommand;
             this.addCommand = addCommand;
+            this.executeCommand = executeCommand;
             this.removeCommand = removeCommand;
+            this.uniqueName = uniqueName;
+
+            node.PictureChanged += this.OnPictureChanged;
+        }
+
+        internal void OnPictureChanged(object sender, EventArgs e)
+        {
+            this.FireOnPropertyChanged(nameof(this.Picture));
         }
 
         public string Label
         {
             get { return this.node.Label; }
+        }
+
+        public string Name
+        {
+            get { return this.uniqueName; }
         }
 
         public string TextValue
@@ -103,11 +120,22 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        public Command ExecuteCommand
+        {
+            get
+            {
+                return this.executeCommand;
+            }
+        }
+
         public void Activate()
         {
             this.node.Activate();
-            this.FireOnPropertyChanged();
-            // clicked -> changed -> should be actualized
+        }
+
+        public void Execute()
+        {
+            this.node.Execute();
         }
 
         protected void FireOnPropertyChanged([CallerMemberName]string name = null)
