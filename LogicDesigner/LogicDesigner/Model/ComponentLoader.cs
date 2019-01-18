@@ -15,7 +15,7 @@ namespace LogicDesigner.Model
 
             foreach (var path in paths)
             {
-                if (!Directory.Exists(Path.GetDirectoryName(path))) ;
+                if (!Directory.Exists(Path.GetDirectoryName(path)))
                 {
                     Directory.CreateDirectory(path);
                 }

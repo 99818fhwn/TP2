@@ -79,7 +79,25 @@
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
-            this.isMoving = true;
+            var pressedComponent = (UIElement)e.Source;
+            var parentType = VisualTreeHelper.GetParent(pressedComponent).GetType();
+
+            if (parentType == typeof(Grid))
+            {
+                var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
+
+                if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
+                {
+                    var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
+                    var componentToActivate = dataContext.NodesVMInField.First(x => x.Name == parent.Name);
+
+                    componentToActivate.Activate();
+
+                    return;
+                }
+
+                this.isMoving = true;
+            }            
         }
 
         /// <summary>
@@ -152,11 +170,11 @@
         {
             // New component
             Grid sampleComponent = new Grid();
-
+            
             // Component Body
             Button sampleBody = new Button();
 
-            sampleBody.Name = componentVM.Label;
+            sampleComponent.Name = componentVM.Name;
             sampleBody.Height = componentVM.Picture.Height;
             sampleBody.Width = componentVM.Picture.Width;
 

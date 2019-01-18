@@ -64,7 +64,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Commands\Command.cs" />
+    <Compile Include="Commands\Command.cs">
+      <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
+    </Compile>
     <Compile Include="Model\Component.cs" />
     <Compile Include="Model\ComponentLoader.cs" />
     <Compile Include="Model\NodesLoader.cs" />
