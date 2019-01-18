@@ -16,6 +16,7 @@ namespace LogicDesigner.ViewModel
         private ProgramManager programManager;
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentVM> possibleComponentsVMToChooseFrom;
+        private int uniqueId;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
@@ -64,14 +65,29 @@ namespace LogicDesigner.ViewModel
                 nodeInFieldVM.Activate();
             });
 
+            var executeCommand = new Command(obj =>
+            {
+                var nodeInFieldVM = obj as ComponentVM;
+                nodeInFieldVM.Execute();
+            });
+
+
+            Func<IDisplayableNode, string> newUniqueName = new Func<IDisplayableNode, string>(node =>
+            {
+                this.uniqueId++;
+                return this.CreateNameTag(node.Label, this.uniqueId.ToString());
+            });
+
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                activateCommand, addCommand, removeCommand));
+                activateCommand, addCommand, executeCommand, removeCommand,
+                newUniqueName(node)));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
             var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(
                 node => new ComponentVM(node,
-                activateCommand, addCommand, removeCommand));
+                activateCommand, addCommand, executeCommand, removeCommand,
+                newUniqueName(node)));
 
             this.possibleComponentsVMToChooseFrom = new ObservableCollection<ComponentVM>(nodesToChoose);
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
@@ -79,12 +95,12 @@ namespace LogicDesigner.ViewModel
 
 
         /// <summary>
-        /// Creates the name tag from Labe and can add additional string to the end, it removes all chars except the letters.
+        /// Creates the name tag from Label and can add additional string to the end, it removes all chars except the letters.
         /// </summary>
         /// <param name="preName">Name of the element.</param>
         /// <param name="additional">The additional string ending.</param>
         /// <returns></returns>
-        public string CreateNameTag(string preName,string additional)
+        public string CreateNameTag(string preName, string additional)
         {
             return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
         }
