@@ -289,7 +289,7 @@ namespace LogicDesigner
             Button sampleBody = new Button();
 
             sampleComponent.Name = componentVM.Name;
-            sampleBody.Height = componentVM.Picture.Height;
+            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid 
             sampleBody.Width = componentVM.Picture.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
