@@ -37,25 +37,6 @@ namespace LogicDesigner.ViewModel
 
             //this.PossibleComponentsToChooseFrom = observableNodes;
 
-            var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                new Command(obj => {
-                    var nodeInFieldVM = obj as ComponentVM;
-                    nodeInFieldVM.Activate();
-                })));
-
-            this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
-
-            var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(
-                node => new ComponentVM(node,
-                new Command(obj => {
-                    var nodeToChooseVM = obj as ComponentVM;
-
-                    nodeToChooseVM.Activate();
-                })));
-
-            this.possibleComponentsVMToChooseFrom = new ObservableCollection<ComponentVM>(nodesToChoose);
-            this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
-
             var addCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
@@ -83,6 +64,26 @@ namespace LogicDesigner.ViewModel
                 this.programManager.FieldNodes.Remove(
                     (IDisplayableNode)Activator.CreateInstance(nodeInFieldVM.GetType()));
             });
+
+            var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
+                new Command(obj => {
+                    var nodeInFieldVM = obj as ComponentVM;
+                    nodeInFieldVM.Activate();
+                }), addCommand, removeCommand));
+
+            this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
+
+            var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(
+                node => new ComponentVM(node,
+                new Command(obj => {
+                    var nodeToChooseVM = obj as ComponentVM;
+
+                    nodeToChooseVM.Activate();
+                }), addCommand, removeCommand));
+
+            this.possibleComponentsVMToChooseFrom = new ObservableCollection<ComponentVM>(nodesToChoose);
+            this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
+
 
             //this.addComponentToFieldCommand = new Command(obj =>
             //{
@@ -133,21 +134,21 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public Command AddComponentCommand
-        {
-            get
-            {
-                return this.addComponentToFieldCommand;
-            }
-        }
+        //public Command AddComponentCommand
+        //{
+        //    get
+        //    {
+        //        return this.addComponentToFieldCommand;
+        //    }
+        //}
 
-        public Command RemoveComponentCommand
-        {
-            get
-            {
-                return this.removeComponentFromFieldCommand;
-            }
-        }
+        //public Command RemoveComponentCommand
+        //{
+        //    get
+        //    {
+        //        return this.removeComponentFromFieldCommand;
+        //    }
+        //}
 
         public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
         {
