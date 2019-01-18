@@ -12,6 +12,7 @@ namespace LogicDesigner.ViewModel
 {
     public class ProgramMngVM
     {
+        // A random comment appeared
         private ProgramManager programManager;
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentVM> possibleComponentsVMToChooseFrom;
