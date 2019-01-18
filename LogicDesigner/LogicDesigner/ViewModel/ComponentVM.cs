@@ -26,7 +26,7 @@ namespace LogicDesigner.ViewModel
         {
             this.node = node;
             this.activateCommand = activateCommand;
-            this.activateCommand = addCommand;
+            this.addCommand = addCommand;
             this.removeCommand = removeCommand;
         }
 
@@ -76,6 +76,30 @@ namespace LogicDesigner.ViewModel
             get
             {
                 return this.node;
+            }
+        }
+
+        public Command AddComponentCommand
+        {
+            get
+            {
+                return this.addCommand;
+            }
+        }
+
+        public Command RemoveComponentCommand
+        {
+            get
+            {
+                return this.removeCommand;
+            }
+        }
+
+        public Command ActivateComponentCommand
+        {
+            get
+            {
+                return this.activateCommand;
             }
         }
 
