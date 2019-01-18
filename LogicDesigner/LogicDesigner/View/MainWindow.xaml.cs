@@ -61,14 +61,18 @@
 
             this.DataContext = this;
             // Set datacontext specifically to MainGrid, else Undo/Redo wouldn't work in current structure - Moe
-            this.MainGrid.DataContext = new ProgramMngVM();
+            ProgramMngVM programMngVM = new ProgramMngVM();
+            this.MainGrid.DataContext = programMngVM;
+
+            //programMngVM.FieldComponentAdded += this.OnComponentAdded;
+            //programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
 
-            this.DrawNewComponent(null);
-            this.DrawNewComponent(null);
+            //this.DrawNewComponent(null);
+            //this.DrawNewComponent(null);
         }
 
         /// <summary>
@@ -155,8 +159,8 @@
             Button sampleBody = new Button();
 
             sampleBody.Name = componentVM.Label;
-            sampleBody.Height = Properties.Resources.And.Height;
-            sampleBody.Width = Properties.Resources.And.Width;
+            sampleBody.Height = componentVM.Picture.Height;
+            sampleBody.Width = componentVM.Picture.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(Properties.Resources.And.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
