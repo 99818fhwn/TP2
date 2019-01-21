@@ -217,7 +217,8 @@ namespace LogicDesigner
                 var previousMouse = this.CurrentMouse;
                 this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
 
-                // Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
+                Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
+
                 if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
                 {
                     Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
@@ -302,7 +303,7 @@ namespace LogicDesigner
             Button sampleBody = new Button();
 
             sampleComponent.Name = componentVM.Name;
-            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid 
+            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception if no picture is set the manager has to check for valid 
             sampleBody.Width = componentVM.Picture.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
@@ -332,7 +333,7 @@ namespace LogicDesigner
 
             this.ComponentWindow.Children.Add(sampleComponent);
 
-            sampleComponent.RenderTransform = new TranslateTransform(0, 100);
+            sampleComponent.RenderTransform = new TranslateTransform(0, 0);
         }
 
         /// <summary>
