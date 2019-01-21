@@ -56,8 +56,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid Grid.Column="1" Grid.Row="1" Name="LogicWindow" Height="Auto" Width="Auto">
+        <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
                 <Grid Name="ComponentWindow" Height="10000" Width="10000">
                     <Grid.InputBindings>
@@ -107,5 +108,28 @@
                 </GridView>
             </ListView.View>
         </ListView>
+        <ScrollViewer Grid.Row="2">
+            <StackPanel Name="CurrentSelectedComponentView">
+                <StackPanel>
+                    <TextBlock Text="Label"/>
+                    <TextBlock Text="{Binding  Name}" TextWrapping="WrapWithOverflow"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Description"/>
+                    <TextBlock Text="{Binding Description}" TextWrapping="WrapWithOverflow"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="X-Pos" />
+                    <TextBlock Text="{Binding XCoord}"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Y-Pos"/>
+                    <TextBlock Text="{Binding YCoord}"/>
+                </StackPanel>
+                <StackPanel>
+                    <Image Height="150" Stretch="Uniform" Source="{Binding Image}" VerticalAlignment="Center"></Image>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Window>

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -13,17 +15,22 @@ using Shared;
 
 namespace LogicDesigner.ViewModel
 {
-    public class ProgramMngVM
+    public class ProgramMngVM : INotifyPropertyChanged
     {
         private ProgramManager programManager;
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentRepresentationVM> selectableComponents;
         private int uniqueId;
+        private PinVM selectedOutputPin;
+        private PinVM selectedInputPin;
+        //private Command setPinCommand;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<EventArgs> PreFieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
+        public event EventHandler<PinsConnectedEventArgs> PinsConnected;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         private readonly Command activateCommand;
         private readonly Command executeCommand;
@@ -35,6 +42,12 @@ namespace LogicDesigner.ViewModel
             this.programManager = new ProgramManager();
             this.programManager.Watcher.Created += NewModuleAdded;
 
+            var setPinCommand = new Command(obj =>
+            {
+                var pin = obj as PinVM;
+                this.SetSelectedPin(pin);
+            });
+
             this.activateCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
@@ -44,8 +57,14 @@ namespace LogicDesigner.ViewModel
             this.executeCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
-                nodeInFieldVM.Execute();
+                nodeInFieldVM.Activate();
             });
+
+            //var executeCommand = new Command(obj =>
+            //{
+            //    var nodeInFieldVM = obj as ComponentVM;
+            //    nodeInFieldVM.Execute();
+            //});
 
             this.removeCommand = new Command(obj =>
             {
@@ -68,20 +87,21 @@ namespace LogicDesigner.ViewModel
 
             this.addCommand = new Command(obj =>
             {
-                // null reference exception
+                // null reference exception?
                 var representationNode = obj as ComponentRepresentationVM;
                 this.PreFieldComponentAdded(this, new EventArgs());
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());////Create new Component
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                var compVM = new ComponentVM(newGenerateComp, CreateUniqueName(realComponent), this.executeCommand, this.activateCommand, this.removeCommand);
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
+                    activateCommand, removeCommand);
                 this.nodesVMInField.Add(compVM);
                 OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
                 CreateUniqueName(node), this.activateCommand, this.executeCommand, this.removeCommand
-                ));////seems suspicious for unnecessary inputs
+                ));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
@@ -89,7 +109,43 @@ namespace LogicDesigner.ViewModel
                 node => new ComponentRepresentationVM(this.addCommand, node));
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
-            this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
+        }
+
+        public void SetSelectedPin(PinVM value)
+        {
+            if(this.selectedOutputPin == value || this.selectedInputPin == value)
+            {
+                this.selectedOutputPin = null;
+            }
+            else
+            {
+                if(!value.IsInputPin)
+                {
+                    this.selectedOutputPin = value;
+                }
+                else
+                {
+                    this.selectedInputPin = value;
+                }
+
+                if (this.selectedOutputPin != null && this.selectedInputPin != null)
+                {
+                    this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
+                }
+            }
+        }
+        
+
+        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
+        {
+            if(this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+            {
+                this.OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
+            }
+
+            this.selectedInputPin = null;
+            this.selectedOutputPin = null;
+
         }
 
         /// <summary>
@@ -142,13 +198,27 @@ namespace LogicDesigner.ViewModel
         public ProgramMngVM(ProgramMngVM old)
         {
             this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
-            //foreach (var node in old.nodesVMInField) ////Will be obsolete.
-            //{
-            //    this.nodesVMInField.Add(node);
-            //}
+            this.SelectedFieldComponent = old.SelectedFieldComponent;
             this.SelectableComponents = old.SelectableComponents;
             this.programManager = new ProgramManager(old.programManager);
         }
+
+        private ComponentVM selectedFieldComponent;
+
+        public ComponentVM SelectedFieldComponent
+        {
+            get
+            {
+                return this.selectedFieldComponent;
+            }
+
+            set
+            {
+                this.selectedFieldComponent = value;
+                this.FireOnPropertyChanged();
+            }
+        }
+
 
         public ObservableCollection<ComponentVM> NodesVMInField
         {
@@ -209,6 +279,15 @@ namespace LogicDesigner.ViewModel
             }));
         }
 
+        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        {
+            this.PinsConnected?.Invoke(this, e);
+        }
+
+        protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 
 
 
