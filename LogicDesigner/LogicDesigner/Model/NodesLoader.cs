@@ -105,7 +105,7 @@
                 return false;
             }
 
-            if (node.Picture == null || node.Picture.Width <= 0 || node.Picture.Height <= 1)
+            if (node.Picture == null || node.Picture.Width <= 0 || node.Picture.Height <= 0)
             {
                 return false;
             }
