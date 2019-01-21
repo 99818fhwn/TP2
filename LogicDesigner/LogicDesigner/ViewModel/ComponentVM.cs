@@ -6,19 +6,20 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace LogicDesigner.ViewModel
 {
-    public class ComponentVM : INotifyPropertyChanged
+    public class ComponentVM : INotifyPropertyChanged, ISerializable
     {
         private IDisplayableNode node;
         private readonly Command activateCommand;
         private readonly Command removeCommand;
         private readonly Command executeCommand;
-        private int xCoord;
-        private int yCoord;
+        private double xCoord;
+        private double yCoord;
         private readonly string uniqueName;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -74,7 +75,7 @@ namespace LogicDesigner.ViewModel
             get { return this.node.Outputs.ElementAt(0).Value.ToString(); }
         }
 
-        public int XCoord
+        public double XCoord
         {
             get { return this.xCoord; }
             set
@@ -84,7 +85,7 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public int YCoord
+        public double YCoord
         {
             get { return this.yCoord; }
             set
@@ -150,6 +151,36 @@ namespace LogicDesigner.ViewModel
         protected void FireOnPropertyChanged([CallerMemberName]string name = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        internal ComponentVM(SerializationInfo info, StreamingContext context)
+        {
+            this.node = (IDisplayableNode)info.GetValue(nameof(this.Node), typeof(IDisplayableNode));
+
+            this.XCoord = (double)info.GetValue(nameof(this.XCoord), typeof(double));
+            this.YCoord = (double)info.GetValue(nameof(this.YCoord), typeof(double));
+            this.IsInField = (bool)info.GetValue(nameof(this.IsInField), typeof(bool));
+
+            this.uniqueName = (string)info.GetValue(nameof(this.Name), typeof(string));
+
+            this.activateCommand = (Command)info.GetValue(nameof(this.ActivateComponentCommand), typeof(Command));
+            this.removeCommand = (Command)info.GetValue(nameof(this.RemoveComponentCommand), typeof(Command));
+            this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
+        }
+
+        public void GetObjectData(SerializationInfo info, StreamingContext context)
+        {
+            info.AddValue(nameof(this.Node), this.Node, this.Node.GetType());
+
+            info.AddValue(nameof(this.XCoord), this.XCoord, this.XCoord.GetType());
+            info.AddValue(nameof(this.YCoord), this.YCoord, this.YCoord.GetType());
+            info.AddValue(nameof(this.IsInField), this.IsInField, this.IsInField.GetType());
+
+            info.AddValue(nameof(this.Name), this.Name, this.Name.GetType());
+
+            info.AddValue(nameof(this.ActivateComponentCommand), this.ActivateComponentCommand, this.ActivateComponentCommand.GetType());
+            info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
+            info.AddValue(nameof(this.RemoveComponentCommand), this.RemoveComponentCommand, this.RemoveComponentCommand.GetType());
         }
 
     }
