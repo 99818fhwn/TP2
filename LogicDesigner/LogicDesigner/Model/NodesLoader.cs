@@ -31,7 +31,7 @@
                 dirs.Add(dI);
                 List<FileInfo> files = new List<FileInfo>();
 
-                foreach(var dir in dirs)
+                foreach (var dir in dirs)
                 {
                     foreach (var f in dir.GetFiles("*.dll"))
                     {
@@ -59,7 +59,11 @@
                                     try
                                     {
                                         IDisplayableNode node = (IDisplayableNode)Activator.CreateInstance(type);
-                                        nodes.Add(node);
+
+                                        if (this.ValidateNode(node))
+                                        {
+                                            nodes.Add(node);
+                                        }
                                     }
                                     catch (Exception)
                                     {
@@ -82,6 +86,36 @@
             }
 
             return nodes;
+        }
+
+        /// <summary>
+        /// Validates the node content and checks for missing necessary properties.
+        /// </summary>
+        /// <param name="node">The node that contiants the data of a electric component.</param>
+        /// <returns>Returns true wether the node is valid or retruns false if not.</returns>
+        private bool ValidateNode(IDisplayableNode node)
+        {
+            if (node.Description == null || node.Description == string.Empty)
+            {
+                return false;
+            }
+
+            if (node.Inputs == null || node.Outputs == null)
+            {
+                return false;
+            }
+
+            if (node.Picture == null || node.Picture.Width <= 0 || node.Picture.Height <= 0)
+            {
+                return false;
+            }
+
+            if (node.Label == null || node.Label == string.Empty)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

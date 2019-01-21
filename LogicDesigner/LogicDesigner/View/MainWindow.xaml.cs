@@ -49,6 +49,8 @@ namespace LogicDesigner
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
+            this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+
             programMngVM.FieldComponentAdded += this.OnComponentAdded;
             programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
@@ -72,61 +74,7 @@ namespace LogicDesigner
         /// The redo history.
         /// </value>
         public Stack<ProgramMngVM> RedoHistory { get; private set; }
-
-        ///// <summary>
-        ///// Gets the undo command.
-        ///// </summary>
-        ///// <value>
-        ///// The undo command.
-        ///// </value>
-        //public Command UndoCommand
-        //{
-        //    get => new Command(new Action<object>((input) =>
-        //    {
-        //        if (this.UndoHistory.Count > 0)
-        //        {
-        //            ProgramMngVM history = this.UndoHistory.Pop();
-        //            this.UndoHistory.Push(history);
-
-        //            history = this.UndoHistory.Pop();
-        //            this.ComponentWindow.Children.Clear();
-        //            this.MainGrid.DataContext = history;
-        //            foreach (var component in history.NodesVMInField)
-        //            {
-        //                DrawNewComponent(component);
-        //            }
-
-        //            this.RedoHistory.Push(history);
-        //        }
-        //    }));
-        //}
-
-        ///// <summary>
-        ///// Gets the redo command.
-        ///// </summary>
-        ///// <value>
-        ///// The redo command.
-        ///// </value>
-        //public Command RedoCommand
-        //{
-        //    get => new Command(new Action<object>((input) =>
-        //    {
-        //        if (this.RedoHistory.Count > 0)
-        //        {
-        //            ProgramMngVM history = this.RedoHistory.Pop();
-
-        //            this.ComponentWindow.Children.Clear();
-        //            this.MainGrid.DataContext = history;
-        //            foreach (var component in history.NodesVMInField)
-        //            {
-        //                DrawNewComponent(component);
-        //            }
-
-        //            this.UndoHistory.Push(history);
-        //        }
-        //    }));
-        //}
-
+        
         /// <summary>
         /// Gets the current mouse.
         /// </summary>
@@ -142,6 +90,70 @@ namespace LogicDesigner
         /// The current move.
         /// </value>
         public Point CurrentMove { get; private set; }
+
+        /// <summary>
+        /// Gets the undo command.
+        /// </summary>
+        /// <value>
+        /// The undo command.
+        /// </value>
+        public Command UndoCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (this.UndoHistory.Count > 0)
+                {
+                    ProgramMngVM history = this.UndoHistory.Pop();
+
+                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    {
+                        this.RedoHistory.Push(history);
+                        history = this.UndoHistory.Pop();
+                    }
+                    
+                    this.ComponentWindow.Children.Clear();
+                    this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
+
+                    this.RedoHistory.Push(history);
+                }
+            }));
+        }
+
+        /// <summary>
+        /// Gets the redo command.
+        /// </summary>
+        /// <value>
+        /// The redo command.
+        /// </value>
+        public Command RedoCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (this.RedoHistory.Count > 0)
+                {
+                    ProgramMngVM history = this.RedoHistory.Pop();
+
+                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    {
+                        this.UndoHistory.Push(history);
+                        history = this.RedoHistory.Pop();
+                    }
+
+                    this.ComponentWindow.Children.Clear();
+                    this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
+
+                    this.UndoHistory.Push(history);
+                }
+            }));
+        }
 
         /// <summary>
         /// Called when the button is pressed down.
@@ -231,20 +243,21 @@ namespace LogicDesigner
             this.RedoHistory.Push(updatedCurrentMan);
         }
 
-
         /// <summary>
-        /// Called when [component changed] and chages the visual of the component.
+        /// Called when [component changed] and changes the visual of the component.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentChanged(object sender, FieldComponentEventArgs e)
         {
-            var compOld = this.ComponentWindow.Children;//FindName(e.Component.Name);
+            var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
+
             foreach (var child in compOld)
             {
                 if (child.GetType() == typeof(Grid))
                 {
                     var grids = (Grid)child;
+                    
                     if (grids.Name == e.Component.Name)
                     {
                         foreach (var item in grids.Children)
@@ -271,7 +284,7 @@ namespace LogicDesigner
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; ////Unsubscribes from the deleted component
+            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
         }
@@ -289,7 +302,7 @@ namespace LogicDesigner
             Button sampleBody = new Button();
 
             sampleComponent.Name = componentVM.Name;
-            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid 
+            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
@@ -332,79 +345,6 @@ namespace LogicDesigner
             var scrollbar = (ScrollViewer)e.Source;
             scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
             scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
-        }
-
-        /// <summary>
-        /// Gets the undo command.
-        /// </summary>
-        /// <value>
-        /// The undo command.
-        /// </value>
-        public Command UndoCommand
-        {
-            get => new Command(new Action<object>((input) =>
-            {
-                if (this.UndoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.UndoHistory.Pop();
-
-                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
-                    {
-                        this.RedoHistory.Push(history);
-                        history = this.UndoHistory.Pop();
-                    }
-                    //if (RedoHistory.Count == 0)
-                    //{
-                    //    this.RedoHistory.Push(new ProgramMngVM((ProgramMngVM)this.MainGrid.DataContext));
-                    //}
-                    //else
-                    //{
-                    //    this.RedoHistory.Push(history);
-                    //}
-                    //MessageBox.Show($"{UndoHistory.Count()} undo count - {RedoHistory.Count} redo count");
-
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        DrawNewComponent(component);
-                    }
-                    this.RedoHistory.Push(history);
-                }
-            }));
-        }
-
-        /// <summary>
-        /// Gets the redo command.
-        /// </summary>
-        /// <value>
-        /// The redo command.
-        /// </value>
-        public Command RedoCommand
-        {
-            get => new Command(new Action<object>((input) =>
-            {
-                if (this.RedoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.RedoHistory.Pop();
-                    //MessageBox.Show($"{UndoHistory.Count()} undo count - {RedoHistory.Count} redo count");
-
-                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
-                    {
-                        this.UndoHistory.Push(history);
-                        history = this.RedoHistory.Pop();
-                    }
-
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        DrawNewComponent(component);
-                    }
-                    this.UndoHistory.Push(history);
-                }
-
-            }));
         }
     }
 }

@@ -154,7 +154,7 @@ namespace LogicDesigner.ViewModel
             //{
             //    this.nodesVMInField.Add(node);
             //}
-            //this.SelectableComponents = old.SelectableComponents;
+            this.SelectableComponents = old.SelectableComponents;
             this.programManager = new ProgramManager(old.programManager);
         }
 
