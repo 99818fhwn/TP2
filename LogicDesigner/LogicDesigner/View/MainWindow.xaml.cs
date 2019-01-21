@@ -73,59 +73,59 @@ namespace LogicDesigner
         /// </value>
         public Stack<ProgramMngVM> RedoHistory { get; private set; }
 
-        /// <summary>
-        /// Gets the undo command.
-        /// </summary>
-        /// <value>
-        /// The undo command.
-        /// </value>
-        public Command UndoCommand
-        {
-            get => new Command(new Action<object>((input) =>
-            {
-                if (this.UndoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.UndoHistory.Pop();
-                    this.UndoHistory.Push(history);
+        ///// <summary>
+        ///// Gets the undo command.
+        ///// </summary>
+        ///// <value>
+        ///// The undo command.
+        ///// </value>
+        //public Command UndoCommand
+        //{
+        //    get => new Command(new Action<object>((input) =>
+        //    {
+        //        if (this.UndoHistory.Count > 0)
+        //        {
+        //            ProgramMngVM history = this.UndoHistory.Pop();
+        //            this.UndoHistory.Push(history);
 
-                    history = this.UndoHistory.Pop();
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        DrawNewComponent(component);
-                    }
+        //            history = this.UndoHistory.Pop();
+        //            this.ComponentWindow.Children.Clear();
+        //            this.MainGrid.DataContext = history;
+        //            foreach (var component in history.NodesVMInField)
+        //            {
+        //                DrawNewComponent(component);
+        //            }
 
-                    this.RedoHistory.Push(history);
-                }
-            }));
-        }
+        //            this.RedoHistory.Push(history);
+        //        }
+        //    }));
+        //}
 
-        /// <summary>
-        /// Gets the redo command.
-        /// </summary>
-        /// <value>
-        /// The redo command.
-        /// </value>
-        public Command RedoCommand
-        {
-            get => new Command(new Action<object>((input) =>
-            {
-                if (this.RedoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.RedoHistory.Pop();
+        ///// <summary>
+        ///// Gets the redo command.
+        ///// </summary>
+        ///// <value>
+        ///// The redo command.
+        ///// </value>
+        //public Command RedoCommand
+        //{
+        //    get => new Command(new Action<object>((input) =>
+        //    {
+        //        if (this.RedoHistory.Count > 0)
+        //        {
+        //            ProgramMngVM history = this.RedoHistory.Pop();
 
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        DrawNewComponent(component);
-                    }
+        //            this.ComponentWindow.Children.Clear();
+        //            this.MainGrid.DataContext = history;
+        //            foreach (var component in history.NodesVMInField)
+        //            {
+        //                DrawNewComponent(component);
+        //            }
 
-                    this.UndoHistory.Push(history);
-                }
-            }));
-        }
+        //            this.UndoHistory.Push(history);
+        //        }
+        //    }));
+        //}
 
         /// <summary>
         /// Gets the current mouse.
@@ -333,22 +333,6 @@ namespace LogicDesigner
             scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
             scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
         }
-
-        /// <summary>
-        /// Gets or sets the undo history.
-        /// </summary>
-        /// <value>
-        /// The undo history.
-        /// </value>
-        public Stack<ProgramMngVM> UndoHistory { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the redo history.
-        /// </summary>
-        /// <value>
-        /// The redo history.
-        /// </value>
-        public Stack<ProgramMngVM> RedoHistory { get; private set; }
 
         /// <summary>
         /// Gets the undo command.
