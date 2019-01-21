@@ -35,7 +35,7 @@ namespace LogicDesigner
         /// If a component is being dragged.
         /// </summary>
         private bool isMoving;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -74,7 +74,7 @@ namespace LogicDesigner
         /// The redo history.
         /// </value>
         public Stack<ProgramMngVM> RedoHistory { get; private set; }
-        
+
         /// <summary>
         /// Gets the current mouse.
         /// </summary>
@@ -110,7 +110,7 @@ namespace LogicDesigner
                         this.RedoHistory.Push(history);
                         history = this.UndoHistory.Pop();
                     }
-                    
+
                     this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
                     foreach (var component in history.NodesVMInField)
@@ -190,10 +190,31 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseUp(object sender, MouseButtonEventArgs e)
         {
-            var pressedComponent = (UIElement)e.Source;
+            if (this.isMoving)
+            {
+                var componentToMove = this.GetParentGrid((UIElement)e.Source);
+                componentToMove.XCoord += this.CurrentMove.X;
+                componentToMove.YCoord += this.CurrentMove.Y;
+            }
+
             this.isMoving = false;
             this.CurrentMove = new Point(0, 0);
             this.CurrentMouse = new Point(0, 0);
+        }
+
+        private ComponentVM GetParentGrid(UIElement uIElement)
+        {
+            var parent = (UIElement)VisualTreeHelper.GetParent(uIElement);
+
+            if (parent.GetType() == typeof(Grid))
+            {
+                var parentgrid = (Grid)parent;
+                var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
+                var component = dataContext.NodesVMInField.First(x => x.Name == parentgrid.Name);
+                return component;
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -207,22 +228,34 @@ namespace LogicDesigner
             var pressedComponent = (UIElement)e.Source;
 
             var parent = (UIElement)VisualTreeHelper.GetParent(pressedComponent);
+            Point newPoint;
 
-            if (!this.isMoving)
+            if (parent.GetType() == typeof(Grid))
             {
-                return;
-            }
-            else
-            {
-                var previousMouse = this.CurrentMouse;
-                this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
+                var parentgrid = (Grid)parent;
+                var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
+                var componentToMove = dataContext.NodesVMInField.First(x => x.Name == parentgrid.Name);
+                newPoint = new Point(componentToMove.XCoord, componentToMove.YCoord);
 
-                // Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
-                if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
+                var curP = parent.TransformToAncestor(this.ComponentWindow).Transform(newPoint);
+
+                if (!this.isMoving)
                 {
-                    Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
-                    this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
-                    parent.RenderTransform = new TranslateTransform(this.CurrentMove.X, this.CurrentMove.Y);
+                    return;
+                }
+                else
+                {
+                    var previousMouse = this.CurrentMouse;
+                    this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
+
+                    // Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
+                    if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
+                    {
+                        Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
+                        this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
+
+                        parent.RenderTransform = new TranslateTransform(this.CurrentMove.X + componentToMove.XCoord, this.CurrentMove.Y + componentToMove.YCoord);
+                    }
                 }
             }
         }
@@ -257,7 +290,7 @@ namespace LogicDesigner
                 if (child.GetType() == typeof(Grid))
                 {
                     var grids = (Grid)child;
-                    
+
                     if (grids.Name == e.Component.Name)
                     {
                         foreach (var item in grids.Children)
@@ -327,6 +360,8 @@ namespace LogicDesigner
 
             label.RenderTransform = new TranslateTransform(0, (-componentVM.Picture.Height / 2) - 10);
 
+            sampleComponent.Height = sampleBody.Height + label.Height + 20;
+            sampleComponent.Width = sampleBody.Width + label.Width + 20;
             sampleComponent.Children.Add(sampleBody);
             sampleComponent.Children.Add(label);
 
