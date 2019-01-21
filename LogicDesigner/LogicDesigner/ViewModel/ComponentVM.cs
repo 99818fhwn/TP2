@@ -10,6 +10,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 
 namespace LogicDesigner.ViewModel
 {
@@ -105,6 +108,21 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        public BitmapSource Image
+        {
+            get
+            {
+                try
+                {
+                    return Imaging.CreateBitmapSourceFromHBitmap(this.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+        }
+
         public Bitmap Picture
         {
             get { return this.node.Picture; }
@@ -121,6 +139,14 @@ namespace LogicDesigner.ViewModel
             get
             {
                 return this.node;
+            }
+        }
+
+        public string Description
+        {
+            get
+            {
+                return this.node.Description;
             }
         }
 

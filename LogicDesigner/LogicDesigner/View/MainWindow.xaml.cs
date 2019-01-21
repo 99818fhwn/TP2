@@ -48,6 +48,9 @@ namespace LogicDesigner
             this.DataContext = this;
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
+            var selectBind = new Binding("SelectedFieldComponent");
+            selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
+            this.CurrentSelectedComponentView.SetBinding(DataContextProperty ,selectBind);
 
             this.UndoHistory.Push(new ProgramMngVM(programMngVM));
 
@@ -168,6 +171,14 @@ namespace LogicDesigner
             if (parentType == typeof(Grid))
             {
                 var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
+                var temp = this.GetParentGridComponent(pressedComponent);
+
+                if (temp == null)
+                {
+                    return;
+                }
+
+                ((ProgramMngVM)this.MainGrid.DataContext).SelectedFieldComponent = temp;
 
                 if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
                 {
@@ -192,7 +203,7 @@ namespace LogicDesigner
         {
             if (this.isMoving)
             {
-                var componentToMove = this.GetParentGrid((UIElement)e.Source);
+                var componentToMove = this.GetParentGridComponent((UIElement)e.Source);
                 componentToMove.XCoord += this.CurrentMove.X;
                 componentToMove.YCoord += this.CurrentMove.Y;
             }
@@ -202,7 +213,7 @@ namespace LogicDesigner
             this.CurrentMouse = new Point(0, 0);
         }
 
-        private ComponentVM GetParentGrid(UIElement uIElement)
+        private ComponentVM GetParentGridComponent(UIElement uIElement)
         {
             var parent = (UIElement)VisualTreeHelper.GetParent(uIElement);
 
@@ -210,7 +221,7 @@ namespace LogicDesigner
             {
                 var parentgrid = (Grid)parent;
                 var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
-                var component = dataContext.NodesVMInField.First(x => x.Name == parentgrid.Name);
+                var component = dataContext.NodesVMInField.FirstOrDefault(x => x.Name == parentgrid.Name);
                 return component;
             }
 

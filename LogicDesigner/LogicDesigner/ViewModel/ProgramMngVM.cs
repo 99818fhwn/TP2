@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -11,7 +13,7 @@ using Shared;
 
 namespace LogicDesigner.ViewModel
 {
-    public class ProgramMngVM
+    public class ProgramMngVM : INotifyPropertyChanged
     {
         private ProgramManager programManager;
         private ObservableCollection<ComponentVM> nodesVMInField;
@@ -25,6 +27,7 @@ namespace LogicDesigner.ViewModel
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
         public event EventHandler<PinsConnectedEventArgs> PinsConnected;
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public ProgramMngVM()
         {
@@ -158,13 +161,27 @@ namespace LogicDesigner.ViewModel
         public ProgramMngVM(ProgramMngVM old)
         {
             this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
-            //foreach (var node in old.nodesVMInField) ////Will be obsolete.
-            //{
-            //    this.nodesVMInField.Add(node);
-            //}
+            this.SelectedFieldComponent = old.SelectedFieldComponent;
             this.SelectableComponents = old.SelectableComponents;
             this.programManager = new ProgramManager(old.programManager);
         }
+
+        private ComponentVM selectedFieldComponent;
+
+        public ComponentVM SelectedFieldComponent
+        {
+            get
+            {
+                return this.selectedFieldComponent;
+            }
+
+            set
+            {
+                this.selectedFieldComponent = value;
+                this.FireOnPropertyChanged();
+            }
+        }
+
 
         public ObservableCollection<ComponentVM> NodesVMInField
         {
@@ -202,6 +219,10 @@ namespace LogicDesigner.ViewModel
             this.PinsConnected?.Invoke(this, e);
         }
 
+        protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
 
         /// <summary>
         /// Fires the on component vm changed, this seemes obsolete because the event when fired already contains the entire component.
