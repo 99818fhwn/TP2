@@ -25,7 +25,7 @@ namespace LogicDesigner.ViewModel
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public event EventHandler<FieldComponentEventArgs> SpeacialPropertyChanged;
+        public event EventHandler<FieldComponentEventArgs> ComponentPropertyChanged;
 
         //public ComponentVM(IDisplayableNode node, Command activateCommand, 
         //    Command executeCommand, Command removeCommand, string uniqueName)
@@ -170,7 +170,7 @@ namespace LogicDesigner.ViewModel
 
         protected virtual void FireOnComponentPropertyChanged(ComponentVM componentVM)
         {
-            this.SpeacialPropertyChanged?.Invoke(this, new FieldComponentEventArgs(componentVM));
+            this.ComponentPropertyChanged?.Invoke(this, new FieldComponentEventArgs(componentVM));
         }
 
         protected void OnPictureChanged(object sender, EventArgs e)

@@ -53,6 +53,7 @@ namespace LogicDesigner
 
             programMngVM.FieldComponentAdded += this.OnComponentAdded;
             programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            programMngVM.PinsConnected += this.OnPinsConnected;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
@@ -237,8 +238,6 @@ namespace LogicDesigner
                 var componentToMove = dataContext.NodesVMInField.First(x => x.Name == parentgrid.Name);
                 newPoint = new Point(componentToMove.XCoord, componentToMove.YCoord);
 
-                var curP = parent.TransformToAncestor(this.ComponentWindow).Transform(newPoint);
-
                 if (!this.isMoving)
                 {
                     return;
@@ -270,7 +269,7 @@ namespace LogicDesigner
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
-            e.Component.SpeacialPropertyChanged += this.OnComponentChanged;
+            e.Component.ComponentPropertyChanged += this.OnComponentChanged;
             this.DrawNewComponent(e.Component);
             var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
             this.RedoHistory.Push(updatedCurrentMan);
@@ -320,7 +319,7 @@ namespace LogicDesigner
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
+            e.Component.ComponentPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
         }
@@ -354,6 +353,10 @@ namespace LogicDesigner
                 pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
 
                 pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
+                
+                componentVM.InputPinsVM[i].XPosition = -componentVM.Picture.Width / 2;
+                componentVM.InputPinsVM[i].YPosition = yOffset;
+
                 yOffset += offsetStepValue;
 
                 sampleComponent.Children.Add(pinButton);
@@ -379,6 +382,9 @@ namespace LogicDesigner
 
                 pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
                 yOffset += offsetStepValue;
+
+                componentVM.OutputPinsVM[i].XPosition = componentVM.Picture.Width / 2;
+                componentVM.OutputPinsVM[i].YPosition = yOffset;
 
                 sampleComponent.Children.Add(pinButton);
             }
@@ -421,6 +427,13 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(sampleComponent);
 
             sampleComponent.RenderTransform = new TranslateTransform(0, 0);
+        }
+
+        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        {
+            var inputPin = e.InputPinVM;
+            var ouputPin = e.OutputPinVM;
+            
         }
 
         /// <summary>
