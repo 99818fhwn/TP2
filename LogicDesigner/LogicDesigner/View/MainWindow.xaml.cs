@@ -299,6 +299,22 @@ namespace LogicDesigner
             // New component
             Grid sampleComponent = new Grid();
 
+            // Draw input pins
+            foreach (var pin in componentVM.InputPinsVM)
+            {
+                Button pinButton = new Button();
+                pinButton.Width = 30;
+                pinButton.Height = 10;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+                pinButton.CommandParameter = pin;
+                pinButton.Command = pin.SetPinCommand;
+
+                pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, 0);
+
+                sampleComponent.Children.Add(pinButton);
+            }
+
             // Component Body
             Button sampleBody = new Button();
 
@@ -330,20 +346,7 @@ namespace LogicDesigner
 
             sampleComponent.Children.Add(sampleBody);
             sampleComponent.Children.Add(label);
-
-            foreach (var pin in componentVM.InputPinsVM)
-            {
-                Button pinButton = new Button();
-                pinButton.Width = 30;
-                pinButton.Height = 10;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-
-                pinButton.CommandParameter = pin;
-                pinButton.Command = pin.SetPinCommand;
-
-                sampleComponent.Children.Add(pinButton);
-            }
-
+            
             this.ComponentWindow.Children.Add(sampleComponent);
 
             sampleComponent.RenderTransform = new TranslateTransform(0, 0);
