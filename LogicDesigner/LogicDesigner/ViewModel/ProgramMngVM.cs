@@ -17,6 +17,9 @@ namespace LogicDesigner.ViewModel
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentRepresentationVM> selectableComponents;
         private int uniqueId;
+        private PinVM selectedOutputPin;
+        private PinVM selectedInputPin;
+        private Command setPinCommand;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
@@ -59,19 +62,20 @@ namespace LogicDesigner.ViewModel
 
             var addCommand = new Command(obj =>
             {
-                // null reference exception
+                // null reference exception?
                 var representationNode = obj as ComponentRepresentationVM;
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());////Create new Component
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), executeCommand, activateCommand, removeCommand);
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), executeCommand, 
+                    activateCommand, removeCommand);
                 this.nodesVMInField.Add(compVM);
                 this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
                 this.CreateUniqueName(node),activateCommand, executeCommand, removeCommand
-                ));////seems suspicious for unnecessary inputs
+                ));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
@@ -79,7 +83,42 @@ namespace LogicDesigner.ViewModel
                 node => new ComponentRepresentationVM(addCommand, node));
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
-            this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
+
+            this.setPinCommand = new Command(obj =>
+            {
+                var pin = obj as PinVM;
+                this.SetSelectedPin(pin);
+            });
+        }
+
+        public void SetSelectedPin(PinVM value)
+        {
+            if(this.selectedOutputPin == value || this.selectedInputPin == value)
+            {
+                this.selectedOutputPin = null;
+            }
+            else
+            {
+                if(!this.selectedOutputPin.IsInputPin)
+                {
+                    this.selectedOutputPin = value;
+                }
+                else
+                {
+                    this.selectedInputPin = value;
+                }
+
+                if (this.selectedOutputPin != null && this.selectedInputPin != null)
+                {
+                    this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
+                }
+            }
+        }
+        
+
+        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
+        {
+            this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin);
         }
 
         /// <summary>

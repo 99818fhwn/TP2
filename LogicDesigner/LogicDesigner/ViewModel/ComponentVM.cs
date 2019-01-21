@@ -16,7 +16,7 @@ namespace LogicDesigner.ViewModel
         private IDisplayableNode node;
         private readonly Command activateCommand;
         private readonly Command removeCommand;
-        private readonly Command executeCommand;
+        //private readonly Command executeCommand;
         private int xCoord;
         private int yCoord;
         private readonly string uniqueName;
@@ -37,11 +37,12 @@ namespace LogicDesigner.ViewModel
         //    node.PictureChanged += this.OnPictureChanged;
         //}
 
-        public ComponentVM(IDisplayableNode realComponent, string uniqueName, Command executeCommand, Command activateCommand, Command removeCommand)
+        public ComponentVM(IDisplayableNode realComponent, string uniqueName, 
+            Command executeCommand, Command activateCommand, Command removeCommand)
         {
             this.node = realComponent;
             this.uniqueName = uniqueName;
-            this.executeCommand = executeCommand;
+            //this.executeCommand = executeCommand;
             this.activateCommand = activateCommand;
             this.removeCommand = removeCommand;
 
@@ -129,13 +130,13 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public Command ExecuteCommand
-        {
-            get
-            {
-                return this.executeCommand;
-            }
-        }
+        //public Command ExecuteCommand
+        //{
+        //    get
+        //    {
+        //        return this.executeCommand;
+        //    }
+        //}
 
         public void Activate()
         {
