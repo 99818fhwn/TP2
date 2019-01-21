@@ -47,6 +47,14 @@ namespace LogicDesigner.Model
             //}
         }
 
+        public ProgramManager (ProgramManager old)
+        {
+            this.Delay = old.Delay;
+            this.FieldNodes = old.FieldNodes;
+            possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
+            this.Stop = old.Stop;
+        }
+
         public ICollection<IDisplayableNode> FieldNodes
         {
             get

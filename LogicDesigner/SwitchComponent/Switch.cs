@@ -128,13 +128,13 @@ namespace SwitchComponent
             if (this.IsClosed)
             {
                 this.IsClosed = false;
-                this.Picture = Properties.Resources.SwitchClosed;
+                this.Picture = Properties.Resources.SwitchOpen;
                 this.FireOnPictureChanged();
             }
             else
             {
                 this.IsClosed = true;
-                this.Picture = Properties.Resources.SwitchOpen;
+                this.Picture = Properties.Resources.SwitchClosed;
                 this.FireOnPictureChanged();
             }
         }
