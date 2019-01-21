@@ -12,7 +12,14 @@ namespace LogicDesigner.Model
 {
     public class ProgramManager
     {
+        /// <summary>
+        /// The field nodes
+        /// </summary>
         private ICollection<IDisplayableNode> fieldNodes;
+
+        /// <summary>
+        /// The possible nodes to choose from
+        /// </summary>
         private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
 
         public ProgramManager()
@@ -23,33 +30,21 @@ namespace LogicDesigner.Model
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
             // test - connect pins
-            for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
-            {
-                for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
-                {
-                    try
-                    {
-                        this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
-                        this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
-                    }
-                    catch(ArgumentOutOfRangeException)
-                    {
-
-                    }
-                }
-            }
-            // test -- hab ich deswegen auskommentiert - Moe
             //for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
             //{
             //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
             //    {
-            //        this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
-            //        this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
+            //        try
+            //        {
+            //            this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
+            //            this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
+            //        }
+            //        catch(ArgumentOutOfRangeException)
+            //        {
+
+            //        }
             //    }
             //}
-
-            //this.ConnectPins(this.possibleNodesToChooseFrom.Last().Outputs.ElementAt(0),
-            //        this.possibleNodesToChooseFrom.Last().Inputs.ElementAt(0));
         }
 
         public ICollection<IDisplayableNode> FieldNodes
