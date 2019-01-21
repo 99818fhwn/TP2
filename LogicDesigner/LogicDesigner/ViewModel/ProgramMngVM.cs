@@ -99,7 +99,7 @@ namespace LogicDesigner.ViewModel
             }
             else
             {
-                if(!this.selectedOutputPin.IsInputPin)
+                if(!value.IsInputPin)
                 {
                     this.selectedOutputPin = value;
                 }
