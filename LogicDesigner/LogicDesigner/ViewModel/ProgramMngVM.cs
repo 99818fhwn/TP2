@@ -24,6 +24,7 @@ namespace LogicDesigner.ViewModel
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
+        public event EventHandler<PinsConnectedEventArgs> PinsConnected;
 
         public ProgramMngVM()
         {
@@ -118,7 +119,14 @@ namespace LogicDesigner.ViewModel
 
         private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
         {
-            this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin);
+            if(this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+            {
+                this.OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
+            }
+
+            this.selectedInputPin = null;
+            this.selectedOutputPin = null;
+
         }
 
         /// <summary>
@@ -187,6 +195,11 @@ namespace LogicDesigner.ViewModel
         public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentRemoved?.Invoke(this, e);
+        }
+
+        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        {
+            this.PinsConnected?.Invoke(this, e);
         }
 
 
