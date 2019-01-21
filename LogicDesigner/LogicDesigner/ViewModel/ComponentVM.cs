@@ -17,7 +17,7 @@ namespace LogicDesigner.ViewModel
         private IDisplayableNode node;
         private readonly Command activateCommand;
         private readonly Command removeCommand;
-        private readonly Command executeCommand;
+       // private readonly Command executeCommand;
         private double xCoord;
         private double yCoord;
         private readonly string uniqueName;
@@ -38,11 +38,12 @@ namespace LogicDesigner.ViewModel
         //    node.PictureChanged += this.OnPictureChanged;
         //}
 
-        public ComponentVM(IDisplayableNode realComponent, string uniqueName, Command executeCommand, Command activateCommand, Command removeCommand)
+        public ComponentVM(IDisplayableNode realComponent, string uniqueName, 
+            Command executeCommand, Command activateCommand, Command removeCommand)
         {
             this.node = realComponent;
             this.uniqueName = uniqueName;
-            this.executeCommand = executeCommand;
+            //this.executeCommand = executeCommand;
             this.activateCommand = activateCommand;
             this.removeCommand = removeCommand;
 
@@ -130,13 +131,13 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public Command ExecuteCommand
-        {
-            get
-            {
-                return this.executeCommand;
-            }
-        }
+        //public Command ExecuteCommand
+        //{
+        //    get
+        //    {
+        //        return this.executeCommand;
+        //    }
+        //}
 
         public void Activate()
         {
@@ -165,7 +166,7 @@ namespace LogicDesigner.ViewModel
 
             this.activateCommand = (Command)info.GetValue(nameof(this.ActivateComponentCommand), typeof(Command));
             this.removeCommand = (Command)info.GetValue(nameof(this.RemoveComponentCommand), typeof(Command));
-            this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
+            //this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -179,7 +180,7 @@ namespace LogicDesigner.ViewModel
             info.AddValue(nameof(this.Name), this.Name, this.Name.GetType());
 
             info.AddValue(nameof(this.ActivateComponentCommand), this.ActivateComponentCommand, this.ActivateComponentCommand.GetType());
-            info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
+            //info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
             info.AddValue(nameof(this.RemoveComponentCommand), this.RemoveComponentCommand, this.RemoveComponentCommand.GetType());
         }
 
