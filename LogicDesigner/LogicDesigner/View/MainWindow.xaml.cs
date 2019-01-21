@@ -255,6 +255,7 @@ namespace LogicDesigner
                 if (child.GetType() == typeof(Grid))
                 {
                     var grids = (Grid)child;
+
                     if (grids.Name == e.Component.Name)
                     {
                         foreach (var item in grids.Children)
@@ -281,7 +282,7 @@ namespace LogicDesigner
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; ////Unsubscribes from the deleted component
+            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
         }
