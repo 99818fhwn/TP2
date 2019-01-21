@@ -331,6 +331,45 @@ namespace LogicDesigner
             // New component
             Grid sampleComponent = new Grid();
 
+            int yOffset = -(componentVM.Picture.Height / 2) + 10;
+            int offsetStepValue = (componentVM.Picture.Height - 20) / ( componentVM.InputPinsVM.Count - 1);
+
+            // Draw input pins
+            for (int i = 0; i < componentVM.InputPinsVM.Count; i++)
+            {
+                Button pinButton = new Button();
+                pinButton.Width = 30;
+                pinButton.Height = 10;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+                pinButton.CommandParameter = componentVM.InputPinsVM[i];
+                pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
+
+                pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
+                yOffset += offsetStepValue;
+
+                sampleComponent.Children.Add(pinButton);
+            }
+
+            yOffset = -(componentVM.Picture.Height / 2) + 10;
+
+            // Draw output pins
+            for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
+            {
+                Button pinButton = new Button();
+                pinButton.Width = 30;
+                pinButton.Height = 10;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+                pinButton.CommandParameter = componentVM.OutputPinsVM[i];
+                pinButton.Command = componentVM.OutputPinsVM[i].SetPinCommand;
+
+                pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
+                yOffset += offsetStepValue;
+
+                sampleComponent.Children.Add(pinButton);
+            }
+
             // Component Body
             Button sampleBody = new Button();
 
@@ -364,10 +403,10 @@ namespace LogicDesigner
             sampleComponent.Width = sampleBody.Width + label.Width + 20;
             sampleComponent.Children.Add(sampleBody);
             sampleComponent.Children.Add(label);
-
+            
             this.ComponentWindow.Children.Add(sampleComponent);
 
-            sampleComponent.RenderTransform = new TranslateTransform(0, 100);
+            sampleComponent.RenderTransform = new TranslateTransform(0, 0);
         }
 
         /// <summary>

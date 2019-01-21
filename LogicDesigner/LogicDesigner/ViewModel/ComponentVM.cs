@@ -2,6 +2,7 @@
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
@@ -17,7 +18,7 @@ namespace LogicDesigner.ViewModel
         private IDisplayableNode node;
         private readonly Command activateCommand;
         private readonly Command removeCommand;
-        private readonly Command executeCommand;
+       // private readonly Command executeCommand;
         private double xCoord;
         private double yCoord;
         private readonly string uniqueName;
@@ -38,26 +39,35 @@ namespace LogicDesigner.ViewModel
         //    node.PictureChanged += this.OnPictureChanged;
         //}
 
-        public ComponentVM(IDisplayableNode realComponent, string uniqueName, Command executeCommand, Command activateCommand, Command removeCommand)
+        public ComponentVM(IDisplayableNode realComponent, string uniqueName, 
+            Command setPinCommand, Command activateCommand, Command removeCommand)
         {
             this.node = realComponent;
             this.uniqueName = uniqueName;
-            this.executeCommand = executeCommand;
             this.activateCommand = activateCommand;
             this.removeCommand = removeCommand;
 
             this.node.PictureChanged += this.OnPictureChanged;
-        }
 
-        protected virtual void FireOnComponentPropertyChanged(ComponentVM componentVM)
-        {
-            this.SpeacialPropertyChanged?.Invoke(this, new FieldComponentEventArgs(componentVM));
-        }
+            this.OutputPinsVM = new ObservableCollection<PinVM>();
+            this.InputPinsVM = new ObservableCollection<PinVM>();
 
-        internal void OnPictureChanged(object sender, EventArgs e)
-        {
-            this.FireOnPropertyChanged(nameof(this.Picture));
-            this.FireOnComponentPropertyChanged(this);
+            foreach (var pin in this.node.Outputs)
+            {
+                if(pin != null)
+                {
+                    this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand));
+                }
+
+            }
+
+            foreach (var pin in this.node.Inputs)
+            {
+                if (pin != null)
+                {
+                    this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand));
+                }
+            }
         }
 
         public string Label
@@ -130,13 +140,23 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public Command ExecuteCommand
+        public ObservableCollection<PinVM> OutputPinsVM
         {
-            get
-            {
-                return this.executeCommand;
-            }
+            get;
         }
+
+        public ObservableCollection<PinVM> InputPinsVM
+        {
+            get;
+        }
+
+        //public Command ExecuteCommand
+        //{
+        //    get
+        //    {
+        //        return this.executeCommand;
+        //    }
+        //}
 
         public void Activate()
         {
@@ -146,6 +166,17 @@ namespace LogicDesigner.ViewModel
         public void Execute()
         {
             this.node.Execute();
+        }
+
+        protected virtual void FireOnComponentPropertyChanged(ComponentVM componentVM)
+        {
+            this.SpeacialPropertyChanged?.Invoke(this, new FieldComponentEventArgs(componentVM));
+        }
+
+        protected void OnPictureChanged(object sender, EventArgs e)
+        {
+            this.FireOnPropertyChanged(nameof(this.Picture));
+            this.FireOnComponentPropertyChanged(this);
         }
 
         protected void FireOnPropertyChanged([CallerMemberName]string name = null)
@@ -165,7 +196,7 @@ namespace LogicDesigner.ViewModel
 
             this.activateCommand = (Command)info.GetValue(nameof(this.ActivateComponentCommand), typeof(Command));
             this.removeCommand = (Command)info.GetValue(nameof(this.RemoveComponentCommand), typeof(Command));
-            this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
+            //this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -179,7 +210,7 @@ namespace LogicDesigner.ViewModel
             info.AddValue(nameof(this.Name), this.Name, this.Name.GetType());
 
             info.AddValue(nameof(this.ActivateComponentCommand), this.ActivateComponentCommand, this.ActivateComponentCommand.GetType());
-            info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
+            //info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
             info.AddValue(nameof(this.RemoveComponentCommand), this.RemoveComponentCommand, this.RemoveComponentCommand.GetType());
         }
 

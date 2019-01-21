@@ -17,14 +17,24 @@ namespace LogicDesigner.ViewModel
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentRepresentationVM> selectableComponents;
         private int uniqueId;
+        private PinVM selectedOutputPin;
+        private PinVM selectedInputPin;
+        //private Command setPinCommand;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
+        public event EventHandler<PinsConnectedEventArgs> PinsConnected;
 
         public ProgramMngVM()
         {
             this.programManager = new ProgramManager();
+
+            var setPinCommand = new Command(obj =>
+            {
+                var pin = obj as PinVM;
+                this.SetSelectedPin(pin);
+            });
 
             var activateCommand = new Command(obj =>
             {
@@ -32,11 +42,11 @@ namespace LogicDesigner.ViewModel
                 nodeInFieldVM.Activate();
             });
 
-            var executeCommand = new Command(obj =>
-            {
-                var nodeInFieldVM = obj as ComponentVM;
-                nodeInFieldVM.Execute();
-            });
+            //var executeCommand = new Command(obj =>
+            //{
+            //    var nodeInFieldVM = obj as ComponentVM;
+            //    nodeInFieldVM.Execute();
+            //});
 
             var removeCommand = new Command(obj =>
             {
@@ -59,19 +69,20 @@ namespace LogicDesigner.ViewModel
 
             var addCommand = new Command(obj =>
             {
-                // null reference exception
+                // null reference exception?
                 var representationNode = obj as ComponentRepresentationVM;
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());////Create new Component
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), executeCommand, activateCommand, removeCommand);
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
+                    activateCommand, removeCommand);
                 this.nodesVMInField.Add(compVM);
                 this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                this.CreateUniqueName(node),activateCommand, executeCommand, removeCommand
-                ));////seems suspicious for unnecessary inputs
+                this.CreateUniqueName(node),activateCommand, setPinCommand, removeCommand
+                ));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
@@ -79,7 +90,43 @@ namespace LogicDesigner.ViewModel
                 node => new ComponentRepresentationVM(addCommand, node));
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
-            this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
+        }
+
+        public void SetSelectedPin(PinVM value)
+        {
+            if(this.selectedOutputPin == value || this.selectedInputPin == value)
+            {
+                this.selectedOutputPin = null;
+            }
+            else
+            {
+                if(!value.IsInputPin)
+                {
+                    this.selectedOutputPin = value;
+                }
+                else
+                {
+                    this.selectedInputPin = value;
+                }
+
+                if (this.selectedOutputPin != null && this.selectedInputPin != null)
+                {
+                    this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
+                }
+            }
+        }
+        
+
+        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
+        {
+            if(this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+            {
+                this.OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
+            }
+
+            this.selectedInputPin = null;
+            this.selectedOutputPin = null;
+
         }
 
         /// <summary>
@@ -148,6 +195,11 @@ namespace LogicDesigner.ViewModel
         public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentRemoved?.Invoke(this, e);
+        }
+
+        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        {
+            this.PinsConnected?.Invoke(this, e);
         }
 
 
