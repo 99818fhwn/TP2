@@ -70,6 +70,9 @@
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
+
+            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.UndoHistory.Push(currentMan);
         }
 
         /// <summary>
@@ -136,8 +139,6 @@
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
             DrawNewComponent(e.Component);
-            var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
@@ -238,9 +239,22 @@
                 if (this.UndoHistory.Count > 0)
                 {
                     ProgramMngVM history = this.UndoHistory.Pop();
-                    this.UndoHistory.Push(history);
 
-                    history = this.UndoHistory.Pop();
+                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    {
+                        this.RedoHistory.Push(history);
+                        history = this.UndoHistory.Pop();
+                    }
+                    //if (RedoHistory.Count == 0)
+                    //{
+                    //    this.RedoHistory.Push(new ProgramMngVM((ProgramMngVM)this.MainGrid.DataContext));
+                    //}
+                    //else
+                    //{
+                    //    this.RedoHistory.Push(history);
+                    //}
+                    //MessageBox.Show($"{UndoHistory.Count()} undo count - {RedoHistory.Count} redo count");
+
                     this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
                     foreach (var component in history.NodesVMInField)
@@ -265,6 +279,13 @@
                 if (this.RedoHistory.Count > 0)
                 {
                     ProgramMngVM history = this.RedoHistory.Pop();
+                    //MessageBox.Show($"{UndoHistory.Count()} undo count - {RedoHistory.Count} redo count");
+
+                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    {
+                        this.UndoHistory.Push(history);
+                        history = this.RedoHistory.Pop();
+                    }
 
                     this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
