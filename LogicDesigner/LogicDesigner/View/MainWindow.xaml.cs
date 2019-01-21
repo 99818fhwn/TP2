@@ -49,6 +49,8 @@ namespace LogicDesigner
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
+            this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+
             programMngVM.FieldComponentAdded += this.OnComponentAdded;
             programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
@@ -348,7 +350,8 @@ namespace LogicDesigner
                 {
                     ProgramMngVM history = this.UndoHistory.Pop();
 
-                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    var context = (ProgramMngVM)this.MainGrid.DataContext;
+                    if (history.NodesVMInField == context.NodesVMInField)
                     {
                         this.RedoHistory.Push(history);
                         history = this.UndoHistory.Pop();
