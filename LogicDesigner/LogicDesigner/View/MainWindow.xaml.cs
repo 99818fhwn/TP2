@@ -49,6 +49,8 @@ namespace LogicDesigner
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
+            this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+
             programMngVM.FieldComponentAdded += this.OnComponentAdded;
             programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
@@ -282,7 +284,7 @@ namespace LogicDesigner
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; ////Unsubscribes from the deleted component
+            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
         }
