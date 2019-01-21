@@ -166,7 +166,7 @@ namespace LogicDesigner.ViewModel
 
             this.activateCommand = (Command)info.GetValue(nameof(this.ActivateComponentCommand), typeof(Command));
             this.removeCommand = (Command)info.GetValue(nameof(this.RemoveComponentCommand), typeof(Command));
-            this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
+            //this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -180,7 +180,7 @@ namespace LogicDesigner.ViewModel
             info.AddValue(nameof(this.Name), this.Name, this.Name.GetType());
 
             info.AddValue(nameof(this.ActivateComponentCommand), this.ActivateComponentCommand, this.ActivateComponentCommand.GetType());
-            info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
+            //info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
             info.AddValue(nameof(this.RemoveComponentCommand), this.RemoveComponentCommand, this.RemoveComponentCommand.GetType());
         }
 
