@@ -384,6 +384,7 @@ namespace LogicDesigner
             Button sampleBody = new Button();
 
             sampleComponent.Name = componentVM.Name;
+            sampleBody.Name = componentVM.Name + "Body"; 
             sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
 
