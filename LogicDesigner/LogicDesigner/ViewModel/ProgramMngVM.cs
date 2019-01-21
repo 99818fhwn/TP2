@@ -15,49 +15,16 @@ namespace LogicDesigner.ViewModel
     {
         private ProgramManager programManager;
         private ObservableCollection<ComponentVM> nodesVMInField;
-        private ObservableCollection<ComponentVM> possibleComponentsVMToChooseFrom;
+        private ObservableCollection<ComponentRepresentationVM> selectableComponents;
         private int uniqueId;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
+        public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
 
         public ProgramMngVM()
         {
             this.programManager = new ProgramManager();
-
-            var addCommand = new Command(obj =>
-            {
-                // null reference exception
-                var nodeInFieldVM = obj as ComponentVM;
-
-                this.programManager.FieldNodes.Add(
-                    (IDisplayableNode)Activator.CreateInstance(nodeInFieldVM.Node.GetType()));
-
-                this.nodesVMInField.Add(nodeInFieldVM);
-
-                this.OnFieldComponentCreated(this, new FieldComponentEventArgs(nodeInFieldVM));
-            });
-
-            var removeCommand = new Command(obj =>
-            {
-                // null reference exception
-                var nodeInFieldVM = obj as ComponentVM;
-                foreach (var n in this.programManager.FieldNodes)
-                {
-                    if (nodeInFieldVM.Node == n)
-                    {
-                        this.programManager.FieldNodes.Remove(n);
-                        this.nodesVMInField.Remove(nodeInFieldVM);
-
-                        this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
-
-                        break;
-                    }
-                }
-
-                this.programManager.FieldNodes.Remove(
-                    (IDisplayableNode)Activator.CreateInstance(nodeInFieldVM.GetType()));
-            });
 
             var activateCommand = new Command(obj =>
             {
@@ -71,28 +38,60 @@ namespace LogicDesigner.ViewModel
                 nodeInFieldVM.Execute();
             });
 
-
-            Func<IDisplayableNode, string> newUniqueName = new Func<IDisplayableNode, string>(node =>
+            var removeCommand = new Command(obj =>
             {
-                this.uniqueId++;
-                return this.CreateNameTag(node.Label, this.uniqueId.ToString());
+                // null reference exception
+                var nodeInFieldVM = obj as ComponentVM;
+                foreach (var n in this.programManager.FieldNodes)
+                {
+                    if (nodeInFieldVM.Node == n)
+                    {
+                        this.programManager.FieldNodes.Remove(n);
+                        this.nodesVMInField.Remove(nodeInFieldVM);
+                        this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
+
+                        break;
+                    }
+                }
+
+                this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);////Temporary fix for testing
+            });
+
+            var addCommand = new Command(obj =>
+            {
+                // null reference exception
+                var representationNode = obj as ComponentRepresentationVM;
+                var realComponent = representationNode.Node;
+                var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());////Create new Component
+                this.programManager.FieldNodes.Add(newGenerateComp);
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), executeCommand, activateCommand, removeCommand);
+                this.nodesVMInField.Add(compVM);
+                this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                activateCommand, addCommand, executeCommand, removeCommand,
-                newUniqueName(node)));
+                this.CreateUniqueName(node),activateCommand, executeCommand, removeCommand
+                ));////seems suspicious for unnecessary inputs
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
             var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(
-                node => new ComponentVM(node,
-                activateCommand, addCommand, executeCommand, removeCommand,
-                newUniqueName(node)));
+                node => new ComponentRepresentationVM(addCommand, node));
 
-            this.possibleComponentsVMToChooseFrom = new ObservableCollection<ComponentVM>(nodesToChoose);
+            this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
         }
 
+        /// <summary>
+        /// Creates an unique name by adding a serial number to the label ending.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns>The identifier will be returned.</returns>
+        private string CreateUniqueName(IDisplayableNode node)
+        {
+            this.uniqueId++;
+            return this.CreateNameTag(node.Label, this.uniqueId.ToString());
+        }
 
         /// <summary>
         /// Creates the name tag from Label and can add additional string to the end, it removes all chars except the letters.
@@ -111,12 +110,12 @@ namespace LogicDesigner.ViewModel
         /// <param name="old"> The ProgramMngVM which values should be copied. </param>
         public ProgramMngVM(ProgramMngVM old)
         {
-            this.nodesVMInField = new ObservableCollection<ComponentVM>();
-            foreach(var node in old.nodesVMInField)
-            {
-                this.nodesVMInField.Add(node);
-            }
-            this.PossibleComponentsToChooseFrom = old.PossibleComponentsToChooseFrom;
+            this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
+            //foreach (var node in old.nodesVMInField) ////Will be obsolete.
+            //{
+            //    this.nodesVMInField.Add(node);
+            //}
+            //this.SelectableComponents = old.SelectableComponents;
             this.programManager = new ProgramManager(old.programManager);
         }
 
@@ -128,15 +127,15 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public ObservableCollection<ComponentVM> PossibleComponentsToChooseFrom
+        public ObservableCollection<ComponentRepresentationVM> SelectableComponents
         {
             get
             {
-                return this.possibleComponentsVMToChooseFrom;
+                return this.selectableComponents;
             }
             set
             {
-                this.possibleComponentsVMToChooseFrom = value;
+                this.selectableComponents = value;
             }
         }
 
@@ -149,6 +148,17 @@ namespace LogicDesigner.ViewModel
         public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentRemoved?.Invoke(this, e);
+        }
+
+
+        /// <summary>
+        /// Fires the on component vm changed, this seemes obsolete because the event when fired already contains the entire component.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
+        protected virtual void FireOnComponentVMChanged(object sender, FieldComponentEventArgs e)
+        {
+            this.FieldComponentChanged?.Invoke(this, e);
         }
     }
 }

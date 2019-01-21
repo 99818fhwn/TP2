@@ -1,4 +1,9 @@
-﻿namespace LogicDesigner
+﻿//-----------------------------------------------------------------------
+// <copyright file="MainWindow.xaml.cs" company="FH">
+//     Company copyright tag.
+// </copyright>
+//-----------------------------------------------------------------------
+namespace LogicDesigner
 {
     using System;
     using System.Collections.Generic;
@@ -27,36 +32,16 @@
     public partial class MainWindow : Window
     {
         /// <summary>
-        /// If a component is beeing dragged.
+        /// If a component is being dragged.
         /// </summary>
         private bool isMoving;
-
-        /// <summary>
-        /// The component position.
-        /// </summary>
-        private Point? componentPosition;
-
-        /// <summary>
-        /// The delta of the clicked x position on the component and the mouse x position.
-        /// </summary>
-        private double deltaX;
-
-        /// <summary>
-        /// The delta of the clicked y position on the component and the mouse y position.
-        /// </summary>
-        private double deltaY;
-
-        /// <summary>
-        /// The translated transform.
-        /// </summary>
-        private TranslateTransform translateTransform;
-
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            this.InitializeComponent();
             this.UndoHistory = new Stack<ProgramMngVM>();
             this.RedoHistory = new Stack<ProgramMngVM>();
 
@@ -64,16 +49,99 @@
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
-            programMngVM.FieldComponentAdded += OnComponentAdded;
-            programMngVM.FieldComponentRemoved += OnComponentDeleted;
+            programMngVM.FieldComponentAdded += this.OnComponentAdded;
+            programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
-            this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
-            this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
-            this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
-
-            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.UndoHistory.Push(currentMan);
+            this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
+            this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
+            this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
+
+        /// <summary>
+        /// Gets the undo history.
+        /// </summary>
+        /// <value>
+        /// The undo history.
+        /// </value>
+        public Stack<ProgramMngVM> UndoHistory { get; private set; }
+
+        /// <summary>
+        /// Gets the redo history.
+        /// </summary>
+        /// <value>
+        /// The redo history.
+        /// </value>
+        public Stack<ProgramMngVM> RedoHistory { get; private set; }
+
+        /// <summary>
+        /// Gets the undo command.
+        /// </summary>
+        /// <value>
+        /// The undo command.
+        /// </value>
+        public Command UndoCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (this.UndoHistory.Count > 0)
+                {
+                    ProgramMngVM history = this.UndoHistory.Pop();
+                    this.UndoHistory.Push(history);
+
+                    history = this.UndoHistory.Pop();
+                    this.ComponentWindow.Children.Clear();
+                    this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
+
+                    this.RedoHistory.Push(history);
+                }
+            }));
+        }
+
+        /// <summary>
+        /// Gets the redo command.
+        /// </summary>
+        /// <value>
+        /// The redo command.
+        /// </value>
+        public Command RedoCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (this.RedoHistory.Count > 0)
+                {
+                    ProgramMngVM history = this.RedoHistory.Pop();
+
+                    this.ComponentWindow.Children.Clear();
+                    this.MainGrid.DataContext = history;
+                    foreach (var component in history.NodesVMInField)
+                    {
+                        DrawNewComponent(component);
+                    }
+
+                    this.UndoHistory.Push(history);
+                }
+            }));
+        }
+
+        /// <summary>
+        /// Gets the current mouse.
+        /// </summary>
+        /// <value>
+        /// The current mouse.
+        /// </value>
+        public Point CurrentMouse { get; private set; }
+
+        /// <summary>
+        /// Gets the current move.
+        /// </summary>
+        /// <value>
+        /// The current move.
+        /// </value>
+        public Point CurrentMove { get; private set; }
 
         /// <summary>
         /// Called when the button is pressed down.
@@ -82,7 +150,25 @@
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseDown(object sender, MouseButtonEventArgs e)
         {
-            this.isMoving = true;
+            var pressedComponent = (UIElement)e.Source;
+            var parentType = VisualTreeHelper.GetParent(pressedComponent).GetType();
+
+            if (parentType == typeof(Grid))
+            {
+                var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
+
+                if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
+                {
+                    var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
+                    var componentToActivate = dataContext.NodesVMInField.First(x => x.Name == parent.Name);
+
+                    componentToActivate.Activate();
+
+                    return;
+                }
+
+                this.isMoving = true;
+            }
         }
 
         /// <summary>
@@ -118,12 +204,13 @@
             {
                 var previousMouse = this.CurrentMouse;
                 this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
-                //Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
+
+                // Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
                 if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
                 {
                     Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
                     this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
-                    pressedComponent.RenderTransform = new TranslateTransform(this.CurrentMove.X, this.CurrentMove.Y);
+                    parent.RenderTransform = new TranslateTransform(this.CurrentMove.X, this.CurrentMove.Y);
                 }
             }
         }
@@ -138,7 +225,42 @@
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
-            DrawNewComponent(e.Component);
+            e.Component.SpeacialPropertyChanged += this.OnComponentChanged;
+            this.DrawNewComponent(e.Component);
+            var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.RedoHistory.Push(updatedCurrentMan);
+        }
+
+
+        /// <summary>
+        /// Called when [component changed] and chages the visual of the component.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
+        private void OnComponentChanged(object sender, FieldComponentEventArgs e)
+        {
+            var compOld = this.ComponentWindow.Children;//FindName(e.Component.Name);
+            foreach (var child in compOld)
+            {
+                if (child.GetType() == typeof(Grid))
+                {
+                    var grids = (Grid)child;
+                    if (grids.Name == e.Component.Name)
+                    {
+                        foreach (var item in grids.Children)
+                        {
+                            if (item.GetType() == typeof(Button))
+                            {
+                                ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+                                imageBrush.Stretch = Stretch.Fill;
+                                var compToChange = (Button)item;
+                                compToChange.Background = imageBrush;
+                                compToChange.UpdateLayout();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -149,14 +271,15 @@
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; ////Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
-            // Delete component.
         }
 
         /// <summary>
-        /// Draws a new component.
+        /// Draws the new component.
         /// </summary>
+        /// <param name="componentVM">The component.</param>
         private void DrawNewComponent(ComponentVM componentVM)
         {
             // New component
@@ -165,8 +288,8 @@
             // Component Body
             Button sampleBody = new Button();
 
-            sampleBody.Name = componentVM.Label;
-            sampleBody.Height = componentVM.Picture.Height;
+            sampleComponent.Name = componentVM.Name;
+            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid 
             sampleBody.Width = componentVM.Picture.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
@@ -175,9 +298,10 @@
 
             // Add the label
             string text = componentVM.Label;
+
             Typeface myTypeface = new Typeface("Helvetica");
-            FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture,
-                    FlowDirection.LeftToRight, myTypeface, 16, Brushes.Red);
+
+            FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, myTypeface, 16, Brushes.Red);
 
             TextBlock label = new TextBlock
             {
@@ -188,7 +312,7 @@
 
             label.TextAlignment = TextAlignment.Center;
 
-            label.RenderTransform = new TranslateTransform(0, -componentVM.Picture.Height / 2 - 10);
+            label.RenderTransform = new TranslateTransform(0, (-componentVM.Picture.Height / 2) - 10);
 
             sampleComponent.Children.Add(sampleBody);
             sampleComponent.Children.Add(label);
@@ -298,22 +422,5 @@
 
             }));
         }
-
-        /// <summary>
-        /// Gets or sets the current mouse.
-        /// </summary>
-        /// <value>
-        /// The current mouse.
-        /// </value>
-        public Point CurrentMouse { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the current move.
-        /// </summary>
-        /// <value>
-        /// The current move.
-        /// </value>
-        public Point CurrentMove { get; private set; }
     }
-
 }
