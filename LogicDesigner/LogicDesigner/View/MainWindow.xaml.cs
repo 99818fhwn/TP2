@@ -331,6 +331,19 @@ namespace LogicDesigner
             sampleComponent.Children.Add(sampleBody);
             sampleComponent.Children.Add(label);
 
+            foreach (var pin in componentVM.InputPinsVM)
+            {
+                Button pinButton = new Button();
+                pinButton.Width = 30;
+                pinButton.Height = 10;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+
+                pinButton.CommandParameter = pin;
+                pinButton.Command = pin.SetPinCommand;
+
+                sampleComponent.Children.Add(pinButton);
+            }
+
             this.ComponentWindow.Children.Add(sampleComponent);
 
             sampleComponent.RenderTransform = new TranslateTransform(0, 0);

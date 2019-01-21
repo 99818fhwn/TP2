@@ -36,5 +36,13 @@ namespace LogicDesigner.ViewModel
                 return this.isInputPin;
             }
         }
+
+        public Command SetPinCommand
+        {
+            get
+            {
+                return this.setPinCommand;
+            }
+        }
     }
 }
