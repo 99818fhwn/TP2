@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows;
 using LogicDesigner.Commands;
 using LogicDesigner.Model;
 using Shared;
@@ -19,26 +21,33 @@ namespace LogicDesigner.ViewModel
         private int uniqueId;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
+        public event EventHandler<EventArgs> PreFieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
+
+        private readonly Command activateCommand;
+        private readonly Command executeCommand;
+        private readonly Command removeCommand;
+        private readonly Command addCommand;
 
         public ProgramMngVM()
         {
             this.programManager = new ProgramManager();
+            this.programManager.Watcher.Created += NewModuleAdded;
 
-            var activateCommand = new Command(obj =>
+            this.activateCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
                 nodeInFieldVM.Activate();
             });
 
-            var executeCommand = new Command(obj =>
+            this.executeCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
                 nodeInFieldVM.Execute();
             });
 
-            var removeCommand = new Command(obj =>
+            this.removeCommand = new Command(obj =>
             {
                 // null reference exception
                 var nodeInFieldVM = obj as ComponentVM;
@@ -48,7 +57,7 @@ namespace LogicDesigner.ViewModel
                     {
                         this.programManager.FieldNodes.Remove(n);
                         this.nodesVMInField.Remove(nodeInFieldVM);
-                        this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
+                        OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
 
                         break;
                     }
@@ -57,26 +66,27 @@ namespace LogicDesigner.ViewModel
                 this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);////Temporary fix for testing
             });
 
-            var addCommand = new Command(obj =>
+            this.addCommand = new Command(obj =>
             {
                 // null reference exception
                 var representationNode = obj as ComponentRepresentationVM;
+                this.PreFieldComponentAdded(this, new EventArgs());
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());////Create new Component
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), executeCommand, activateCommand, removeCommand);
+                var compVM = new ComponentVM(newGenerateComp, CreateUniqueName(realComponent), this.executeCommand, this.activateCommand, this.removeCommand);
                 this.nodesVMInField.Add(compVM);
-                this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
+                OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                this.CreateUniqueName(node),activateCommand, executeCommand, removeCommand
+                CreateUniqueName(node), this.activateCommand, this.executeCommand, this.removeCommand
                 ));////seems suspicious for unnecessary inputs
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
             var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(
-                node => new ComponentRepresentationVM(addCommand, node));
+                node => new ComponentRepresentationVM(this.addCommand, node));
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
@@ -90,7 +100,28 @@ namespace LogicDesigner.ViewModel
         private string CreateUniqueName(IDisplayableNode node)
         {
             this.uniqueId++;
-            return this.CreateNameTag(node.Label, this.uniqueId.ToString());
+            return CreateNameTag(node.Label, this.uniqueId.ToString());
+        }
+
+        private void NewModuleAdded(object sender, FileSystemEventArgs e)
+        {
+            this.programManager = new ProgramManager();
+            this.programManager.Watcher.Created += NewModuleAdded;
+
+            var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
+
+            // hässlich, aber konnte keinen besseren Weg finden
+            App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+            {
+                this.SelectableComponents.Clear();
+            });
+            foreach (var item in nodesToChoose)
+            {
+                    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
+                    {
+                        this.SelectableComponents.Add(item);
+                    });
+            }
         }
 
         /// <summary>
@@ -149,6 +180,36 @@ namespace LogicDesigner.ViewModel
         {
             this.FieldComponentRemoved?.Invoke(this, e);
         }
+
+        /// <summary>
+        /// Gets the paste command.
+        /// </summary>
+        /// <value>
+        /// The paste command.
+        /// </value>
+        public Command PasteCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                MessageBox.Show("Se Paste Wörks!");
+            }));
+        }
+
+        /// <summary>
+        /// Gets the copy command.
+        /// </summary>
+        /// <value>
+        /// The copy command.
+        /// </value>
+        public Command CopyCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+
+            }));
+        }
+
+
 
 
         /// <summary>

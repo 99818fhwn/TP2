@@ -1,6 +1,7 @@
 ﻿using Shared;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -22,6 +23,8 @@ namespace LogicDesigner.Model
         /// </summary>
         private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
 
+        public FileSystemWatcher Watcher { get; set; }
+
         public ProgramManager()
         {
             this.Stop = false;
@@ -29,6 +32,15 @@ namespace LogicDesigner.Model
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
+            string path = "Components";
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            {
+                Directory.CreateDirectory(path);
+            }
+            this.Watcher = new FileSystemWatcher(path);
+            Watcher.IncludeSubdirectories = true;
+            Watcher.EnableRaisingEvents = true;
+            Watcher.Filter = "";
             // test - connect pins
             //for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
             //{

@@ -37,16 +37,6 @@
                     Key="L"
                     Command="{Binding LoadProjectCommand}" />
 
-        <!--Copy-->
-        <KeyBinding Modifiers="Ctrl"
-                    Key="C"
-                    Command="{Binding CopyCommand}" />
-
-        <!--Paste-->
-        <KeyBinding Modifiers="Ctrl"
-                    Key="V"
-                    Command="{Binding PasteCommand}" />
-
         <!--Undo-->
         <KeyBinding Modifiers="Ctrl"
                     Key="Z"
@@ -69,7 +59,19 @@
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Name="LogicWindow" Height="Auto" Width="Auto">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
-                <Grid Name="ComponentWindow" Height="10000" Width="10000"/>
+                <Grid Name="ComponentWindow" Height="10000" Width="10000">
+                    <Grid.InputBindings>
+                        <!--Copy-->
+                        <KeyBinding Modifiers="Ctrl"
+                        Key="C"
+                        Command="{Binding CopyCommand}" />
+
+                        <!--Paste-->
+                        <KeyBinding Modifiers="Ctrl"
+                        Key="V"
+                        Command="{Binding PasteCommand}" />
+                    </Grid.InputBindings>
+                </Grid>
             </ScrollViewer>
         </Grid>
         <DockPanel Grid.ColumnSpan="2">
@@ -89,6 +91,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
+                                    <!--Had to be changed for UndoStack implementation-->
                                     <Button Background="Transparent" Height="80" Width="60" Command="{Binding AddComponentCommand}" CommandParameter="{Binding}">
                                         <StackPanel Background="Transparent" Width="Auto">
                                             <Image Panel.ZIndex="1" Height="60" Stretch="Uniform" Source="{Binding Picture}" VerticalAlignment="Center"></Image>

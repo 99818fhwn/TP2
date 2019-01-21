@@ -49,10 +49,14 @@ namespace LogicDesigner
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
 
-            this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+            //this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+
+            this.InputBindings.Add(new InputBinding(programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
+            this.InputBindings.Add(new InputBinding(programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
 
             programMngVM.FieldComponentAdded += this.OnComponentAdded;
             programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
@@ -105,7 +109,8 @@ namespace LogicDesigner
                 {
                     ProgramMngVM history = this.UndoHistory.Pop();
 
-                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    var current = (ProgramMngVM)this.MainGrid.DataContext;
+                    if (history.NodesVMInField == current.NodesVMInField)
                     {
                         this.RedoHistory.Push(history);
                         history = this.UndoHistory.Pop();
@@ -137,7 +142,8 @@ namespace LogicDesigner
                 {
                     ProgramMngVM history = this.RedoHistory.Pop();
 
-                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    var current = (ProgramMngVM)this.MainGrid.DataContext;
+                    if (history.NodesVMInField == current.NodesVMInField)
                     {
                         this.UndoHistory.Push(history);
                         history = this.RedoHistory.Pop();
@@ -178,7 +184,6 @@ namespace LogicDesigner
 
                     return;
                 }
-
                 this.isMoving = true;
             }
         }
@@ -234,12 +239,11 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
-            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.UndoHistory.Push(currentMan);
-            this.RedoHistory.Clear();
             e.Component.SpeacialPropertyChanged += this.OnComponentChanged;
             this.DrawNewComponent(e.Component);
+
             var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.RedoHistory.Clear();
             this.RedoHistory.Push(updatedCurrentMan);
         }
 
@@ -344,6 +348,13 @@ namespace LogicDesigner
             var scrollbar = (ScrollViewer)e.Source;
             scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
             scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
+        }
+
+        private void PreComponentAdded(object sender, EventArgs e)
+        {
+            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.UndoHistory.Push(currentMan);
+            this.RedoHistory.Clear();
         }
     }
 }
