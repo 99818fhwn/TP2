@@ -56,7 +56,7 @@ namespace LogicDesigner.ViewModel
             {
                 if(pin != null)
                 {
-                    this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand));
+                    this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand, this));
                 }
 
             }
@@ -65,7 +65,7 @@ namespace LogicDesigner.ViewModel
             {
                 if (pin != null)
                 {
-                    this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand));
+                    this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand, this));
                 }
             }
         }

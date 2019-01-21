@@ -235,7 +235,13 @@ namespace LogicDesigner
             {
                 var parentgrid = (Grid)parent;
                 var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
-                var componentToMove = dataContext.NodesVMInField.First(x => x.Name == parentgrid.Name);
+                var componentToMove = dataContext.NodesVMInField.FirstOrDefault(x => x.Name == parentgrid.Name);
+
+                if (componentToMove == null)
+                {
+                    return;
+                }
+
                 newPoint = new Point(componentToMove.XCoord, componentToMove.YCoord);
 
                 if (!this.isMoving)
@@ -353,7 +359,7 @@ namespace LogicDesigner
                 pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
 
                 pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
-                
+
                 componentVM.InputPinsVM[i].XPosition = -componentVM.Picture.Width / 2;
                 componentVM.InputPinsVM[i].YPosition = yOffset;
 
@@ -382,7 +388,7 @@ namespace LogicDesigner
 
                 pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
                 yOffset += offsetStepValue;
-
+                
                 componentVM.OutputPinsVM[i].XPosition = componentVM.Picture.Width / 2;
                 componentVM.OutputPinsVM[i].YPosition = yOffset;
 
@@ -425,15 +431,32 @@ namespace LogicDesigner
             sampleComponent.Children.Add(label);
             
             this.ComponentWindow.Children.Add(sampleComponent);
-
-            sampleComponent.RenderTransform = new TranslateTransform(0, 0);
         }
 
+        /// <summary>
+        /// Called when [pins connected].
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
         public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
         {
             var inputPin = e.InputPinVM;
-            var ouputPin = e.OutputPinVM;
-            
+            var outputPin = e.OutputPinVM;
+
+            Line line = new Line();
+            line.Visibility = Visibility.Visible;
+            line.StrokeThickness = 4;
+            line.Stroke = Brushes.Black;
+            line.X1 = inputPin.XPosition;
+            line.X2 = outputPin.YPosition;
+            line.Y1 = inputPin.YPosition;
+            line.Y2 = outputPin.YPosition;
+
+            //line.RenderTransform = new TranslateTransform(line.X1, line.Y1);
+
+            this.ComponentWindow.Children.Add(line);
+
+            this.ComponentWindow.UpdateLayout();
         }
 
         /// <summary>
