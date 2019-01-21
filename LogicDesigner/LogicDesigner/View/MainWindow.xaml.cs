@@ -297,11 +297,14 @@ namespace LogicDesigner
                         {
                             if (item.GetType() == typeof(Button))
                             {
-                                ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
-                                imageBrush.Stretch = Stretch.Fill;
                                 var compToChange = (Button)item;
-                                compToChange.Background = imageBrush;
-                                compToChange.UpdateLayout();
+                                if (compToChange.Name == (e.Component.Name+"Body"))
+                                {
+                                    ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+                                    imageBrush.Stretch = Stretch.Fill; 
+                                    compToChange.Background = imageBrush;
+                                    compToChange.UpdateLayout();
+                                }
                             }
                         }
                     }
