@@ -1,17 +1,25 @@
-﻿using Shared;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LogicDesigner.Model
+﻿namespace LogicDesigner.Model
 {
+    using Shared;
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using System.Text;
+    using System.Threading.Tasks;
+
+
     public class NodesLoader
     {
         // all nodes in components folder user to choose from
+        /// <summary>
+        ///   Gets the nodes.
+        /// </summary>
+        /// <param name="filePath">
+        ///   The file path.
+        /// </param>
+        /// <returns></returns>
         public List<IDisplayableNode> GetNodes(string filePath)
         {
             List<IDisplayableNode> nodes = new List<IDisplayableNode>();
