@@ -288,7 +288,9 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
-            e.Component.SpeacialPropertyChanged += this.OnComponentChanged;
+            //Not sure if I broke it or not, maybe was a different event
+            e.Component.ComponentPropertyChanged += this.OnComponentChanged;
+
             this.DrawNewComponent(e.Component);
 
             var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
