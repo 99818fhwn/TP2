@@ -300,7 +300,12 @@ namespace LogicDesigner
             Grid sampleComponent = new Grid();
 
             int yOffset = -(componentVM.Picture.Height / 2) + 10;
-            int offsetStepValue = (componentVM.Picture.Height - 20) / ( componentVM.InputPinsVM.Count - 1);
+            int offsetStepValue = 0;
+
+            if (componentVM.InputPinsVM.Count > 1)
+            {
+                offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.InputPinsVM.Count - 1);
+            }
 
             // Draw input pins
             for (int i = 0; i < componentVM.InputPinsVM.Count; i++)
@@ -320,6 +325,11 @@ namespace LogicDesigner
             }
 
             yOffset = -(componentVM.Picture.Height / 2) + 10;
+
+            if (componentVM.OutputPinsVM.Count > 1)
+            {
+                offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.OutputPinsVM.Count - 1);
+            }
 
             // Draw output pins
             for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
