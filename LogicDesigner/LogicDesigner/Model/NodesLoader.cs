@@ -31,7 +31,7 @@
                 dirs.Add(dI);
                 List<FileInfo> files = new List<FileInfo>();
 
-                foreach(var dir in dirs)
+                foreach (var dir in dirs)
                 {
                     foreach (var f in dir.GetFiles("*.dll"))
                     {
@@ -93,7 +93,7 @@
         /// </summary>
         /// <param name="node">The node that contiants the data of a electric component.</param>
         /// <returns>Returns true wether the node is valid or retruns false if not.</returns>
-/        private bool ValidateNode(IDisplayableNode node)
+        private bool ValidateNode(IDisplayableNode node)
         {
             if (node.Description == null || node.Description == string.Empty)
             {
