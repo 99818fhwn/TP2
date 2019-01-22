@@ -7,8 +7,10 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
 using LogicDesigner.Commands;
 using LogicDesigner.Model;
 using Shared;
@@ -43,17 +45,14 @@ namespace LogicDesigner.ViewModel
 
             this.StartCommand = new Command(obj =>
             {
-                Task.Run(() =>
-                {
-                    //int progress = 0;
-                    //for (; ; )
-                    //{
-                    //    System.Threading.Thread.Sleep(1);
-                    //    progress++;
-                    //    Logger.Info(progress);
-                    //}
-                    this.programManager.Run();
-                });
+               Task.Run(() => {
+                   this.programManager.Run();
+               });
+
+                // Dispatcher.CurrentDispatcher.BeginInvoke(new ThreadStart(() =>
+                //{
+                //    this.programManager.Run();
+                //}));
 
                 //this.programManager.Run();
             });
@@ -80,11 +79,11 @@ namespace LogicDesigner.ViewModel
                 nodeInFieldVM.Activate();
             });
 
-            this.executeCommand = new Command(obj =>
-            {
-                var nodeInFieldVM = obj as ComponentVM;
-                nodeInFieldVM.Activate();
-            });
+            //this.executeCommand = new Command(obj =>
+            //{
+            //    var nodeInFieldVM = obj as ComponentVM;
+            //    nodeInFieldVM.Activate();
+            //});
 
             //var executeCommand = new Command(obj =>
             //{

@@ -49,6 +49,7 @@
                     try
                     {
                         Assembly ass = Assembly.LoadFrom(file.FullName);
+                        //Assembly ass = Assembly.Load(file.FullName);
 
                         foreach (var type in ass.GetExportedTypes())
                         {

@@ -77,6 +77,8 @@ namespace SharedClasses
         /// </value>
         IValue IPin.Value
         {
+            // commented for testing
+
             get
             {
                 return this.Value;
@@ -85,7 +87,10 @@ namespace SharedClasses
             set
             {
                 this.Value.Current = (T)value;
+                //this.Value = value;
             }
+            //get;
+            //set;
         }
 
         /// <summary>

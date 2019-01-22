@@ -114,7 +114,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\SharedClasses\SharedClasses.csproj">
+      <Project>{167c2a7d-ee37-4505-b299-4e52e89d609b}</Project>
+      <Name>SharedClasses</Name>
+    </ProjectReference>
+  </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\And.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

@@ -55,8 +55,11 @@
 
     <Grid Name="MainGrid">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="8*"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="10*"/>
+            <ColumnDefinition Width="63*"/>
+            <ColumnDefinition Width="706*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -65,7 +68,7 @@
             <!--<RowDefinition Height="*"/>-->
             <!--<RowDefinition Height="*"/>-->
         </Grid.RowDefinitions>
-        <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto" Margin="0,0,-0.4,0">
+        <Grid Grid.Column="4" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto" Margin="0,0,-0.4,0">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
                 <Grid Name="ComponentWindow" Height="10000" Width="10000">
                     <Grid.InputBindings>
@@ -82,7 +85,7 @@
                 </Grid>
             </ScrollViewer>
         </Grid>
-        <DockPanel Grid.ColumnSpan="2" Margin="0,0,-0.4,318.8" Grid.RowSpan="2">
+        <DockPanel Grid.ColumnSpan="5" Grid.Row="0" Margin="0,0,-0.4,319" Grid.RowSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Header="_Load"/>
@@ -93,8 +96,8 @@
             <StackPanel></StackPanel>
         </DockPanel>
 
-        <Grid Grid.Column ="1" Grid.Row ="2" 
-              Width="Auto" Margin="0,4.2,16.6,17" 
+        <Grid Grid.Column ="4" Grid.Row ="2" 
+              Width="Auto" Margin="0,4,16.6,17" 
               Background="White">
 
             <Grid.ColumnDefinitions>
@@ -111,10 +114,12 @@
                     Command="{Binding StartCommand}"
                     >
                 <!--<Button.Background>
-                    --><!--<ImageBrush ImageSource="ButtonPictures/step.png">
+                    -->
+                <!--<ImageBrush ImageSource="ButtonPictures/step.png">
                         
-                    </ImageBrush>--><!--
-                </Button.Background>-->  
+                    </ImageBrush>-->
+                <!--
+                </Button.Background>-->
                 Start
             </Button>
             <Button Background="White" Grid.Column="2" Margin="2"
@@ -126,8 +131,10 @@
                     <Image Source="ButtonPictures/step.png" Width="34" 
                            Height="34"
                            HorizontalAlignment="Center"/>
-                    --><!--<TextBlock Text="" VerticalAlignment="Center" 
-                               HorizontalAlignment="Center"/>--><!--
+                    -->
+                <!--<TextBlock Text="" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>-->
+                <!--
                 </StackPanel>-->
                 Step
             </Button>
@@ -140,14 +147,16 @@
                     <Image Source="ButtonPictures/stop.png" 
                            Width="34" Height="34"
                            HorizontalAlignment="Center"/>
-                    --><!--<TextBlock Text="" VerticalAlignment="Center" 
-                               HorizontalAlignment="Center"/>--><!--
+                    -->
+                <!--<TextBlock Text="" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>-->
+                <!--
                 </StackPanel>-->
                 Stop
             </Button>
         </Grid>
 
-        <ListView Grid.Row="1" Grid.RowSpan="1" ItemsSource="{Binding SelectableComponents}">
+        <ListView Grid.Row="1" Grid.RowSpan="1" ItemsSource="{Binding SelectableComponents}" Grid.ColumnSpan="4">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto" Header="Component">
@@ -170,7 +179,7 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <ScrollViewer Grid.Row="2">
+        <ScrollViewer Grid.Row="2" Grid.ColumnSpan="4">
             <StackPanel Name="CurrentSelectedComponentView">
                 <StackPanel>
                     <TextBlock Text="Label"/>
