@@ -356,63 +356,7 @@ namespace LogicDesigner
         {
             // New component
             Grid newComponent = new Grid();
-
-            int yOffset = -(componentVM.Picture.Height / 2) + 10;
-            int offsetStepValue = 0;
-
-            if (componentVM.InputPinsVM.Count > 1)
-            {
-                offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.InputPinsVM.Count - 1);
-            }
-
-            // Draw input pins
-            for (int i = 0; i < componentVM.InputPinsVM.Count; i++)
-            {
-                Button pinButton = new Button();
-                pinButton.Width = 30;
-                pinButton.Height = 10;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-
-                pinButton.CommandParameter = componentVM.InputPinsVM[i];
-                pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
-
-                pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
-
-                componentVM.InputPinsVM[i].XPosition = 0;
-                componentVM.InputPinsVM[i].YPosition = yOffset;
-
-                yOffset += offsetStepValue;
-
-                newComponent.Children.Add(pinButton);
-            }
-
-            yOffset = -(componentVM.Picture.Height / 2) + 10;
-
-            if (componentVM.OutputPinsVM.Count > 1)
-            {
-                offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.OutputPinsVM.Count - 1);
-            }
-
-            // Draw output pins
-            for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
-            {
-                Button pinButton = new Button();
-                pinButton.Width = 30;
-                pinButton.Height = 10;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
-
-                pinButton.CommandParameter = componentVM.OutputPinsVM[i];
-                pinButton.Command = componentVM.OutputPinsVM[i].SetPinCommand;
-
-                pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
-                yOffset += offsetStepValue;
-                
-                componentVM.OutputPinsVM[i].XPosition = 0;
-                componentVM.OutputPinsVM[i].YPosition = yOffset;
-
-                newComponent.Children.Add(pinButton);
-            }
-
+            
             // Component Body
             Button sampleBody = new Button();
 
@@ -445,9 +389,69 @@ namespace LogicDesigner
 
             newComponent.Height = sampleBody.Height + label.Height + 20;
             newComponent.Width = sampleBody.Width + label.Width + 20;
+            Panel.SetZIndex(sampleBody, 100);
             newComponent.Children.Add(sampleBody);
             newComponent.Children.Add(label);
-            
+
+            int yOffset = -(componentVM.Picture.Height / 2) + 10;
+
+            int offsetStepValue = 0;
+
+            if (componentVM.InputPinsVM.Count > 1)
+            {
+                offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.InputPinsVM.Count - 1);
+            }
+
+            // Draw input pins
+            for (int i = 0; i < componentVM.InputPinsVM.Count; i++)
+            {
+                Button pinButton = new Button();
+                pinButton.Width = 30;
+                pinButton.Height = 10;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+                pinButton.CommandParameter = componentVM.InputPinsVM[i];
+                pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
+
+                pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
+
+                componentVM.InputPinsVM[i].XPosition = (newComponent.Width / 2) - (componentVM.Picture.Width / 2);
+                componentVM.InputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
+
+                yOffset += offsetStepValue;
+
+                newComponent.Children.Add(pinButton);
+            }
+
+            yOffset = -(componentVM.Picture.Height / 2) + 10;
+
+            offsetStepValue = 0;
+
+            if (componentVM.OutputPinsVM.Count > 1)
+            {
+                offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.OutputPinsVM.Count - 1);
+            }
+
+            // Draw output pins
+            for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
+            {
+                Button pinButton = new Button();
+                pinButton.Width = 30;
+                pinButton.Height = 10;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+                pinButton.CommandParameter = componentVM.OutputPinsVM[i];
+                pinButton.Command = componentVM.OutputPinsVM[i].SetPinCommand;
+
+                pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
+                yOffset += offsetStepValue;
+
+                componentVM.OutputPinsVM[i].XPosition = (newComponent.Width / 2) + (componentVM.Picture.Width / 2);
+                componentVM.OutputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
+
+                newComponent.Children.Add(pinButton);
+            }
+
             this.ComponentWindow.Children.Add(newComponent);
         }
 
