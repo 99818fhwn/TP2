@@ -35,6 +35,14 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        public Type PinValueType
+        {
+            get
+            {
+                return this.pin.Value.Current?.GetType();
+            }
+        }
+
         public bool IsInputPin
         {
             get

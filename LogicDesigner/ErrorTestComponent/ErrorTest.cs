@@ -1,11 +1,11 @@
 ﻿// -----------------------------------------------------------------------     
-// <copyright file="Inverter.cs" company="FHWN">    
+// <copyright file="ErrorTest.cs" company="FHWN">    
 // Copyright (c) FHWN. All rights reserved.    
 // </copyright>    
-// <summary>The InverterComponent for logic designers that implements IDisplayableNode</summary>    
+// <summary>The ErrorComponent for logic designers that implements IDisplayableNode</summary>    
 // <author>Fabian Weisser</author>    
 // -----------------------------------------------------------------------
-namespace InverterComponent
+namespace ErrorTestComponent
 {
     using System;
     using System.Collections.Generic;
@@ -16,24 +16,24 @@ namespace InverterComponent
     using SharedClasses;
 
     /// <summary>
-    /// This class represent the Inverter.
+    /// This class represent the Error.
     /// </summary>
     /// <seealso cref="Shared.IDisplayableNode" />
-    public class Inverter : IDisplayableNode
+    public class ErrorTest : IDisplayableNode
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Inverter"/> class.
+        /// Initializes a new instance of the <see cref="ErrorTest"/> class.
         /// </summary>
-        public Inverter()
+        public ErrorTest()
         {
             this.Inputs = new List<IPin>();
             this.Outputs = new List<IPin>();
-            this.Label = "NOT";
-            this.Description = "Inverts the incoming signal";
-            this.Picture = Properties.Resources.Inverter;
+            this.Label = "Error";
+            this.Description = "Produces errors and unwanted pin values";
+            this.Picture = Properties.Resources.ErrorProducer;
             this.Type = NodeType.Logic;
-            this.Inputs.Add(new GenericPin<bool>(new GenericValue<bool>(false), "Pin1"));
-            this.Outputs.Add(new GenericPin<bool>(new GenericValue<bool>(true), "Pin2"));
+            this.Inputs.Add(new GenericPin<string>(new GenericValue<string>(null), "Pin1"));
+            this.Outputs.Add(new GenericPin<string>(new GenericValue<string>(null), "Pin2"));
         }
 
         /// <summary>
@@ -42,7 +42,7 @@ namespace InverterComponent
         public event EventHandler PictureChanged;
 
         /// <summary>
-        /// Gets the inputs.
+        /// Gets or sets the inputs.
         /// </summary>
         /// <value>
         /// The input pins.
@@ -50,10 +50,11 @@ namespace InverterComponent
         public ICollection<IPin> Inputs
         {
             get;
+            set;
         }
 
         /// <summary>
-        /// Gets the outputs.
+        /// Gets or sets the outputs.
         /// </summary>
         /// <value>
         /// The output pins.
@@ -61,6 +62,7 @@ namespace InverterComponent
         public ICollection<IPin> Outputs
         {
             get;
+            set;
         }
 
         /// <summary>
@@ -112,28 +114,28 @@ namespace InverterComponent
         /// </summary>
         public void Activate()
         {
-            return;
+            throw new Exception();
         }
 
         /// <summary>
-        /// When executing the input signal will be inverted into the output.
+        /// When executing all gets set to null and an exception gets thrown.
         /// </summary>
         public void Execute()
         {
-            if (this.Inputs.Any(i => (bool)i.Value.Current == true))
+            foreach (var i in this.Inputs)
             {
-                foreach (var o in this.Outputs)
-                {
-                    o.Value.Current = false;
-                }
+                i.Value.Current = null;
             }
-            else
+
+            foreach (var o in this.Outputs)
             {
-                foreach (var o in this.Outputs)
-                {
-                    o.Value.Current = true;
-                }
+                o.Value.Current = null;
             }
+
+            this.Inputs = null;
+            this.Outputs = null;
+
+            throw new Exception();
         }
     }
 }

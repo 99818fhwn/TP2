@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InverterComponent", "Invert
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BinaryConverterComponent", "BinaryConverterComponent\BinaryConverterComponent.csproj", "{F8E716AF-A166-4547-8595-EF7E02A3AA6B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ErrorTestComponent", "ErrorTestComponent\ErrorTestComponent.csproj", "{1E48FE22-EFF8-42E5-AE54-BD5CA83C24F3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{F8E716AF-A166-4547-8595-EF7E02A3AA6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8E716AF-A166-4547-8595-EF7E02A3AA6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8E716AF-A166-4547-8595-EF7E02A3AA6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E48FE22-EFF8-42E5-AE54-BD5CA83C24F3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E48FE22-EFF8-42E5-AE54-BD5CA83C24F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E48FE22-EFF8-42E5-AE54-BD5CA83C24F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E48FE22-EFF8-42E5-AE54-BD5CA83C24F3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

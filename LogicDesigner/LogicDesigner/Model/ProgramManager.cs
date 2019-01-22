@@ -163,8 +163,13 @@ namespace LogicDesigner.Model
 
         public bool ConnectPins(IPin output, IPin input)
         {
-            var outputType = output.Value.Current.GetType();
-            var inputType = input.Value.Current.GetType();
+            var outputType = output.Value.Current?.GetType();
+            var inputType = input.Value.Current?.GetType();
+
+            if (outputType == null || inputType == null)
+            {
+                return false;
+            }
 
             if (outputType != inputType)
             {
