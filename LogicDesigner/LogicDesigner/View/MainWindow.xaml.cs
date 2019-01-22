@@ -21,6 +21,7 @@ namespace LogicDesigner
     using System.Windows.Media.Imaging;
     using System.Windows.Navigation;
     using System.Windows.Shapes;
+    using System.Windows.Threading;
     using LogicDesigner.Commands;
     using LogicDesigner.ViewModel;
 
@@ -350,34 +351,37 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentChanged(object sender, FieldComponentEventArgs e)
         {
-            var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
-
-            foreach (var child in compOld)
+            Dispatcher.Invoke(() =>
             {
-                if (child.GetType() == typeof(Grid))
-                {
-                    var grids = (Grid)child;
+                var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
 
-                    if (grids.Name == e.Component.Name)
+                foreach (var child in compOld)
+                {
+                    if (child.GetType() == typeof(Grid))
                     {
-                        foreach (var item in grids.Children)
+                        var grids = (Grid)child;
+
+                        if (grids.Name == e.Component.Name)
                         {
-                            if (item.GetType() == typeof(Button))
+                            foreach (var item in grids.Children)
                             {
-                                var compToChange = (Button)item;
-                                if (compToChange.Name == (e.Component.Name+"Body"))
+                                if (item.GetType() == typeof(Button))
                                 {
-                                    ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), 
-                                        IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
-                                    imageBrush.Stretch = Stretch.Fill; 
-                                    compToChange.Background = imageBrush;
-                                    compToChange.UpdateLayout();
+                                    var compToChange = (Button)item;
+                                    if (compToChange.Name == (e.Component.Name + "Body"))
+                                    {
+                                        ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(),
+                                            IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+                                        imageBrush.Stretch = Stretch.Fill;
+                                        compToChange.Background = imageBrush;
+                                        compToChange.UpdateLayout();
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>

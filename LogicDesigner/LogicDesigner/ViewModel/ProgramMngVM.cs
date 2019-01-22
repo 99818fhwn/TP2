@@ -46,10 +46,10 @@ namespace LogicDesigner.ViewModel
 
             this.StartCommand = new Command(obj =>
             {
-                Task.Run(() =>
+                Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
                 {
                     this.programManager.Run();
-                });
+                }));
             });
 
             this.StepCommand = new Command(obj =>
