@@ -119,6 +119,7 @@ namespace LogicDesigner.ViewModel
         {
             if (this.selectedOutputPin == value || this.selectedInputPin == value)
             {
+                this.selectedInputPin = null;
                 this.selectedOutputPin = null;
             }
             else

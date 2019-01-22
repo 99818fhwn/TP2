@@ -156,13 +156,25 @@ namespace LogicDesigner.Model
                 return false;
             }
 
-            this.UnConnectPins(output, input);
+            this.UnConnectPin(input);
             this.UnConnectPins(output, input);
             this.ConnectedOutputInputPairs.Add(new Tuple<IPin, IPin>(output, input));
 
            
 
             return true;
+        }
+
+        private void UnConnectPin(IPin input)
+        {
+            foreach (var t in this.ConnectedOutputInputPairs)
+            {
+                if (t.Item2 == input)
+                {
+                    this.ConnectedOutputInputPairs.Remove(t);
+                    break;
+                }
+            }
         }
 
         public void UnConnectPins(IPin output, IPin input)
