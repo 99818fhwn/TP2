@@ -39,7 +39,7 @@ namespace LogicDesigner.ViewModel
         {
             get
             {
-                return this.pin.Value.Current.GetType();
+                return this.pin.Value.Current?.GetType();
             }
         }
 
