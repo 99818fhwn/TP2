@@ -65,8 +65,8 @@
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="1" Name="LogicWindow" Height="Auto" Width="Auto">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
-                <Grid Name="ComponentWindow" Height="10000" Width="10000">
-                    <Grid.InputBindings>
+                <Canvas Name="ComponentWindow" Height="10000" Width="10000">
+                    <Canvas.InputBindings>
                         <!--Copy-->
                         <KeyBinding Modifiers="Ctrl"
                         Key="C"
@@ -76,8 +76,8 @@
                         <KeyBinding Modifiers="Ctrl"
                         Key="V"
                         Command="{Binding PasteCommand}" />
-                    </Grid.InputBindings>
-                </Grid>
+                    </Canvas.InputBindings>
+                </Canvas>
             </ScrollViewer>
         </Grid>
         <DockPanel Grid.Row="0" Grid.ColumnSpan="2">

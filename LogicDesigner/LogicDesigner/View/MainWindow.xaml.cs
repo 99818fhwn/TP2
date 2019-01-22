@@ -447,7 +447,9 @@ namespace LogicDesigner
             newComponent.Width = sampleBody.Width + label.Width + 20;
             newComponent.Children.Add(sampleBody);
             newComponent.Children.Add(label);
-            
+
+            newComponent.RenderTransform = new TranslateTransform(5000, 5000);
+
             this.ComponentWindow.Children.Add(newComponent);
         }
 
@@ -469,20 +471,10 @@ namespace LogicDesigner
             line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
-
-            line.X1 = 0;
-            line.X2 = 300;
-            line.Y1 = 0;
-            line.Y2 = 0;
-            
+                        
             Grid lineBody = new Grid();
-
-            Button button = new Button();
-            button.Height = 100;
-            button.Width = 100;
-
+            
             lineBody.Children.Add(line);
-            lineBody.Children.Add(button);
 
             this.ComponentWindow.Children.Add(lineBody);            
         }
