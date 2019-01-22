@@ -27,22 +27,24 @@ namespace LogicDesigner.Model
         /// </summary>
         private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
 
+        private readonly string componentDirectory;
+
         public FileSystemWatcher Watcher { get; set; }
 
         public ProgramManager()
         {
+            this.componentDirectory = "Components";
             this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
-            string path = "Components";
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            if (!Directory.Exists(Path.GetDirectoryName(componentDirectory)))
             {
-                Directory.CreateDirectory(path);
+                Directory.CreateDirectory(componentDirectory);
             }
-            this.Watcher = new FileSystemWatcher(path);
+            this.Watcher = new FileSystemWatcher(componentDirectory);
             Watcher.IncludeSubdirectories = true;
             Watcher.EnableRaisingEvents = true;
             Watcher.Filter = "";
@@ -90,7 +92,7 @@ namespace LogicDesigner.Model
 
         private ICollection<IDisplayableNode> InitializeNodesToChooseFrom()
         {
-            return new NodesLoader().GetNodes("Components");
+            return new NodesLoader().GetNodes(componentDirectory);
         }
 
         public void Run()

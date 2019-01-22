@@ -311,7 +311,17 @@ namespace LogicDesigner.ViewModel
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        public void SaveStatus(string path)
+        {
+            SerializationLogic serializer = new SerializationLogic();
+            serializer.SerializeObject(path, NodesVMInField);
+        }
 
+        public void LoadStatus(string path)
+        {
+            SerializationLogic serializer = new SerializationLogic();
+            this.nodesVMInField = (ObservableCollection<ComponentVM>)serializer.DeserializeObject(path);
+        }
 
         /// <summary>
         /// Fires the on component vm changed, this seemes obsolete because the event when fired already contains the entire component.
