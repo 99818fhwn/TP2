@@ -41,13 +41,15 @@ namespace LogicDesigner.ViewModel
         public ProgramMngVM()
         {
             this.programManager = new ProgramManager();
-            this.programManager.Watcher.Created += NewModuleAdded;
+            this.programManager.Watcher.Created += this.NewModuleAdded;
+            this.programManager.StepFinished += this.RefreshVM;
 
             this.StartCommand = new Command(obj =>
             {
-               Task.Run(() => {
-                   this.programManager.Run();
-               });
+                Task.Run(() =>
+                {
+                    this.programManager.Run();
+                });
             });
 
             this.StepCommand = new Command(obj =>
@@ -168,6 +170,18 @@ namespace LogicDesigner.ViewModel
             this.selectedInputPin = null;
             this.selectedOutputPin = null;
 
+        }
+
+        /// <summary>
+        /// Refreshes the view models, in case a step in program manager finished.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data in this case not necesary.</param>
+        private void RefreshVM(object sender, EventArgs e)
+        {
+            var oldTemp = this.SelectedFieldComponent;
+            this.SelectedFieldComponent = null;
+            this.SelectedFieldComponent = oldTemp;
         }
 
         /// <summary>

@@ -31,6 +31,8 @@ namespace LogicDesigner.Model
 
         public FileSystemWatcher Watcher { get; set; }
 
+        public event EventHandler StepFinished;
+
         public ProgramManager()
         {
             this.componentDirectory = "Components";
@@ -127,6 +129,13 @@ namespace LogicDesigner.Model
                     break;
                 }
             }
+
+            this.FireOnStepFinished();
+        }
+
+        protected virtual void FireOnStepFinished()
+        {
+            this.StepFinished?.Invoke(this, new EventArgs());
         }
 
         public void Step(INode node)

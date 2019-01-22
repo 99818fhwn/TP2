@@ -128,6 +128,13 @@ namespace ANDComponent
                     o.Value.Current = false;
                 }
             }
+            else
+            {
+                foreach (var o in this.Outputs)
+                {
+                    o.Value.Current = true;
+                }
+            }
         }
     }
 }
