@@ -62,8 +62,8 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="100"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <!--<RowDefinition Height="*"/>-->
+            <!--<RowDefinition Height="*"/>-->
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto" Margin="0,0,-0.4,0">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
@@ -147,7 +147,7 @@
             </Button>
         </Grid>
 
-        <ListView Grid.Row="1" Grid.RowSpan="2" ItemsSource="{Binding SelectableComponents}">
+        <ListView Grid.Row="1" Grid.RowSpan="1" ItemsSource="{Binding SelectableComponents}">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto" Header="Component">
