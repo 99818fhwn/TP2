@@ -7,6 +7,7 @@ using System.Runtime.Remoting;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace LogicDesigner.Model
 {
@@ -28,23 +29,6 @@ namespace LogicDesigner.Model
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
-
-            // test - connect pins
-            //for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
-            //{
-            //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
-            //    {
-            //        try
-            //        {
-            //            this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
-            //            this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
-            //        }
-            //        catch(ArgumentOutOfRangeException)
-            //        {
-
-            //        }
-            //    }
-            //}
         }
 
         public ProgramManager (ProgramManager old)
@@ -96,16 +80,36 @@ namespace LogicDesigner.Model
         {
             while(!this.Stop)
             {
-                this.Step();
+                this.RunCircle();
             }
         }
 
-        public void Step()
+        public void RunCircle()
         {
             foreach(INode node in this.fieldNodes)
             {
+                if(!this.Stop)
+                {
+                    node.Execute();
+                    //MessageBox.Show("Step made");
+                    Thread.Sleep(this.Delay);
+
+                    //this.Step();
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+        public void Step(INode node)
+        {
+            if (!this.Stop)
+            {
                 node.Execute();
-                Thread.Sleep(this.Delay);
+                //MessageBox.Show("Step made");
+                //Thread.Sleep(this.Delay);
             }
         }
 
