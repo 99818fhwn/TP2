@@ -354,7 +354,7 @@ namespace LogicDesigner
         private void DrawNewComponent(ComponentVM componentVM)
         {
             // New component
-            Grid sampleComponent = new Grid();
+            Grid newComponent = new Grid();
 
             int yOffset = -(componentVM.Picture.Height / 2) + 10;
             int offsetStepValue = 0;
@@ -377,12 +377,12 @@ namespace LogicDesigner
 
                 pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
 
-                componentVM.InputPinsVM[i].XPosition = -componentVM.Picture.Width / 2;
+                componentVM.InputPinsVM[i].XPosition = 0;
                 componentVM.InputPinsVM[i].YPosition = yOffset;
 
                 yOffset += offsetStepValue;
 
-                sampleComponent.Children.Add(pinButton);
+                newComponent.Children.Add(pinButton);
             }
 
             yOffset = -(componentVM.Picture.Height / 2) + 10;
@@ -406,16 +406,16 @@ namespace LogicDesigner
                 pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
                 yOffset += offsetStepValue;
                 
-                componentVM.OutputPinsVM[i].XPosition = componentVM.Picture.Width / 2;
+                componentVM.OutputPinsVM[i].XPosition = 0;
                 componentVM.OutputPinsVM[i].YPosition = yOffset;
 
-                sampleComponent.Children.Add(pinButton);
+                newComponent.Children.Add(pinButton);
             }
 
             // Component Body
             Button sampleBody = new Button();
 
-            sampleComponent.Name = componentVM.Name;
+            newComponent.Name = componentVM.Name;
             sampleBody.Name = componentVM.Name + "Body"; 
             sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
@@ -442,12 +442,12 @@ namespace LogicDesigner
 
             label.RenderTransform = new TranslateTransform(0, (-componentVM.Picture.Height / 2) - 10);
 
-            sampleComponent.Height = sampleBody.Height + label.Height + 20;
-            sampleComponent.Width = sampleBody.Width + label.Width + 20;
-            sampleComponent.Children.Add(sampleBody);
-            sampleComponent.Children.Add(label);
+            newComponent.Height = sampleBody.Height + label.Height + 20;
+            newComponent.Width = sampleBody.Width + label.Width + 20;
+            newComponent.Children.Add(sampleBody);
+            newComponent.Children.Add(label);
             
-            this.ComponentWindow.Children.Add(sampleComponent);
+            this.ComponentWindow.Children.Add(newComponent);
         }
 
         /// <summary>
@@ -464,31 +464,29 @@ namespace LogicDesigner
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
             line.Stroke = Brushes.Black;
-            line.X1 = outputPin.XPosition;
-            line.X2 = inputPin.XPosition;
+            line.X1 = inputPin.XPosition;
+            line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
+                        
+            Grid lineBody = new Grid();
+            
+            lineBody.Children.Add(line);
 
-            Grid grid = new Grid();
-            grid.Height = ComponentWindow.Height;
-            grid.Width = ComponentWindow.Width;
-
-            grid.Children.Add(line);
-
-            this.ComponentWindow.Children.Add(grid);            
+            this.ComponentWindow.Children.Add(lineBody);            
         }
 
-        /// <summary>
-        /// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs" /> instance containing the event data.</param>
-        private void ScrollViewerLoaded(object sender, RoutedEventArgs e)
-        {
-            var scrollbar = (ScrollViewer)e.Source;
-            scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
-            scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
-        }
+        ///// <summary>
+        ///// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 
+        ///// </summary>
+        ///// <param name="sender">The source of the event.</param>
+        ///// <param name="e">The <see cref="System.Windows.RoutedEventArgs" /> instance containing the event data.</param>
+        ////private void ScrollViewerLoaded(object sender, RoutedEventArgs e)
+        ////{
+        ////    var scrollbar = (ScrollViewer)e.Source;
+        ////    scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
+        ////    scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
+        ////}
 
         private void PreComponentAdded(object sender, EventArgs e)
         {
