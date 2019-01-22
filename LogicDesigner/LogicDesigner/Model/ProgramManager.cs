@@ -1,6 +1,7 @@
 ﻿using Shared;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting;
@@ -23,12 +24,40 @@ namespace LogicDesigner.Model
         /// </summary>
         private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
 
+        public FileSystemWatcher Watcher { get; set; }
+
         public ProgramManager()
         {
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
+
+            string path = "Components";
+            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            {
+                Directory.CreateDirectory(path);
+            }
+            this.Watcher = new FileSystemWatcher(path);
+            Watcher.IncludeSubdirectories = true;
+            Watcher.EnableRaisingEvents = true;
+            Watcher.Filter = "";
+            // test - connect pins
+            //for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
+            //{
+            //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
+            //    {
+            //        try
+            //        {
+            //            this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
+            //            this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
+            //        }
+            //        catch(ArgumentOutOfRangeException)
+            //        {
+
+            //        }
+            //    }
+            //}
         }
 
         public ProgramManager (ProgramManager old)

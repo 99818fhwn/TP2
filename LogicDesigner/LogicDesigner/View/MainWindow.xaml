@@ -42,16 +42,6 @@
                     Key="L"
                     Command="{Binding LoadProjectCommand}" />
 
-        <!--Copy-->
-        <KeyBinding Modifiers="Ctrl"
-                    Key="C"
-                    Command="{Binding CopyCommand}" />
-
-        <!--Paste-->
-        <KeyBinding Modifiers="Ctrl"
-                    Key="V"
-                    Command="{Binding PasteCommand}" />
-
         <!--Undo-->
         <KeyBinding Modifiers="Ctrl"
                     Key="Z"
@@ -72,10 +62,24 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="100"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto" Margin="0,0,-0.4,0">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
-                <Grid Name="ComponentWindow" Height="10000" Width="10000"/>
+                <Grid Name="ComponentWindow" Height="10000" Width="10000">
+                    <Grid.InputBindings>
+                        <!--Copy-->
+                        <KeyBinding Modifiers="Ctrl"
+                        Key="C"
+                        Command="{Binding CopyCommand}" />
+
+                        <!--Paste-->
+                        <KeyBinding Modifiers="Ctrl"
+                        Key="V"
+                        Command="{Binding PasteCommand}" />
+                    </Grid.InputBindings>
+                </Grid>
             </ScrollViewer>
         </Grid>
         <DockPanel Grid.ColumnSpan="2" Margin="0,0,-0.4,318.8" Grid.RowSpan="2">
@@ -150,6 +154,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <Grid>
+                                    <!--Had to be changed for UndoStack implementation-->
                                     <Button Background="Transparent" Height="80" Width="60" Command="{Binding AddComponentCommand}" CommandParameter="{Binding}">
                                         <StackPanel Background="Transparent" Width="Auto">
                                             <Image Panel.ZIndex="1" Height="60" Stretch="Uniform" Source="{Binding Picture}" VerticalAlignment="Center"></Image>
@@ -165,5 +170,28 @@
                 </GridView>
             </ListView.View>
         </ListView>
+        <ScrollViewer Grid.Row="2">
+            <StackPanel Name="CurrentSelectedComponentView">
+                <StackPanel>
+                    <TextBlock Text="Label"/>
+                    <TextBlock Text="{Binding  Name}" TextWrapping="WrapWithOverflow"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Description"/>
+                    <TextBlock Text="{Binding Description}" TextWrapping="WrapWithOverflow"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="X-Pos" />
+                    <TextBlock Text="{Binding XCoord}"/>
+                </StackPanel>
+                <StackPanel>
+                    <TextBlock Text="Y-Pos"/>
+                    <TextBlock Text="{Binding YCoord}"/>
+                </StackPanel>
+                <StackPanel>
+                    <Image Height="150" Stretch="Uniform" Source="{Binding Image}" VerticalAlignment="Center"></Image>
+                </StackPanel>
+            </StackPanel>
+        </ScrollViewer>
     </Grid>
 </Window>

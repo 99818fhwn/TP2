@@ -48,11 +48,19 @@ namespace LogicDesigner
             this.DataContext = this;
             ProgramMngVM programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
+            var selectBind = new Binding("SelectedFieldComponent");
+            selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
+            this.CurrentSelectedComponentView.SetBinding(DataContextProperty ,selectBind);
 
-            this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+            //this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+
+            this.InputBindings.Add(new InputBinding(programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
+            this.InputBindings.Add(new InputBinding(programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
 
             programMngVM.FieldComponentAdded += this.OnComponentAdded;
             programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            programMngVM.PinsConnected += this.OnPinsConnected;
+            programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
@@ -105,7 +113,8 @@ namespace LogicDesigner
                 {
                     ProgramMngVM history = this.UndoHistory.Pop();
 
-                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    var current = (ProgramMngVM)this.MainGrid.DataContext;
+                    if (history.NodesVMInField == current.NodesVMInField)
                     {
                         this.RedoHistory.Push(history);
                         history = this.UndoHistory.Pop();
@@ -137,7 +146,8 @@ namespace LogicDesigner
                 {
                     ProgramMngVM history = this.RedoHistory.Pop();
 
-                    if (history == (ProgramMngVM)this.MainGrid.DataContext)
+                    var current = (ProgramMngVM)this.MainGrid.DataContext;
+                    if (history.NodesVMInField == current.NodesVMInField)
                     {
                         this.UndoHistory.Push(history);
                         history = this.RedoHistory.Pop();
@@ -168,6 +178,14 @@ namespace LogicDesigner
             if (parentType == typeof(Grid))
             {
                 var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
+                var temp = this.GetParentGridComponent(pressedComponent);
+
+                if (temp == null)
+                {
+                    return;
+                }
+
+                ((ProgramMngVM)this.MainGrid.DataContext).SelectedFieldComponent = temp;
 
                 if (e.ChangedButton == MouseButton.Left && e.ClickCount == 2)
                 {
@@ -178,7 +196,6 @@ namespace LogicDesigner
 
                     return;
                 }
-
                 this.isMoving = true;
             }
         }
@@ -192,7 +209,7 @@ namespace LogicDesigner
         {
             if (this.isMoving)
             {
-                var componentToMove = this.GetParentGrid((UIElement)e.Source);
+                var componentToMove = this.GetParentGridComponent((UIElement)e.Source);
                 componentToMove.XCoord += this.CurrentMove.X;
                 componentToMove.YCoord += this.CurrentMove.Y;
             }
@@ -202,7 +219,7 @@ namespace LogicDesigner
             this.CurrentMouse = new Point(0, 0);
         }
 
-        private ComponentVM GetParentGrid(UIElement uIElement)
+        private ComponentVM GetParentGridComponent(UIElement uIElement)
         {
             var parent = (UIElement)VisualTreeHelper.GetParent(uIElement);
 
@@ -210,7 +227,7 @@ namespace LogicDesigner
             {
                 var parentgrid = (Grid)parent;
                 var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
-                var component = dataContext.NodesVMInField.First(x => x.Name == parentgrid.Name);
+                var component = dataContext.NodesVMInField.FirstOrDefault(x => x.Name == parentgrid.Name);
                 return component;
             }
 
@@ -234,10 +251,14 @@ namespace LogicDesigner
             {
                 var parentgrid = (Grid)parent;
                 var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
-                var componentToMove = dataContext.NodesVMInField.First(x => x.Name == parentgrid.Name);
-                newPoint = new Point(componentToMove.XCoord, componentToMove.YCoord);
+                var componentToMove = dataContext.NodesVMInField.FirstOrDefault(x => x.Name == parentgrid.Name);
 
-                var curP = parent.TransformToAncestor(this.ComponentWindow).Transform(newPoint);
+                if (componentToMove == null)
+                {
+                    return;
+                }
+
+                newPoint = new Point(componentToMove.XCoord, componentToMove.YCoord);
 
                 if (!this.isMoving)
                 {
@@ -267,12 +288,13 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
-            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.UndoHistory.Push(currentMan);
-            this.RedoHistory.Clear();
-            e.Component.SpeacialPropertyChanged += this.OnComponentChanged;
+            //Not sure if I broke it or not, maybe was a different event
+            e.Component.ComponentPropertyChanged += this.OnComponentChanged;
+
             this.DrawNewComponent(e.Component);
+
             var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.RedoHistory.Clear();
             this.RedoHistory.Push(updatedCurrentMan);
         }
 
@@ -297,11 +319,14 @@ namespace LogicDesigner
                         {
                             if (item.GetType() == typeof(Button))
                             {
-                                ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
-                                imageBrush.Stretch = Stretch.Fill;
                                 var compToChange = (Button)item;
-                                compToChange.Background = imageBrush;
-                                compToChange.UpdateLayout();
+                                if (compToChange.Name == (e.Component.Name+"Body"))
+                                {
+                                    ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+                                    imageBrush.Stretch = Stretch.Fill; 
+                                    compToChange.Background = imageBrush;
+                                    compToChange.UpdateLayout();
+                                }
                             }
                         }
                     }
@@ -317,7 +342,7 @@ namespace LogicDesigner
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            e.Component.SpeacialPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
+            e.Component.ComponentPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
         }
@@ -351,6 +376,10 @@ namespace LogicDesigner
                 pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
 
                 pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
+
+                componentVM.InputPinsVM[i].XPosition = -componentVM.Picture.Width / 2;
+                componentVM.InputPinsVM[i].YPosition = yOffset;
+
                 yOffset += offsetStepValue;
 
                 sampleComponent.Children.Add(pinButton);
@@ -376,6 +405,9 @@ namespace LogicDesigner
 
                 pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
                 yOffset += offsetStepValue;
+                
+                componentVM.OutputPinsVM[i].XPosition = componentVM.Picture.Width / 2;
+                componentVM.OutputPinsVM[i].YPosition = yOffset;
 
                 sampleComponent.Children.Add(pinButton);
             }
@@ -384,6 +416,7 @@ namespace LogicDesigner
             Button sampleBody = new Button();
 
             sampleComponent.Name = componentVM.Name;
+            sampleBody.Name = componentVM.Name + "Body"; 
             sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
 
@@ -415,8 +448,32 @@ namespace LogicDesigner
             sampleComponent.Children.Add(label);
             
             this.ComponentWindow.Children.Add(sampleComponent);
+        }
 
-            sampleComponent.RenderTransform = new TranslateTransform(0, 0);
+        /// <summary>
+        /// Called when [pins connected].
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
+        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        {
+            var inputPin = e.InputPinVM;
+            var outputPin = e.OutputPinVM;
+
+            Line line = new Line();
+            line.Visibility = Visibility.Visible;
+            line.StrokeThickness = 4;
+            line.Stroke = Brushes.Black;
+            line.X1 = inputPin.XPosition;
+            line.X2 = outputPin.YPosition;
+            line.Y1 = inputPin.YPosition;
+            line.Y2 = outputPin.YPosition;
+
+            //line.RenderTransform = new TranslateTransform(line.X1, line.Y1);
+
+            this.ComponentWindow.Children.Add(line);
+
+            this.ComponentWindow.UpdateLayout();
         }
 
         /// <summary>
@@ -429,6 +486,13 @@ namespace LogicDesigner
             var scrollbar = (ScrollViewer)e.Source;
             scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
             scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
+        }
+
+        private void PreComponentAdded(object sender, EventArgs e)
+        {
+            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            this.UndoHistory.Push(currentMan);
+            this.RedoHistory.Clear();
         }
     }
 }
