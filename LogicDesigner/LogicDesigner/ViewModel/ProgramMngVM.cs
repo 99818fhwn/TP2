@@ -20,9 +20,10 @@ namespace LogicDesigner.ViewModel
     public class ProgramMngVM : INotifyPropertyChanged
     {
         private ProgramManager programManager;
+        private ObservableCollection<ConnectionVM> connectionsVM;
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentRepresentationVM> selectableComponents;
-        private int uniqueId;
+        private int uniqueNodeId;
         private PinVM selectedOutputPin;
         private PinVM selectedInputPin;
 
@@ -30,17 +31,19 @@ namespace LogicDesigner.ViewModel
         public event EventHandler<EventArgs> PreFieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
-        public event EventHandler<PinsConnectedEventArgs> PinsConnected;
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private readonly Command activateCommand;
-        private readonly Command executeCommand;
+        private ComponentVM selectedFieldComponent;
+        private int newUniqueConnectionId;
+
         private readonly Command removeCommand;
         private readonly Command addCommand;
 
         public ProgramMngVM()
         {
-            this.programManager = new ProgramManager();
+            this.programManager = new ProgramManager("Components");
             this.programManager.Watcher.Created += NewModuleAdded;
 
             this.StartCommand = new Command(obj =>
@@ -66,12 +69,6 @@ namespace LogicDesigner.ViewModel
                 this.SetSelectedPin(pin);
             });
 
-            this.activateCommand = new Command(obj =>
-            {
-                var nodeInFieldVM = obj as ComponentVM;
-                nodeInFieldVM.Activate();
-            });
-
             this.removeCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
@@ -87,7 +84,7 @@ namespace LogicDesigner.ViewModel
                     }
                 }
 
-                this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);////Temporary fix for testing
+                this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);
             });
 
             this.addCommand = new Command(obj =>
@@ -98,13 +95,13 @@ namespace LogicDesigner.ViewModel
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
                 var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
-                    activateCommand, removeCommand);
+                    removeCommand);
                 this.nodesVMInField.Add(compVM);
                 OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                CreateUniqueName(node), this.activateCommand, this.executeCommand, this.removeCommand
+                CreateUniqueName(node), setPinCommand, this.removeCommand
                 ));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
@@ -113,31 +110,21 @@ namespace LogicDesigner.ViewModel
                 node => new ComponentRepresentationVM(this.addCommand, node));
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
+
+            var connections = this.programManager.ConnectedOutputInputPairs.Select(conn =>
+            new ConnectionVM(new PinVM(conn.Item1, false, setPinCommand), 
+            new PinVM(conn.Item2, true, setPinCommand), this.NewUniqueConnectionId()));
+
+            this.connectionsVM = new ObservableCollection<ConnectionVM>(connections);
+
+            this.programManager.PinsDisconnected += this.OnPinsDisconnected;
         }
 
-        public void SetSelectedPin(PinVM value)
+        private string NewUniqueConnectionId()
         {
-            if(this.selectedOutputPin == value || this.selectedInputPin == value)
-            {
-                this.selectedInputPin = null;
-                this.selectedOutputPin = null;
-            }
-            else
-            {
-                if(!value.IsInputPin)
-                {
-                    this.selectedOutputPin = value;
-                }
-                else
-                {
-                    this.selectedInputPin = value;
-                }
-
-                if (this.selectedOutputPin != null && this.selectedInputPin != null)
-                {
-                    this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
-                }
-            }
+            string s = "Connection" + this.newUniqueConnectionId.ToString();
+            this.newUniqueConnectionId++;
+            return s;
         }
 
         public Command StartCommand
@@ -157,75 +144,6 @@ namespace LogicDesigner.ViewModel
             get;
             private set;
         }
-
-        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
-        {
-            if(this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
-            {
-                this.OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
-            }
-
-            this.selectedInputPin = null;
-            this.selectedOutputPin = null;
-
-        }
-
-        /// <summary>
-        /// Creates an unique name by adding a serial number to the label ending.
-        /// </summary>
-        /// <param name="node">The node.</param>
-        /// <returns>The identifier will be returned.</returns>
-        private string CreateUniqueName(IDisplayableNode node)
-        {
-            this.uniqueId++;
-            return CreateNameTag(node.Label, this.uniqueId.ToString());
-        }
-
-        private void NewModuleAdded(object sender, FileSystemEventArgs e)
-        {
-            this.programManager = new ProgramManager();
-            this.programManager.Watcher.Created += NewModuleAdded;
-
-            var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
-
-            // hässlich, aber konnte keinen besseren Weg finden
-            App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
-            {
-                this.SelectableComponents.Clear();
-            });
-            foreach (var item in nodesToChoose)
-            {
-                    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
-                    {
-                        this.SelectableComponents.Add(item);
-                    });
-            }
-        }
-
-        /// <summary>
-        /// Creates the name tag from Label and can add additional string to the end, it removes all chars except the letters.
-        /// </summary>
-        /// <param name="preName">Name of the element.</param>
-        /// <param name="additional">The additional string ending.</param>
-        /// <returns></returns>
-        public string CreateNameTag(string preName, string additional)
-        {
-            return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
-        /// </summary>
-        /// <param name="old"> The ProgramMngVM which values should be copied. </param>
-        public ProgramMngVM(ProgramMngVM old)
-        {
-            this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
-            this.SelectedFieldComponent = old.SelectedFieldComponent;
-            this.SelectableComponents = old.SelectableComponents;
-            this.programManager = new ProgramManager(old.programManager);
-        }
-
-        private ComponentVM selectedFieldComponent;
 
         public ComponentVM SelectedFieldComponent
         {
@@ -262,15 +180,16 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-
-        public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
+        ObservableCollection<ConnectionVM> ConnectionsVM
         {
-            this.FieldComponentAdded?.Invoke(this, e);
-        }
-
-        public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
-        {
-            this.FieldComponentRemoved?.Invoke(this, e);
+            get
+            {
+                return this.connectionsVM;
+            }
+            set
+            {
+                this.connectionsVM = value;
+            }
         }
 
         /// <summary>
@@ -301,17 +220,129 @@ namespace LogicDesigner.ViewModel
             }));
         }
 
-        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        public void SetSelectedPin(PinVM value)
+        {
+            if (this.selectedOutputPin == value || this.selectedInputPin == value)
+            {
+                this.selectedInputPin = null;
+                this.selectedOutputPin = null;
+            }
+            else
+            {
+                if (!value.IsInputPin)
+                {
+                    this.selectedOutputPin = value;
+                }
+                else
+                {
+                    this.selectedInputPin = value;
+                }
+
+                if (this.selectedOutputPin != null && this.selectedInputPin != null)
+                {
+                    this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
+                }
+            }
+        }
+
+        public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
+        {
+            this.FieldComponentAdded?.Invoke(this, e);
+        }
+
+        public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
+        {
+            this.FieldComponentRemoved?.Invoke(this, e);
+        }
+
+        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
+        {
+            if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+            {
+                var conn = new ConnectionVM(selectedOutputPin, selectedInputPin,
+                    this.NewUniqueConnectionId());
+                this.connectionsVM.Add(conn);
+
+                this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
+            }
+
+            this.selectedInputPin = null;
+            this.selectedOutputPin = null;
+
+        }
+
+        /// <summary>
+        /// Creates an unique name by adding a serial number to the label ending.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns>The identifier will be returned.</returns>
+        private string CreateUniqueName(IDisplayableNode node)
+        {
+            this.uniqueNodeId++;
+            return CreateNameTag(node.Label, this.uniqueNodeId.ToString());
+        }
+
+        private void NewModuleAdded(object sender, FileSystemEventArgs e)
+        {
+            this.programManager = new ProgramManager("Components");
+            this.programManager.Watcher.Created += NewModuleAdded;
+
+            var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
+
+            // hässlich, aber konnte keinen besseren Weg finden
+            App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+            {
+                this.SelectableComponents.Clear();
+            });
+            foreach (var item in nodesToChoose)
+            {
+                App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
+                {
+                    this.SelectableComponents.Add(item);
+                });
+            }
+        }
+
+        /// <summary>
+        /// Creates the name tag from Label and can add additional string to the end, it removes all chars except the letters.
+        /// </summary>
+        /// <param name="preName">Name of the element.</param>
+        /// <param name="additional">The additional string ending.</param>
+        /// <returns></returns>
+        public string CreateNameTag(string preName, string additional)
+        {
+            return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
+        /// </summary>
+        /// <param name="old"> The ProgramMngVM which values should be copied. </param>
+        public ProgramMngVM(ProgramMngVM old)
+        {
+            this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
+            this.SelectedFieldComponent = old.SelectedFieldComponent;
+            this.SelectableComponents = old.SelectableComponents;
+            this.programManager = new ProgramManager(old.programManager);
+        }
+
+        public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
         {
             this.PinsConnected?.Invoke(this, e);
+        }
+
+        public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
+        {
+            //System.InvalidOperationException: Sequence contains no elements
+            var conn = this.connectionsVM.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).First();
+            this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
+            this.connectionsVM.Remove(conn);
         }
 
         protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
-
-
 
         /// <summary>
         /// Fires the on component vm changed, this seemes obsolete because the event when fired already contains the entire component.

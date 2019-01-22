@@ -27,6 +27,15 @@ namespace LogicDesigner.ViewModel
             this.yposition = 0;
         }
 
+        public PinVM(IPin pin, bool isInputPin, Command setPinCommand)
+        {
+            this.pin = pin;
+            this.isInputPin = isInputPin;
+            this.setPinCommand = setPinCommand;
+            this.xposition = 0;
+            this.yposition = 0;
+        }
+
         public IPin Pin
         {
             get

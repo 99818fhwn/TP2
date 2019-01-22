@@ -79,7 +79,9 @@
     </Compile>
     <Compile Include="ViewModel\ComponentRepresentationVM.cs" />
     <Compile Include="ViewModel\ComponentVM.cs" />
+    <Compile Include="ViewModel\ConnectionVM.cs" />
     <Compile Include="ViewModel\FieldComponentEventArgs.cs" />
+    <Compile Include="ViewModel\PinVMConnectionChangedEventArgs.cs" />
     <Compile Include="ViewModel\PinsConnectedEventArgs.cs" />
     <Compile Include="ViewModel\PinVM.cs" />
     <Compile Include="ViewModel\ProgramMngVM.cs" />

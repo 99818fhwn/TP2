@@ -36,12 +36,14 @@ namespace LogicDesigner
         /// </summary>
         private bool isMoving;
 
+        private List<Tuple<Line, ConnectionVM>> connectionLines;
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
         {
             this.InitializeComponent();
+            this.connectionLines = new List<Tuple<Line, ConnectionVM>>();
             this.UndoHistory = new Stack<ProgramMngVM>();
             this.RedoHistory = new Stack<ProgramMngVM>();
 
@@ -59,7 +61,10 @@ namespace LogicDesigner
 
             programMngVM.FieldComponentAdded += this.OnComponentAdded;
             programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+
             programMngVM.PinsConnected += this.OnPinsConnected;
+            programMngVM.PinsDisconnected += this.OnPinsDisconnected;
+
             programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
@@ -455,17 +460,53 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(newComponent);
         }
 
-        /// <summary>
-        /// Called when [pins connected].
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
-        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        // OnPinsDisconnected with ConnectionVM
+        public void OnPinsDisconnected(object sender, PinVMConnectionChangedEventArgs e)
         {
-            var inputPin = e.InputPinVM;
-            var outputPin = e.OutputPinVM;
+            var inputPin = e.Connection.InputPin;
+            var outputPin = e.Connection.OutputPin;
+
+            //var connectionToRemove = this.connectionLines.Where(l => l.Item2.ConnectionId == e.Connection.ConnectionId).First();
+            //Line lineToRemove = connectionToRemove.Item1;
+
+            foreach(var child in this.ComponentWindow.Children)
+            {
+                try
+                {
+                    Grid grid = child as Grid;
+
+                    foreach (var gridChild in grid.Children)
+                    {
+                        try
+                        {
+                            Line l = (Line)gridChild;
+                            if (l.Name == e.Connection.ConnectionId)
+                            {
+                                //this.connectionLines.Remove(connectionToRemove);
+                                grid.Children.Remove((Line)gridChild);
+                            }
+                        }
+                        catch (Exception)
+                        {
+                            continue;
+                        }
+                    }
+                }
+                catch(Exception)
+                {
+                    continue;
+                }
+            }
+        }
+
+        // new OnPinsConnected with ConnectionVM
+        public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
+        {
+            var inputPin = e.Connection.InputPin;
+            var outputPin = e.Connection.OutputPin;
 
             Line line = new Line();
+            line.Name = e.Connection.ConnectionId;
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
             line.Stroke = Brushes.Black;
@@ -473,13 +514,42 @@ namespace LogicDesigner
             line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
-                        
+
             Grid lineBody = new Grid();
-            
+
             lineBody.Children.Add(line);
 
-            this.ComponentWindow.Children.Add(lineBody);            
+            this.ComponentWindow.Children.Add(lineBody);
+
+            //this.connectionLines.Add(new Tuple<Line, ConnectionVM>(line, e.Connection));
         }
+        // Commented by Katja, connectionVM 
+
+        /// <summary>
+        /// Called when [pins connected].
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
+        //public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        //{
+        //var inputPin = e.InputPinVM;
+        //var outputPin = e.OutputPinVM;
+
+        //Line line = new Line();
+        //line.Visibility = Visibility.Visible;
+        //line.StrokeThickness = 4;
+        //line.Stroke = Brushes.Black;
+        //line.X1 = inputPin.XPosition;
+        //line.X2 = outputPin.XPosition;
+        //line.Y1 = inputPin.YPosition;
+        //line.Y2 = outputPin.YPosition;
+
+        //Grid lineBody = new Grid();
+
+        //lineBody.Children.Add(line);
+
+        //this.ComponentWindow.Children.Add(lineBody);            
+        //}
 
         ///// <summary>
         ///// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 

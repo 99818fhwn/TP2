@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using LogicDesigner.ViewModel;
+using Shared;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -19,29 +20,32 @@ namespace LogicDesigner.Model
         /// The field nodes
         /// </summary>
         private ICollection<IDisplayableNode> fieldNodes;
-        private List<Tuple<IPin, IPin>> ConnectedOutputInputPairs;
+        private List<Tuple<IPin, IPin>> connectedOutputInputPairs;
 
         /// <summary>
         /// The possible nodes to choose from
         /// </summary>
         private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
+        private readonly string path;
+        public event EventHandler<PinsConnectedEventArgs> PinsDisconnected;
 
         public FileSystemWatcher Watcher { get; set; }
 
-        public ProgramManager()
+        public ProgramManager(string path)
         {
-            this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
+            this.path = path;
+            this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
-            string path = "Components";
+            //this.path = "Components";
             if (!Directory.Exists(Path.GetDirectoryName(path)))
             {
-                Directory.CreateDirectory(path);
+                Directory.CreateDirectory(this.path);
             }
-            this.Watcher = new FileSystemWatcher(path);
+            this.Watcher = new FileSystemWatcher(this.path);
             Watcher.IncludeSubdirectories = true;
             Watcher.EnableRaisingEvents = true;
             Watcher.Filter = "";
@@ -53,6 +57,18 @@ namespace LogicDesigner.Model
             this.FieldNodes = old.FieldNodes;
             possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
             this.Stop = old.Stop;
+        }
+
+        public List<Tuple<IPin, IPin>> ConnectedOutputInputPairs
+        {
+            get
+            {
+                return this.connectedOutputInputPairs;
+            }
+            set
+            {
+                this.connectedOutputInputPairs = value;
+            }
         }
 
         public ICollection<IDisplayableNode> FieldNodes
@@ -89,7 +105,7 @@ namespace LogicDesigner.Model
 
         private ICollection<IDisplayableNode> InitializeNodesToChooseFrom()
         {
-            return new NodesLoader().GetNodes("Components");
+            return new NodesLoader().GetNodes(this.path);
         }
 
         public void Run()
@@ -171,6 +187,7 @@ namespace LogicDesigner.Model
                 if (t.Item2 == input)
                 {
                     this.ConnectedOutputInputPairs.Remove(t);
+                    this.OnDisconnectedPins(this, new PinsConnectedEventArgs(t.Item1, input));
                     break;
                 }
             }
@@ -183,9 +200,15 @@ namespace LogicDesigner.Model
                 if (t.Item1 == output && t.Item2 == input)
                 {
                     this.ConnectedOutputInputPairs.Remove(t);
+                    this.OnDisconnectedPins(this, new PinsConnectedEventArgs(output, input));
                     break;
                 }
             }
+        }
+
+        protected void OnDisconnectedPins(object source, PinsConnectedEventArgs e)
+        {
+            this.PinsDisconnected?.Invoke(source, e);
         }
     }
 }
