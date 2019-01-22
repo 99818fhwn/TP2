@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogicDesigner"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowState="Maximized">
+        Title="MainWindow" Height="450" Width="800" WindowState="Maximized" PreviewMouseWheel="MouseWheelZoom">
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Template">
@@ -27,20 +27,16 @@
         <!--<Image x:Key="StepIcon" Source="ButtonPictures/step.jpg"/>-->
     </Window.Resources>
 
-    <!--<UserControl.Resources>
-        <Image x:Key="MyImage" Source.../>
-    </UserControl.Resources>-->
-
     <!--KeyboardShortcuts-->
     <Window.InputBindings>
         <!--Save-->
         <KeyBinding Modifiers="Ctrl"
                     Key="S"                 
-                    Command="{Binding SaveProjectCommand}"/>
+                    Command="{Binding SaveCommand}"/>
         <!--Load-->
         <KeyBinding Modifiers="Ctrl"
                     Key="L"
-                    Command="{Binding LoadProjectCommand}" />
+                    Command="{Binding LoadCommand}" />
 
         <!--Undo-->
         <KeyBinding Modifiers="Ctrl"
@@ -51,6 +47,26 @@
         <KeyBinding Modifiers="Ctrl"
                     Key="Y"
                     Command="{Binding RedoCommand}" />
+
+        <!--Zoom in-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="OemPlus"
+                    Command="{Binding ZoomInCommand}" />
+
+        <!--Zoom out-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="OemMinus"
+                    Command="{Binding ZoomOutCommand}" />
+
+        <!--Zoom in numpad-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="Add"
+                    Command="{Binding ZoomInCommand}" />
+
+        <!--Zoom out numpad-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="Subtract"
+                    Command="{Binding ZoomOutCommand}" />
     </Window.InputBindings>
 
     <Grid Name="MainGrid">
@@ -66,17 +82,6 @@
         <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="1" Name="LogicWindow" Height="Auto" Width="Auto">
             <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
                 <Canvas Name="ComponentWindow" Height="10000" Width="10000">
-                    <Canvas.InputBindings>
-                        <!--Copy-->
-                        <KeyBinding Modifiers="Ctrl"
-                        Key="C"
-                        Command="{Binding CopyCommand}" />
-
-                        <!--Paste-->
-                        <KeyBinding Modifiers="Ctrl"
-                        Key="V"
-                        Command="{Binding PasteCommand}" />
-                    </Canvas.InputBindings>
                 </Canvas>
             </ScrollViewer>
         </Grid>

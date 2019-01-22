@@ -1,5 +1,6 @@
 ﻿using LogicDesigner.ViewModel;
 using Shared;
+using SharedClasses;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,23 +30,28 @@ namespace LogicDesigner.Model
         private readonly string path;
         public event EventHandler<PinsConnectedEventArgs> PinsDisconnected;
 
+        private readonly string componentDirectory;
+
         public FileSystemWatcher Watcher { get; set; }
 
-        public ProgramManager(string path)
+        public event EventHandler StepFinished;
+
+        public ProgramManager()
         {
-            this.path = path;
-            this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
+            //this.path = path;
+            //this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
+            this.componentDirectory = "Components";
+            this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
             this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
 
-            //this.path = "Components";
-            if (!Directory.Exists(Path.GetDirectoryName(path)))
+            if (!Directory.Exists(Path.GetDirectoryName(componentDirectory)))
             {
-                Directory.CreateDirectory(this.path);
+                Directory.CreateDirectory(componentDirectory);
             }
-            this.Watcher = new FileSystemWatcher(this.path);
+            this.Watcher = new FileSystemWatcher(componentDirectory);
             Watcher.IncludeSubdirectories = true;
             Watcher.EnableRaisingEvents = true;
             Watcher.Filter = "";
@@ -105,7 +111,7 @@ namespace LogicDesigner.Model
 
         private ICollection<IDisplayableNode> InitializeNodesToChooseFrom()
         {
-            return new NodesLoader().GetNodes(this.path);
+            return new NodesLoader().GetNodes(componentDirectory);
         }
 
         public void Run()
@@ -140,6 +146,13 @@ namespace LogicDesigner.Model
                     break;
                 }
             }
+
+            this.FireOnStepFinished();
+        }
+
+        protected virtual void FireOnStepFinished()
+        {
+            this.StepFinished?.Invoke(this, new EventArgs());
         }
 
         public void Step(INode node)

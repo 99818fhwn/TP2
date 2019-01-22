@@ -43,14 +43,16 @@ namespace LogicDesigner.ViewModel
 
         public ProgramMngVM()
         {
-            this.programManager = new ProgramManager("Components");
-            this.programManager.Watcher.Created += NewModuleAdded;
+            this.programManager = new ProgramManager();
+            this.programManager.Watcher.Created += this.NewModuleAdded;
+            this.programManager.StepFinished += this.RefreshVM;
 
             this.StartCommand = new Command(obj =>
             {
-               Task.Run(() => {
-                   this.programManager.Run();
-               });
+                Task.Run(() =>
+                {
+                    this.programManager.Run();
+                });
             });
 
             this.StepCommand = new Command(obj =>
@@ -66,7 +68,7 @@ namespace LogicDesigner.ViewModel
             var setPinCommand = new Command(obj =>
             {
                 var pin = obj as PinVM;
-                this.SetSelectedPin(pin);
+                SetSelectedPin(pin);
             });
 
             this.removeCommand = new Command(obj =>
@@ -94,6 +96,8 @@ namespace LogicDesigner.ViewModel
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
+                //var compVM = new ComponentVM(newGenerateComp, CreateUniqueName(realComponent), setPinCommand,
+                //    this.activateCommand, this.removeCommand);
                 var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
                     removeCommand);
                 this.nodesVMInField.Add(compVM);
@@ -272,6 +276,18 @@ namespace LogicDesigner.ViewModel
         }
 
         /// <summary>
+        /// Refreshes the view models, in case a step in program manager finished.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data in this case not necesary.</param>
+        private void RefreshVM(object sender, EventArgs e)
+        {
+            var oldTemp = this.SelectedFieldComponent;
+            this.SelectedFieldComponent = null;
+            this.SelectedFieldComponent = oldTemp;
+        }
+
+        /// <summary>
         /// Creates an unique name by adding a serial number to the label ending.
         /// </summary>
         /// <param name="node">The node.</param>
@@ -284,7 +300,7 @@ namespace LogicDesigner.ViewModel
 
         private void NewModuleAdded(object sender, FileSystemEventArgs e)
         {
-            this.programManager = new ProgramManager("Components");
+            this.programManager = new ProgramManager();
             this.programManager.Watcher.Created += NewModuleAdded;
 
             var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
@@ -337,11 +353,24 @@ namespace LogicDesigner.ViewModel
             var conn = this.connectionsVM.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).First();
             this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
             this.connectionsVM.Remove(conn);
+
         }
 
         protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        public void SaveStatus(string path)
+        {
+            SerializationLogic serializer = new SerializationLogic();
+            serializer.SerializeObject(path, NodesVMInField);
+        }
+
+        public void LoadStatus(string path)
+        {
+            SerializationLogic serializer = new SerializationLogic();
+            this.nodesVMInField = (ObservableCollection<ComponentVM>)serializer.DeserializeObject(path);
         }
 
         /// <summary>
