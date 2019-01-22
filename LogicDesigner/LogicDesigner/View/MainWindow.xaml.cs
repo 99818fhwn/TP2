@@ -23,7 +23,13 @@ namespace LogicDesigner
     using System.Windows.Shapes;
     using System.Windows.Threading;
     using LogicDesigner.Commands;
+
+    // Will be restructured
+    using LogicDesigner.Model;
+    //
+
     using LogicDesigner.ViewModel;
+    using Microsoft.Win32;
 
     /// <summary>
     /// WPF Logic
@@ -43,7 +49,7 @@ namespace LogicDesigner
         public MainWindow()
         {
             this.Scale = 1;
-            this.InitializeComponent();
+            InitializeComponent();
             this.UndoHistory = new Stack<ProgramMngVM>();
             this.RedoHistory = new Stack<ProgramMngVM>();
 
@@ -52,21 +58,21 @@ namespace LogicDesigner
             this.MainGrid.DataContext = programMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
-            this.CurrentSelectedComponentView.SetBinding(DataContextProperty ,selectBind);
+            this.CurrentSelectedComponentView.SetBinding(DataContextProperty, selectBind);
 
             //this.UndoHistory.Push(new ProgramMngVM(programMngVM));
 
             this.InputBindings.Add(new InputBinding(programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
             this.InputBindings.Add(new InputBinding(programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
 
-            programMngVM.FieldComponentAdded += this.OnComponentAdded;
-            programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
-            programMngVM.PinsConnected += this.OnPinsConnected;
-            programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
+            programMngVM.FieldComponentAdded += OnComponentAdded;
+            programMngVM.FieldComponentRemoved += OnComponentDeleted;
+            programMngVM.PinsConnected += OnPinsConnected;
+            programMngVM.PreFieldComponentAdded += PreComponentAdded;
 
-            this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
-            this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
-            this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
+            this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(ComponentMouseDown);
+            this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(ComponentMouseUp);
+            this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(ComponentMouseMovePre);
         }
 
         /// <summary>
@@ -135,6 +141,50 @@ namespace LogicDesigner
         }
 
         /// <summary>
+        /// Gets the undo command.
+        /// </summary>
+        /// <value>
+        /// The undo command.
+        /// </value>
+        public Command SaveCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                SaveFileDialog filepicker = new SaveFileDialog();
+                //filepicker.CheckFileExists = false;
+                filepicker.DefaultExt = ".ldf";
+
+                filepicker.ShowDialog();
+
+                string filename = filepicker.FileName;
+                var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                manager.SaveStatus(filename);
+
+                manager.LoadStatus(filename);
+
+            }));
+        }
+
+        /// <summary>
+        /// Handles zooming with mouse wheel.
+        /// </summary>
+        private void MouseWheelZoom(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers != ModifierKeys.Control)
+                return;
+
+            if (e.Delta > 0)
+            {
+                this.ZoomInCommand.Execute(null);
+            }
+
+            if (e.Delta < 0)
+            {
+                this.ZoomOutCommand.Execute(null);
+            }
+        }
+
+        /// <summary>
         /// Gets the zoom in command.
         /// </summary>
         /// <value>
@@ -144,10 +194,10 @@ namespace LogicDesigner
         {
             get => new Command(new Action<object>((input) =>
             {
-                if (Scale < 2)
+                if (this.Scale < 2)
                 {
-                    Scale = Scale + 0.05;
-                    var scaleTransform = new ScaleTransform(Scale, Scale);
+                    this.Scale = this.Scale + 0.05;
+                    var scaleTransform = new ScaleTransform(this.Scale, this.Scale);
                     this.ComponentWindow.RenderTransform = scaleTransform;
                 }
                 //this.ComponentWindow.RenderTransform = scaleTransform;
@@ -166,10 +216,10 @@ namespace LogicDesigner
         {
             get => new Command(new Action<object>((input) =>
             {
-                if (Scale > 0.2)
+                if (this.Scale > 0.2)
                 {
-                    Scale = Scale - 0.05;
-                    var scaleTransform = new ScaleTransform(Scale, Scale);
+                    this.Scale = this.Scale - 0.05;
+                    var scaleTransform = new ScaleTransform(this.Scale, this.Scale);
                     this.ComponentWindow.RenderTransform = scaleTransform;
                 }
             }));
@@ -221,7 +271,7 @@ namespace LogicDesigner
             if (parentType == typeof(Grid))
             {
                 var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
-                var temp = this.GetParentGridComponent(pressedComponent);
+                var temp = GetParentGridComponent(pressedComponent);
 
                 if (temp == null)
                 {
@@ -252,7 +302,7 @@ namespace LogicDesigner
         {
             if (this.isMoving)
             {
-                var componentToMove = this.GetParentGridComponent((UIElement)e.Source);
+                var componentToMove = GetParentGridComponent((UIElement)e.Source);
                 componentToMove.XCoord += this.CurrentMove.X;
                 componentToMove.YCoord += this.CurrentMove.Y;
             }
@@ -315,7 +365,7 @@ namespace LogicDesigner
                 {
                     var previousMouse = this.CurrentMouse;
                     this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
-                    
+
                     if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
                     {
                         Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
@@ -335,9 +385,9 @@ namespace LogicDesigner
         private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
             //Not sure if I broke it or not, maybe was a different event
-            e.Component.ComponentPropertyChanged += this.OnComponentChanged;
+            e.Component.ComponentPropertyChanged += OnComponentChanged;
 
-            this.DrawNewComponent(e.Component);
+            DrawNewComponent(e.Component);
 
             var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
             this.RedoHistory.Clear();
@@ -392,7 +442,7 @@ namespace LogicDesigner
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            e.Component.ComponentPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
+            e.Component.ComponentPropertyChanged -= OnComponentChanged; // Unsubscribes from the deleted component
             this.UndoHistory.Push(currentMan);
             this.RedoHistory.Clear();
         }
@@ -405,12 +455,12 @@ namespace LogicDesigner
         {
             // New component
             Grid newComponent = new Grid();
-            
+
             // Component Body
             Button sampleBody = new Button();
 
             newComponent.Name = componentVM.Name;
-            sampleBody.Name = componentVM.Name + "Body"; 
+            sampleBody.Name = componentVM.Name + "Body";
             sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
 
@@ -525,7 +575,7 @@ namespace LogicDesigner
 
             Panel.SetZIndex(line, -100);
 
-            this.ComponentWindow.Children.Add(line);            
+            this.ComponentWindow.Children.Add(line);
         }
 
         /// <summary>

@@ -44,7 +44,8 @@
                 throw new ArgumentException("Path not found.");
             }
 
-            using (Stream writer = new FileStream(path + ".ldf", FileMode.Create))
+            using (Stream writer = new FileStream(path, FileMode.Create))
+            //using (BinaryWriter binWriter = new BinaryWriter(writer))
             {
                 try
                 {
@@ -52,7 +53,7 @@
                 }
                 catch (SerializationException ex)
                 {
-                    throw new SerializationException("Object could not be deserialized", ex);
+                    throw new SerializationException("Object could not be serialized", ex);
                 }
             }
         }
@@ -66,6 +67,7 @@
         /// <returns> The constructed object. </returns>
         public object DeserializeObject(string path)
         {
+            path += ".ldf";
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException($"File not found at {path}.");
