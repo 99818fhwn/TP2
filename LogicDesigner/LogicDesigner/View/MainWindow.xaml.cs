@@ -42,7 +42,7 @@ namespace LogicDesigner
         /// </summary>
         private bool isMoving;
 
-        private List<Tuple<Line, ConnectionVM>> connectionLines;
+        //private List<Tuple<Line, ConnectionVM>> connectionLines;
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -564,37 +564,40 @@ namespace LogicDesigner
             //var connectionToRemove = this.connectionLines.Where(l => l.Item2.ConnectionId == e.Connection.ConnectionId).First();
             //Line lineToRemove = connectionToRemove.Item1;
 
-            foreach(var child in this.ComponentWindow.Children)
+            foreach (var child in this.ComponentWindow.Children)
             {
-                try
-                {
-                    Grid grid = child as Grid;
+                //try
+                //{
+                    //Grid grid = child as Grid;
 
-                    foreach (var gridChild in grid.Children)
-                    {
+                    //foreach (var gridChild in grid.Children)
+                    //{
                         try
                         {
-                            Line l = (Line)gridChild;
+                            Line l = (Line)child;
+                            //Line l = (Line)gridChild;
                             if (l.Name == e.Connection.ConnectionId)
                             {
-                                //this.connectionLines.Remove(connectionToRemove);
-                                grid.Children.Remove((Line)gridChild);
+                            //this.connectionLines.Remove(connectionToRemove);
+                            //grid.Children.Remove((Line)gridChild);
+                                this.ComponentWindow.Children.Remove((Line)child);
+                            break;
                             }
                         }
                         catch (Exception)
                         {
                             continue;
                         }
-                    }
-                }
-                catch(Exception)
-                {
-                    continue;
-                }
+                //    }
+                //}
+                //catch (Exception)
+                //{
+                //    continue;
+                //}
             }
         }
 
-        // new OnPinsConnected with ConnectionVM
+        //new OnPinsConnected with ConnectionVM
         public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
         {
             var inputPin = e.Connection.InputPin;
@@ -615,22 +618,22 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(line);
         }
 
-        /// <summary>
-        /// Called when pins disconnected.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
-        public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
-        {
+        ///// <summary>
+        ///// Called when pins disconnected.
+        ///// </summary>
+        ///// <param name="sender">The sender.</param>
+        ///// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
+        //public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
+        //{
 
-            Grid lineBody = new Grid();
+        //    Grid lineBody = new Grid();
 
-            lineBody.Children.Add(line);
+        //    lineBody.Children.Add(line);
 
-            this.ComponentWindow.Children.Add(lineBody);
+        //    this.ComponentWindow.Children.Add(lineBody);
 
-            //this.connectionLines.Add(new Tuple<Line, ConnectionVM>(line, e.Connection));
-        }
+        //    //this.connectionLines.Add(new Tuple<Line, ConnectionVM>(line, e.Connection));
+        //}
         // Commented by Katja, connectionVM 
 
         /// <summary>
