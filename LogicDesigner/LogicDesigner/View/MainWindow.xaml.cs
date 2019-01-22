@@ -464,16 +464,18 @@ namespace LogicDesigner
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
             line.Stroke = Brushes.Black;
-            line.X1 = inputPin.XPosition;
-            line.X2 = outputPin.YPosition;
+            line.X1 = outputPin.XPosition;
+            line.X2 = inputPin.XPosition;
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
 
-            //line.RenderTransform = new TranslateTransform(line.X1, line.Y1);
+            Grid grid = new Grid();
+            grid.Height = ComponentWindow.Height;
+            grid.Width = ComponentWindow.Width;
 
-            this.ComponentWindow.Children.Add(line);
+            grid.Children.Add(line);
 
-            this.ComponentWindow.UpdateLayout();
+            this.ComponentWindow.Children.Add(grid);            
         }
 
         /// <summary>
