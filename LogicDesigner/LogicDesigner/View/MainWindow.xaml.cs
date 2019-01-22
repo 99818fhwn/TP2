@@ -378,7 +378,7 @@ namespace LogicDesigner
 
                 pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
 
-                componentVM.InputPinsVM[i].XPosition = -componentVM.Picture.Width / 2;
+                componentVM.InputPinsVM[i].XPosition = 0;
                 componentVM.InputPinsVM[i].YPosition = yOffset;
 
                 yOffset += offsetStepValue;
@@ -407,7 +407,7 @@ namespace LogicDesigner
                 pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
                 yOffset += offsetStepValue;
                 
-                componentVM.OutputPinsVM[i].XPosition = componentVM.Picture.Width / 2;
+                componentVM.OutputPinsVM[i].XPosition = 0;
                 componentVM.OutputPinsVM[i].YPosition = yOffset;
 
                 newComponent.Children.Add(pinButton);
@@ -447,9 +447,7 @@ namespace LogicDesigner
             newComponent.Width = sampleBody.Width + label.Width + 20;
             newComponent.Children.Add(sampleBody);
             newComponent.Children.Add(label);
-
-            newComponent.RenderTransform = new TranslateTransform(5000, 5000);
-
+            
             this.ComponentWindow.Children.Add(newComponent);
         }
 
@@ -479,17 +477,17 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(lineBody);            
         }
 
-        /// <summary>
-        /// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 
-        /// </summary>
-        /// <param name="sender">The source of the event.</param>
-        /// <param name="e">The <see cref="System.Windows.RoutedEventArgs" /> instance containing the event data.</param>
-        private void ScrollViewerLoaded(object sender, RoutedEventArgs e)
-        {
-            var scrollbar = (ScrollViewer)e.Source;
-            scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
-            scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
-        }
+        ///// <summary>
+        ///// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 
+        ///// </summary>
+        ///// <param name="sender">The source of the event.</param>
+        ///// <param name="e">The <see cref="System.Windows.RoutedEventArgs" /> instance containing the event data.</param>
+        ////private void ScrollViewerLoaded(object sender, RoutedEventArgs e)
+        ////{
+        ////    var scrollbar = (ScrollViewer)e.Source;
+        ////    scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
+        ////    scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
+        ////}
 
         private void PreComponentAdded(object sender, EventArgs e)
         {

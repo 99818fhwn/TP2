@@ -64,7 +64,7 @@
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="1" Name="LogicWindow" Height="Auto" Width="Auto">
-            <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
+            <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
                 <Canvas Name="ComponentWindow" Height="10000" Width="10000">
                     <Canvas.InputBindings>
                         <!--Copy-->
