@@ -41,13 +41,15 @@ namespace LogicDesigner.ViewModel
         public ProgramMngVM()
         {
             this.programManager = new ProgramManager();
-            this.programManager.Watcher.Created += NewModuleAdded;
+            this.programManager.Watcher.Created += this.NewModuleAdded;
+            this.programManager.StepFinished += this.RefreshVM;
 
             this.StartCommand = new Command(obj =>
             {
-               Task.Run(() => {
-                   this.programManager.Run();
-               });
+                Task.Run(() =>
+                {
+                    this.programManager.Run();
+                });
             });
 
             this.StepCommand = new Command(obj =>
@@ -97,7 +99,7 @@ namespace LogicDesigner.ViewModel
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand,
                     activateCommand, removeCommand);
                 this.nodesVMInField.Add(compVM);
                 OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
@@ -117,13 +119,13 @@ namespace LogicDesigner.ViewModel
 
         public void SetSelectedPin(PinVM value)
         {
-            if(this.selectedOutputPin == value || this.selectedInputPin == value)
+            if (this.selectedOutputPin == value || this.selectedInputPin == value)
             {
                 this.selectedOutputPin = null;
             }
             else
             {
-                if(!value.IsInputPin)
+                if (!value.IsInputPin)
                 {
                     this.selectedOutputPin = value;
                 }
@@ -159,7 +161,7 @@ namespace LogicDesigner.ViewModel
 
         private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
         {
-            if(this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+            if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
             {
                 this.OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
             }
@@ -167,6 +169,18 @@ namespace LogicDesigner.ViewModel
             this.selectedInputPin = null;
             this.selectedOutputPin = null;
 
+        }
+
+        /// <summary>
+        /// Refreshes the view models, in case a step in program manager finished.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data in this case not necesary.</param>
+        private void RefreshVM(object sender, EventArgs e)
+        {
+            var oldTemp = this.SelectedFieldComponent;
+            this.SelectedFieldComponent = null;
+            this.SelectedFieldComponent = oldTemp;
         }
 
         /// <summary>
@@ -194,10 +208,10 @@ namespace LogicDesigner.ViewModel
             });
             foreach (var item in nodesToChoose)
             {
-                    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
-                    {
-                        this.SelectableComponents.Add(item);
-                    });
+                App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
+                {
+                    this.SelectableComponents.Add(item);
+                });
             }
         }
 
