@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using LogicDesigner.ViewModel;
+using Shared;
 using SharedClasses;
 using System;
 using System.Collections.Generic;
@@ -20,12 +21,14 @@ namespace LogicDesigner.Model
         /// The field nodes
         /// </summary>
         private ICollection<IDisplayableNode> fieldNodes;
-        private List<Tuple<IPin, IPin>> ConnectedOutputInputPairs;
+        private List<Tuple<IPin, IPin>> connectedOutputInputPairs;
 
         /// <summary>
         /// The possible nodes to choose from
         /// </summary>
         private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
+        private readonly string path;
+        public event EventHandler<PinsConnectedEventArgs> PinsDisconnected;
 
         private readonly string componentDirectory;
 
@@ -35,6 +38,8 @@ namespace LogicDesigner.Model
 
         public ProgramManager()
         {
+            //this.path = path;
+            //this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.componentDirectory = "Components";
             this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.Stop = false;
@@ -58,6 +63,18 @@ namespace LogicDesigner.Model
             this.FieldNodes = old.FieldNodes;
             possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
             this.Stop = old.Stop;
+        }
+
+        public List<Tuple<IPin, IPin>> ConnectedOutputInputPairs
+        {
+            get
+            {
+                return this.connectedOutputInputPairs;
+            }
+            set
+            {
+                this.connectedOutputInputPairs = value;
+            }
         }
 
         public ICollection<IDisplayableNode> FieldNodes
@@ -183,6 +200,7 @@ namespace LogicDesigner.Model
                 if (t.Item2 == input)
                 {
                     this.ConnectedOutputInputPairs.Remove(t);
+                    this.OnDisconnectedPins(this, new PinsConnectedEventArgs(t.Item1, input));
                     break;
                 }
             }
@@ -195,9 +213,15 @@ namespace LogicDesigner.Model
                 if (t.Item1 == output && t.Item2 == input)
                 {
                     this.ConnectedOutputInputPairs.Remove(t);
+                    this.OnDisconnectedPins(this, new PinsConnectedEventArgs(output, input));
                     break;
                 }
             }
+        }
+
+        protected void OnDisconnectedPins(object source, PinsConnectedEventArgs e)
+        {
+            this.PinsDisconnected?.Invoke(source, e);
         }
     }
 }

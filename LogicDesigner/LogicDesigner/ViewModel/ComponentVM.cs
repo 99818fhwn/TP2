@@ -19,9 +19,7 @@ namespace LogicDesigner.ViewModel
     public class ComponentVM : INotifyPropertyChanged, ISerializable
     {
         private IDisplayableNode node;
-        private readonly Command activateCommand;
         private readonly Command removeCommand;
-       // private readonly Command executeCommand;
         private double xCoord;
         private double yCoord;
         private readonly string uniqueName;
@@ -30,24 +28,11 @@ namespace LogicDesigner.ViewModel
 
         public event EventHandler<FieldComponentEventArgs> ComponentPropertyChanged;
 
-        //public ComponentVM(IDisplayableNode node, Command activateCommand, 
-        //    Command executeCommand, Command removeCommand, string uniqueName)
-        //{
-        //    this.node = node;
-        //    this.activateCommand = activateCommand;
-        //    this.executeCommand = executeCommand;
-        //    this.removeCommand = removeCommand;
-        //    this.uniqueName = uniqueName;
-
-        //    node.PictureChanged += this.OnPictureChanged;
-        //}
-
         public ComponentVM(IDisplayableNode realComponent, string uniqueName, 
-            Command setPinCommand, Command activateCommand, Command removeCommand)
+            Command setPinCommand, Command removeCommand)
         {
             this.node = realComponent;
             this.uniqueName = uniqueName;
-            this.activateCommand = activateCommand;
             this.removeCommand = removeCommand;
 
             this.node.PictureChanged += this.OnPictureChanged;
@@ -60,6 +45,7 @@ namespace LogicDesigner.ViewModel
                 if(pin != null)
                 {
                     this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand, this));
+                    //this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand));
                 }
 
             }
@@ -69,6 +55,7 @@ namespace LogicDesigner.ViewModel
                 if (pin != null)
                 {
                     this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand, this));
+                    //this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand));
                 }
             }
         }
@@ -114,7 +101,8 @@ namespace LogicDesigner.ViewModel
             {
                 try
                 {
-                    return Imaging.CreateBitmapSourceFromHBitmap(this.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+                    return Imaging.CreateBitmapSourceFromHBitmap(this.Picture.GetHbitmap(), IntPtr.Zero, 
+                        Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
                 }
                 catch (Exception)
                 {
@@ -158,14 +146,6 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public Command ActivateComponentCommand
-        {
-            get
-            {
-                return this.activateCommand;
-            }
-        }
-
         public ObservableCollection<PinVM> OutputPinsVM
         {
             get;
@@ -175,14 +155,6 @@ namespace LogicDesigner.ViewModel
         {
             get;
         }
-
-        //public Command ExecuteCommand
-        //{
-        //    get
-        //    {
-        //        return this.executeCommand;
-        //    }
-        //}
 
         public void Activate()
         {
@@ -220,9 +192,7 @@ namespace LogicDesigner.ViewModel
 
             this.uniqueName = (string)info.GetValue(nameof(this.Name), typeof(string));
 
-            this.activateCommand = (Command)info.GetValue(nameof(this.ActivateComponentCommand), typeof(Command));
             this.removeCommand = (Command)info.GetValue(nameof(this.RemoveComponentCommand), typeof(Command));
-            //this.executeCommand = (Command)info.GetValue(nameof(this.ExecuteCommand), typeof(Command));
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -235,9 +205,8 @@ namespace LogicDesigner.ViewModel
 
             info.AddValue(nameof(this.Name), this.Name, this.Name.GetType());
 
-            info.AddValue(nameof(this.ActivateComponentCommand), this.ActivateComponentCommand, this.ActivateComponentCommand.GetType());
-            //info.AddValue(nameof(this.ExecuteCommand), this.ExecuteCommand, this.ExecuteCommand.GetType());
-            info.AddValue(nameof(this.RemoveComponentCommand), this.RemoveComponentCommand, this.RemoveComponentCommand.GetType());
+            info.AddValue(nameof(this.RemoveComponentCommand), this.RemoveComponentCommand, 
+                this.RemoveComponentCommand.GetType());
         }
 
     }

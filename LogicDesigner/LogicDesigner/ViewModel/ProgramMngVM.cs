@@ -20,9 +20,10 @@ namespace LogicDesigner.ViewModel
     public class ProgramMngVM : INotifyPropertyChanged
     {
         private ProgramManager programManager;
+        private ObservableCollection<ConnectionVM> connectionsVM;
         private ObservableCollection<ComponentVM> nodesVMInField;
         private ObservableCollection<ComponentRepresentationVM> selectableComponents;
-        private int uniqueId;
+        private int uniqueNodeId;
         private PinVM selectedOutputPin;
         private PinVM selectedInputPin;
 
@@ -30,11 +31,13 @@ namespace LogicDesigner.ViewModel
         public event EventHandler<EventArgs> PreFieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
-        public event EventHandler<PinsConnectedEventArgs> PinsConnected;
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private readonly Command activateCommand;
-        private readonly Command executeCommand;
+        private ComponentVM selectedFieldComponent;
+        private int newUniqueConnectionId;
+
         private readonly Command removeCommand;
         private readonly Command addCommand;
 
@@ -68,12 +71,6 @@ namespace LogicDesigner.ViewModel
                 SetSelectedPin(pin);
             });
 
-            this.activateCommand = new Command(obj =>
-            {
-                var nodeInFieldVM = obj as ComponentVM;
-                nodeInFieldVM.Activate();
-            });
-
             this.removeCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
@@ -89,7 +86,7 @@ namespace LogicDesigner.ViewModel
                     }
                 }
 
-                this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);////Temporary fix for testing
+                this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);
             });
 
             this.addCommand = new Command(obj =>
@@ -99,14 +96,16 @@ namespace LogicDesigner.ViewModel
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                var compVM = new ComponentVM(newGenerateComp, CreateUniqueName(realComponent), setPinCommand,
-                    this.activateCommand, this.removeCommand);
+                //var compVM = new ComponentVM(newGenerateComp, CreateUniqueName(realComponent), setPinCommand,
+                //    this.activateCommand, this.removeCommand);
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
+                    removeCommand);
                 this.nodesVMInField.Add(compVM);
                 OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                CreateUniqueName(node), this.activateCommand, this.executeCommand, this.removeCommand
+                CreateUniqueName(node), setPinCommand, this.removeCommand
                 ));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
@@ -115,6 +114,114 @@ namespace LogicDesigner.ViewModel
                 node => new ComponentRepresentationVM(this.addCommand, node));
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
+
+            var connections = this.programManager.ConnectedOutputInputPairs.Select(conn =>
+            new ConnectionVM(new PinVM(conn.Item1, false, setPinCommand), 
+            new PinVM(conn.Item2, true, setPinCommand), this.NewUniqueConnectionId()));
+
+            this.connectionsVM = new ObservableCollection<ConnectionVM>(connections);
+
+            this.programManager.PinsDisconnected += this.OnPinsDisconnected;
+        }
+
+        private string NewUniqueConnectionId()
+        {
+            string s = "Connection" + this.newUniqueConnectionId.ToString();
+            this.newUniqueConnectionId++;
+            return s;
+        }
+
+        public Command StartCommand
+        {
+            get;
+            private set;
+        }
+
+        public Command StepCommand
+        {
+            get;
+            private set;
+        }
+
+        public Command StopCommand
+        {
+            get;
+            private set;
+        }
+
+        public ComponentVM SelectedFieldComponent
+        {
+            get
+            {
+                return this.selectedFieldComponent;
+            }
+
+            set
+            {
+                this.selectedFieldComponent = value;
+                this.FireOnPropertyChanged();
+            }
+        }
+
+
+        public ObservableCollection<ComponentVM> NodesVMInField
+        {
+            get
+            {
+                return this.nodesVMInField;
+            }
+        }
+
+        public ObservableCollection<ComponentRepresentationVM> SelectableComponents
+        {
+            get
+            {
+                return this.selectableComponents;
+            }
+            set
+            {
+                this.selectableComponents = value;
+            }
+        }
+
+        ObservableCollection<ConnectionVM> ConnectionsVM
+        {
+            get
+            {
+                return this.connectionsVM;
+            }
+            set
+            {
+                this.connectionsVM = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the paste command.
+        /// </summary>
+        /// <value>
+        /// The paste command.
+        /// </value>
+        public Command PasteCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                MessageBox.Show("Se Paste Wörks!");
+            }));
+        }
+
+        /// <summary>
+        /// Gets the copy command.
+        /// </summary>
+        /// <value>
+        /// The copy command.
+        /// </value>
+        public Command CopyCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+
+            }));
         }
 
         public void SetSelectedPin(PinVM value)
@@ -137,34 +244,30 @@ namespace LogicDesigner.ViewModel
 
                 if (this.selectedOutputPin != null && this.selectedInputPin != null)
                 {
-                    ConnectPins(this.selectedOutputPin, this.selectedInputPin);
+                    this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
                 }
             }
         }
 
-        public Command StartCommand
+        public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
         {
-            get;
-            private set;
+            this.FieldComponentAdded?.Invoke(this, e);
         }
 
-        public Command StepCommand
+        public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
-            get;
-            private set;
-        }
-
-        public Command StopCommand
-        {
-            get;
-            private set;
+            this.FieldComponentRemoved?.Invoke(this, e);
         }
 
         private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
         {
             if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
             {
-                OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
+                var conn = new ConnectionVM(selectedOutputPin, selectedInputPin,
+                    this.NewUniqueConnectionId());
+                this.connectionsVM.Add(conn);
+
+                this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
             }
 
             this.selectedInputPin = null;
@@ -191,8 +294,8 @@ namespace LogicDesigner.ViewModel
         /// <returns>The identifier will be returned.</returns>
         private string CreateUniqueName(IDisplayableNode node)
         {
-            this.uniqueId++;
-            return CreateNameTag(node.Label, this.uniqueId.ToString());
+            this.uniqueNodeId++;
+            return CreateNameTag(node.Label, this.uniqueNodeId.ToString());
         }
 
         private void NewModuleAdded(object sender, FileSystemEventArgs e)
@@ -239,85 +342,18 @@ namespace LogicDesigner.ViewModel
             this.programManager = new ProgramManager(old.programManager);
         }
 
-        private ComponentVM selectedFieldComponent;
-
-        public ComponentVM SelectedFieldComponent
-        {
-            get
-            {
-                return this.selectedFieldComponent;
-            }
-
-            set
-            {
-                this.selectedFieldComponent = value;
-                FireOnPropertyChanged();
-            }
-        }
-
-
-        public ObservableCollection<ComponentVM> NodesVMInField
-        {
-            get
-            {
-                return this.nodesVMInField;
-            }
-        }
-
-        public ObservableCollection<ComponentRepresentationVM> SelectableComponents
-        {
-            get
-            {
-                return this.selectableComponents;
-            }
-            set
-            {
-                this.selectableComponents = value;
-            }
-        }
-
-
-        public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
-        {
-            this.FieldComponentAdded?.Invoke(this, e);
-        }
-
-        public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
-        {
-            this.FieldComponentRemoved?.Invoke(this, e);
-        }
-
-        /// <summary>
-        /// Gets the paste command.
-        /// </summary>
-        /// <value>
-        /// The paste command.
-        /// </value>
-        public Command PasteCommand
-        {
-            get => new Command(new Action<object>((input) =>
-            {
-                MessageBox.Show("Se Paste Wörks!");
-            }));
-        }
-
-        /// <summary>
-        /// Gets the copy command.
-        /// </summary>
-        /// <value>
-        /// The copy command.
-        /// </value>
-        public Command CopyCommand
-        {
-            get => new Command(new Action<object>((input) =>
-            {
-
-            }));
-        }
-
-        public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
+        public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
         {
             this.PinsConnected?.Invoke(this, e);
+        }
+
+        public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
+        {
+            //System.InvalidOperationException: Sequence contains no elements
+            var conn = this.connectionsVM.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).First();
+            this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
+            this.connectionsVM.Remove(conn);
+
         }
 
         protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)

@@ -1,22 +1,23 @@
-﻿using System;
+﻿using Shared;
+using System;
 
 namespace LogicDesigner.ViewModel
 {
     public class PinsConnectedEventArgs :  EventArgs
     {
-        public PinsConnectedEventArgs(PinVM outputPinVM, PinVM inputPinVM)
+        public PinsConnectedEventArgs(IPin outputPinVM, IPin inputPinVM)
         {
-            this.OutputPinVM = outputPinVM;
-            this.InputPinVM = inputPinVM;
+            this.OutputPin = outputPinVM;
+            this.InputPin = inputPinVM;
         }
 
-        public PinVM OutputPinVM
+        public IPin OutputPin
         {
             get;
             private set;
         }
 
-        public PinVM InputPinVM
+        public IPin InputPin
         {
             get;
             private set;
