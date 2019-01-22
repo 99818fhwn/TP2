@@ -41,6 +41,7 @@ namespace LogicDesigner
         /// </summary>
         public MainWindow()
         {
+            this.Scale = 1;
             this.InitializeComponent();
             this.UndoHistory = new Stack<ProgramMngVM>();
             this.RedoHistory = new Stack<ProgramMngVM>();
@@ -128,6 +129,47 @@ namespace LogicDesigner
                     }
 
                     this.RedoHistory.Push(history);
+                }
+            }));
+        }
+
+        /// <summary>
+        /// Gets the zoom in command.
+        /// </summary>
+        /// <value>
+        /// The zoom in command.
+        /// </value>
+        public Command ZoomInCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (Scale < 2)
+                {
+                    Scale = Scale + 0.05;
+                    var scaleTransform = new ScaleTransform(Scale, Scale);
+                    this.ComponentWindow.RenderTransform = scaleTransform;
+                }
+                //this.ComponentWindow.RenderTransform = scaleTransform;
+            }));
+        }
+
+        private double Scale { get; set; }
+
+        /// <summary>
+        /// Gets the zoom out command.
+        /// </summary>
+        /// <value>
+        /// The zoom out command.
+        /// </value>
+        public Command ZoomOutCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                if (Scale > 0.2)
+                {
+                    Scale = Scale - 0.05;
+                    var scaleTransform = new ScaleTransform(Scale, Scale);
+                    this.ComponentWindow.RenderTransform = scaleTransform;
                 }
             }));
         }

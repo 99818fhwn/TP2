@@ -1,4 +1,5 @@
 ﻿using Shared;
+using SharedClasses;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -96,11 +97,11 @@ namespace LogicDesigner.Model
         {
             while (!this.Stop)
             {
-                this.RunLoop();
+                this.RunLoop(this.Delay);
             }
         }
 
-        public void RunLoop()
+        public void RunLoop(int delay)
         {
             foreach (var t in this.ConnectedOutputInputPairs)
             {
@@ -117,7 +118,7 @@ namespace LogicDesigner.Model
                     }
 
                     node.Execute();
-                    Thread.Sleep(this.Delay);
+                    Task.Delay(delay);
                 }
                 else
                 {
@@ -131,7 +132,7 @@ namespace LogicDesigner.Model
             if (!this.Stop)
             {
                 node.Execute();
-                Thread.Sleep(this.Delay);
+                Task.Delay(this.Delay);
             }
         }
 
@@ -155,13 +156,25 @@ namespace LogicDesigner.Model
                 return false;
             }
 
-            this.UnConnectPins(output, input);
+            this.UnConnectPin(input);
             this.UnConnectPins(output, input);
             this.ConnectedOutputInputPairs.Add(new Tuple<IPin, IPin>(output, input));
 
            
 
             return true;
+        }
+
+        private void UnConnectPin(IPin input)
+        {
+            foreach (var t in this.ConnectedOutputInputPairs)
+            {
+                if (t.Item2 == input)
+                {
+                    this.ConnectedOutputInputPairs.Remove(t);
+                    break;
+                }
+            }
         }
 
         public void UnConnectPins(IPin output, IPin input)

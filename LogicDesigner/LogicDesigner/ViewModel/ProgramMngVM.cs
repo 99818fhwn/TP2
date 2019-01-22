@@ -52,7 +52,7 @@ namespace LogicDesigner.ViewModel
 
             this.StepCommand = new Command(obj =>
             {
-                this.programManager.RunLoop(); // step
+                this.programManager.RunLoop(0); // step
             });
 
             this.StopCommand = new Command(obj =>
@@ -63,7 +63,7 @@ namespace LogicDesigner.ViewModel
             var setPinCommand = new Command(obj =>
             {
                 var pin = obj as PinVM;
-                this.SetSelectedPin(pin);
+                SetSelectedPin(pin);
             });
 
             this.activateCommand = new Command(obj =>
@@ -97,8 +97,8 @@ namespace LogicDesigner.ViewModel
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
-                    activateCommand, removeCommand);
+                var compVM = new ComponentVM(newGenerateComp, CreateUniqueName(realComponent), setPinCommand,
+                    this.activateCommand, this.removeCommand);
                 this.nodesVMInField.Add(compVM);
                 OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
@@ -117,13 +117,14 @@ namespace LogicDesigner.ViewModel
 
         public void SetSelectedPin(PinVM value)
         {
-            if(this.selectedOutputPin == value || this.selectedInputPin == value)
+            if (this.selectedOutputPin == value || this.selectedInputPin == value)
             {
+                this.selectedInputPin = null;
                 this.selectedOutputPin = null;
             }
             else
             {
-                if(!value.IsInputPin)
+                if (!value.IsInputPin)
                 {
                     this.selectedOutputPin = value;
                 }
@@ -134,7 +135,7 @@ namespace LogicDesigner.ViewModel
 
                 if (this.selectedOutputPin != null && this.selectedInputPin != null)
                 {
-                    this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
+                    ConnectPins(this.selectedOutputPin, this.selectedInputPin);
                 }
             }
         }
@@ -159,9 +160,9 @@ namespace LogicDesigner.ViewModel
 
         private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
         {
-            if(this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+            if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
             {
-                this.OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
+                OnPinsConnected(this, new PinsConnectedEventArgs(selectedOutputPin, selectedInputPin));
             }
 
             this.selectedInputPin = null;
@@ -194,10 +195,10 @@ namespace LogicDesigner.ViewModel
             });
             foreach (var item in nodesToChoose)
             {
-                    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
-                    {
-                        this.SelectableComponents.Add(item);
-                    });
+                App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
+                {
+                    this.SelectableComponents.Add(item);
+                });
             }
         }
 
@@ -236,7 +237,7 @@ namespace LogicDesigner.ViewModel
             set
             {
                 this.selectedFieldComponent = value;
-                this.FireOnPropertyChanged();
+                FireOnPropertyChanged();
             }
         }
 
