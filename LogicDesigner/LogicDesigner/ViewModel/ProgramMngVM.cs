@@ -23,7 +23,6 @@ namespace LogicDesigner.ViewModel
         private int uniqueId;
         private PinVM selectedOutputPin;
         private PinVM selectedInputPin;
-        //private Command setPinCommand;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         public event EventHandler<EventArgs> PreFieldComponentAdded;
@@ -41,6 +40,33 @@ namespace LogicDesigner.ViewModel
         {
             this.programManager = new ProgramManager();
             this.programManager.Watcher.Created += NewModuleAdded;
+
+            this.StartCommand = new Command(obj =>
+            {
+                Task.Run(() =>
+                {
+                    //int progress = 0;
+                    //for (; ; )
+                    //{
+                    //    System.Threading.Thread.Sleep(1);
+                    //    progress++;
+                    //    Logger.Info(progress);
+                    //}
+                    this.programManager.Run();
+                });
+
+                //this.programManager.Run();
+            });
+
+            this.StepCommand = new Command(obj =>
+            {
+                this.programManager.RunCircle(); // step
+            });
+
+            this.StopCommand = new Command(obj =>
+            {
+                this.programManager.StopProgram();
+            });
 
             var setPinCommand = new Command(obj =>
             {
@@ -134,7 +160,24 @@ namespace LogicDesigner.ViewModel
                 }
             }
         }
-        
+
+        public Command StartCommand
+        {
+            get;
+            private set;
+        }
+
+        public Command StepCommand
+        {
+            get;
+            private set;
+        }
+
+        public Command StopCommand
+        {
+            get;
+            private set;
+        }
 
         private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
         {

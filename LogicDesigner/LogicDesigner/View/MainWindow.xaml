@@ -24,7 +24,12 @@
                 </Setter.Value>
             </Setter>
         </Style>
+        <!--<Image x:Key="StepIcon" Source="ButtonPictures/step.jpg"/>-->
     </Window.Resources>
+
+    <!--<UserControl.Resources>
+        <Image x:Key="MyImage" Source.../>
+    </UserControl.Resources>-->
 
     <!--KeyboardShortcuts-->
     <Window.InputBindings>
@@ -55,10 +60,12 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition/>
+            <RowDefinition Height="100"/>
+            <!--<RowDefinition Height="*"/>-->
+            <!--<RowDefinition Height="*"/>-->
         </Grid.RowDefinitions>
-        <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto">
+        <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto" Margin="0,0,-0.4,0">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
                 <Grid Name="ComponentWindow" Height="10000" Width="10000">
                     <Grid.InputBindings>
@@ -75,7 +82,7 @@
                 </Grid>
             </ScrollViewer>
         </Grid>
-        <DockPanel Grid.ColumnSpan="2">
+        <DockPanel Grid.ColumnSpan="2" Margin="0,0,-0.4,318.8" Grid.RowSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
                     <MenuItem Header="_Load"/>
@@ -85,7 +92,62 @@
             </Menu>
             <StackPanel></StackPanel>
         </DockPanel>
-        <ListView Grid.Row="1" ItemsSource="{Binding SelectableComponents}">
+
+        <Grid Grid.Column ="1" Grid.Row ="2" 
+              Width="Auto" Margin="0,4.2,16.6,17" 
+              Background="White">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Button Background="White" Grid.Column="1" Margin="2" 
+                    Height="40" VerticalAlignment="Top"
+                    HorizontalAlignment="Left"
+                    Width="100"
+                    Command="{Binding StartCommand}"
+                    >
+                <!--<Button.Background>
+                    --><!--<ImageBrush ImageSource="ButtonPictures/step.png">
+                        
+                    </ImageBrush>--><!--
+                </Button.Background>-->  
+                Start
+            </Button>
+            <Button Background="White" Grid.Column="2" Margin="2"
+                    Height="40" VerticalAlignment="Top"
+                    HorizontalAlignment="Center"
+                    Width="100"
+                    Command="{Binding StepCommand}">
+                <!--<StackPanel Orientation="Horizontal">
+                    <Image Source="ButtonPictures/step.png" Width="34" 
+                           Height="34"
+                           HorizontalAlignment="Center"/>
+                    --><!--<TextBlock Text="" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>--><!--
+                </StackPanel>-->
+                Step
+            </Button>
+            <Button Background="White" Grid.Column="3" Margin="2"
+                    Height="40" VerticalAlignment="Top"
+                    HorizontalAlignment="Right"
+                    Width="100"
+                    Command="{Binding StopCommand}">
+                <!--<StackPanel Orientation="Horizontal">
+                    <Image Source="ButtonPictures/stop.png" 
+                           Width="34" Height="34"
+                           HorizontalAlignment="Center"/>
+                    --><!--<TextBlock Text="" VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>--><!--
+                </StackPanel>-->
+                Stop
+            </Button>
+        </Grid>
+
+        <ListView Grid.Row="1" Grid.RowSpan="1" ItemsSource="{Binding SelectableComponents}">
             <ListView.View>
                 <GridView>
                     <GridViewColumn Width="Auto" Header="Component">
@@ -111,23 +173,39 @@
         <ScrollViewer Grid.Row="2">
             <StackPanel Name="CurrentSelectedComponentView">
                 <StackPanel>
-                    <TextBlock Text="Label"/>
+                    <TextBlock Text="Label:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding  Name}" TextWrapping="WrapWithOverflow"/>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="Description"/>
+                    <TextBlock Text="Description:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding Description}" TextWrapping="WrapWithOverflow"/>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="X-Pos" />
+                    <TextBlock Text="X-Pos:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding XCoord}"/>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="Y-Pos"/>
+                    <TextBlock Text="Y-Pos:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding YCoord}"/>
                 </StackPanel>
                 <StackPanel>
                     <Image Height="150" Stretch="Uniform" Source="{Binding Image}" VerticalAlignment="Center"></Image>
+                </StackPanel>
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding InputPinsVM}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Grid></Grid>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Label}"></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
