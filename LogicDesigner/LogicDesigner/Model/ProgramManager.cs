@@ -94,25 +94,13 @@ namespace LogicDesigner.Model
 
         public void Run()
         {
-            //var t = Task.Run(() =>
-            //{
-            //    this.RunCircle();
-            //});
-
             while (!this.Stop)
             {
-                //Dispatcher.CurrentDispatcher.BeginInvoke(new ThreadStart(() =>
-                //{
-                //    this.RunCircle();
-                //}));
-
-                //Dispatcher.CurrentDispatcher.BeginInvoke(new ThreadStart(t.Start));
-
-                this.RunCircle();
+                this.RunLoop();
             }
         }
 
-        public void RunCircle()
+        public void RunLoop()
         {
             foreach (var t in this.ConnectedOutputInputPairs)
             {
@@ -127,14 +115,6 @@ namespace LogicDesigner.Model
                     {
                         t.Item2.Value.Current = t.Item1.Value.Current;
                     }
-
-                    //var tsk = Task.Run(() =>
-                    //{
-                    //    node.Execute();
-                    //});
-                    
-
-                    //Dispatcher.CurrentDispatcher.BeginInvoke(new ThreadStart(tsk.Start));
 
                     node.Execute();
                     Thread.Sleep(this.Delay);
@@ -151,8 +131,7 @@ namespace LogicDesigner.Model
             if (!this.Stop)
             {
                 node.Execute();
-                //MessageBox.Show("Step made");
-                //Thread.Sleep(this.Delay);
+                Thread.Sleep(this.Delay);
             }
         }
 
@@ -177,38 +156,10 @@ namespace LogicDesigner.Model
             }
 
             this.UnConnectPins(output, input);
+            this.UnConnectPins(output, input);
             this.ConnectedOutputInputPairs.Add(new Tuple<IPin, IPin>(output, input));
 
-            //if(output.Value.Current == null && input.Value.Current == null)
-            //{
-            //    //IValue instanc = (IValue)Activator.CreateInstance(outputType);
-
-            //    //output.Value.Current = instanc;
-
-            //    var instance = Activator.CreateInstance(outputType);
-
-            //    output.Value.Current = instance;
-
-            //    input.Value.Current = output.Value.Current;
-            //    input.Value = output.Value;
-
-            //    return true;
-            //}
-
-            //input.Value = output.Value;
-
-            //input.Value = Activator.CreateInstance(input.Value.GetType());
-            //input.Value.Current = output.Value.Current;
-
-            // test
-            //try
-            //{
-            //    output.Value.Current = true;
-            //}
-            //catch(Exception)
-            //{
-
-            //}
+           
 
             return true;
         }

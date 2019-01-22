@@ -48,18 +48,11 @@ namespace LogicDesigner.ViewModel
                Task.Run(() => {
                    this.programManager.Run();
                });
-
-                // Dispatcher.CurrentDispatcher.BeginInvoke(new ThreadStart(() =>
-                //{
-                //    this.programManager.Run();
-                //}));
-
-                //this.programManager.Run();
             });
 
             this.StepCommand = new Command(obj =>
             {
-                this.programManager.RunCircle(); // step
+                this.programManager.RunLoop(); // step
             });
 
             this.StopCommand = new Command(obj =>
@@ -79,21 +72,8 @@ namespace LogicDesigner.ViewModel
                 nodeInFieldVM.Activate();
             });
 
-            //this.executeCommand = new Command(obj =>
-            //{
-            //    var nodeInFieldVM = obj as ComponentVM;
-            //    nodeInFieldVM.Activate();
-            //});
-
-            //var executeCommand = new Command(obj =>
-            //{
-            //    var nodeInFieldVM = obj as ComponentVM;
-            //    nodeInFieldVM.Execute();
-            //});
-
             this.removeCommand = new Command(obj =>
             {
-                // null reference exception
                 var nodeInFieldVM = obj as ComponentVM;
                 foreach (var n in this.programManager.FieldNodes)
                 {
@@ -112,11 +92,10 @@ namespace LogicDesigner.ViewModel
 
             this.addCommand = new Command(obj =>
             {
-                // null reference exception?
                 var representationNode = obj as ComponentRepresentationVM;
                 this.PreFieldComponentAdded(this, new EventArgs());
                 var realComponent = representationNode.Node;
-                var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());////Create new Component
+                var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
                 var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
                     activateCommand, removeCommand);
