@@ -159,39 +159,105 @@
             <ScrollViewer Grid.Row="1" Height="300">
                 <StackPanel Name="CurrentSelectedComponentView">
                     <StackPanel>
-                        <TextBlock Text="Label:" FontWeight="Medium"/>
+                        <TextBlock Text="Label:" FontWeight="Bold" TextDecorations="Underline"/>
                         <TextBlock Text="{Binding  Name}" TextWrapping="WrapWithOverflow"/>
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Text="Description:" FontWeight="Medium"/>
+                        <TextBlock Text="Description:" FontWeight="Bold" TextDecorations="Underline"/>
                         <TextBlock Text="{Binding Description}" TextWrapping="WrapWithOverflow"/>
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Text="X-Pos:" FontWeight="Medium"/>
+                        <TextBlock Text="X-Pos:" FontWeight="Bold" TextDecorations="Underline"/>
                         <TextBlock Text="{Binding XCoord}"/>
                     </StackPanel>
                     <StackPanel>
-                        <TextBlock Text="Y-Pos:" FontWeight="Medium"/>
+                        <TextBlock Text="Y-Pos:" FontWeight="Bold" TextDecorations="Underline"/>
                         <TextBlock Text="{Binding YCoord}"/>
                     </StackPanel>
                     <StackPanel>
                         <Image Height="150" Stretch="Uniform" Source="{Binding Image}" VerticalAlignment="Center"></Image>
                     </StackPanel>
                     <StackPanel>
-                        <ItemsControl Name="InputPinView" ItemsSource="{Binding InputPinsVM}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <Grid></Grid>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel>
-                                        <TextBlock Text="{Binding Label}"></TextBlock>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock FontWeight="Bold" TextDecorations="Underline"> Input Pins:</TextBlock>
+                        <ListView Name="InputPinView" ItemsSource="{Binding InputPinsVM}">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn>
+                                        <GridViewColumnHeader>
+                                            PinLabel
+                                        </GridViewColumnHeader>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock Text="{Binding Pin.Label}"></TextBlock>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn>
+                                        <GridViewColumnHeader>
+                                            Value
+                                        </GridViewColumnHeader>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Pin.Value.Current}"></TextBlock>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn>
+                                        <GridViewColumnHeader>
+                                            Type
+                                        </GridViewColumnHeader>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding PinValueType}"></TextBlock>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
+                    </StackPanel>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" TextDecorations="Underline"> Output Pins:</TextBlock>
+                        <ListView Name="OutputPinView" ItemsSource="{Binding OutputPinsVM}">
+                            <ListView.View>
+                                <GridView>
+                                    <GridViewColumn>
+                                        <GridViewColumnHeader>
+                                            PinLabel
+                                        </GridViewColumnHeader>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock>
+                                                    <TextBlock Text="{Binding Pin.Label}"></TextBlock>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn>
+                                        <GridViewColumnHeader>
+                                            Value
+                                        </GridViewColumnHeader>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Pin.Value.Current}"></TextBlock>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                    <GridViewColumn>
+                                        <GridViewColumnHeader>
+                                            Type
+                                        </GridViewColumnHeader>
+                                        <GridViewColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding PinValueType}"></TextBlock>
+                                            </DataTemplate>
+                                        </GridViewColumn.CellTemplate>
+                                    </GridViewColumn>
+                                </GridView>
+                            </ListView.View>
+                        </ListView>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>

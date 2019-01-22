@@ -63,7 +63,7 @@ namespace LogicDesigner.ViewModel
                 }
 
             }
-
+            
             foreach (var pin in this.node.Inputs)
             {
                 if (pin != null)
