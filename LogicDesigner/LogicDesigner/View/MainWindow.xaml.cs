@@ -51,7 +51,6 @@ namespace LogicDesigner
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
             this.CurrentSelectedComponentView.SetBinding(DataContextProperty ,selectBind);
-            this.InputPinView.SetBinding(ItemsControl.DataContextProperty, selectBind);
 
             //this.UndoHistory.Push(new ProgramMngVM(programMngVM));
 
