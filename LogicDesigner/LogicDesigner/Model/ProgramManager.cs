@@ -1,4 +1,5 @@
 ﻿using Shared;
+using SharedClasses;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -122,7 +123,6 @@ namespace LogicDesigner.Model
                     node.Execute();
                     //MessageBox.Show("Step made");
                     Thread.Sleep(this.Delay);
-
                     //this.Step();
                 }
                 else
@@ -169,7 +169,6 @@ namespace LogicDesigner.Model
             }
 
             input.Value.Current = output.Value.Current;
-
             //else if(output.Value.Current == null && input.Value.Current != null)
             //{
             //    output.Value.Current = input.Value.Current;

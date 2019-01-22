@@ -51,6 +51,16 @@
         <KeyBinding Modifiers="Ctrl"
                     Key="Y"
                     Command="{Binding RedoCommand}" />
+
+        <!--Zoom in-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="OemPlus"
+                    Command="{Binding ZoomInCommand}" />
+
+        <!--Zoom ouz-->
+        <KeyBinding Modifiers="Ctrl"
+                    Key="OemMinus"
+                    Command="{Binding ZoomOutCommand}" />
     </Window.InputBindings>
 
     <Grid Name="MainGrid">
@@ -68,17 +78,6 @@
         <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto" Margin="0,0,-0.4,0">
             <ScrollViewer Loaded="ScrollViewerLoaded" CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
                 <Grid Name="ComponentWindow" Height="10000" Width="10000">
-                    <Grid.InputBindings>
-                        <!--Copy-->
-                        <KeyBinding Modifiers="Ctrl"
-                        Key="C"
-                        Command="{Binding CopyCommand}" />
-
-                        <!--Paste-->
-                        <KeyBinding Modifiers="Ctrl"
-                        Key="V"
-                        Command="{Binding PasteCommand}" />
-                    </Grid.InputBindings>
                 </Grid>
             </ScrollViewer>
         </Grid>
