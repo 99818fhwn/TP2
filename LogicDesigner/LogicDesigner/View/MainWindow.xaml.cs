@@ -354,7 +354,7 @@ namespace LogicDesigner
         private void DrawNewComponent(ComponentVM componentVM)
         {
             // New component
-            Grid sampleComponent = new Grid();
+            Grid newComponent = new Grid();
 
             int yOffset = -(componentVM.Picture.Height / 2) + 10;
             int offsetStepValue = 0;
@@ -382,7 +382,7 @@ namespace LogicDesigner
 
                 yOffset += offsetStepValue;
 
-                sampleComponent.Children.Add(pinButton);
+                newComponent.Children.Add(pinButton);
             }
 
             yOffset = -(componentVM.Picture.Height / 2) + 10;
@@ -409,13 +409,13 @@ namespace LogicDesigner
                 componentVM.OutputPinsVM[i].XPosition = componentVM.Picture.Width / 2;
                 componentVM.OutputPinsVM[i].YPosition = yOffset;
 
-                sampleComponent.Children.Add(pinButton);
+                newComponent.Children.Add(pinButton);
             }
 
             // Component Body
             Button sampleBody = new Button();
 
-            sampleComponent.Name = componentVM.Name;
+            newComponent.Name = componentVM.Name;
             sampleBody.Name = componentVM.Name + "Body"; 
             sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
@@ -442,12 +442,12 @@ namespace LogicDesigner
 
             label.RenderTransform = new TranslateTransform(0, (-componentVM.Picture.Height / 2) - 10);
 
-            sampleComponent.Height = sampleBody.Height + label.Height + 20;
-            sampleComponent.Width = sampleBody.Width + label.Width + 20;
-            sampleComponent.Children.Add(sampleBody);
-            sampleComponent.Children.Add(label);
+            newComponent.Height = sampleBody.Height + label.Height + 20;
+            newComponent.Width = sampleBody.Width + label.Width + 20;
+            newComponent.Children.Add(sampleBody);
+            newComponent.Children.Add(label);
             
-            this.ComponentWindow.Children.Add(sampleComponent);
+            this.ComponentWindow.Children.Add(newComponent);
         }
 
         /// <summary>
@@ -464,18 +464,26 @@ namespace LogicDesigner
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
             line.Stroke = Brushes.Black;
-            line.X1 = outputPin.XPosition;
-            line.X2 = inputPin.XPosition;
+            line.X1 = inputPin.XPosition;
+            line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
 
-            Grid grid = new Grid();
-            grid.Height = ComponentWindow.Height;
-            grid.Width = ComponentWindow.Width;
+            line.X1 = 0;
+            line.X2 = 300;
+            line.Y1 = 0;
+            line.Y2 = 0;
+            
+            Grid lineBody = new Grid();
 
-            grid.Children.Add(line);
+            Button button = new Button();
+            button.Height = 100;
+            button.Width = 100;
 
-            this.ComponentWindow.Children.Add(grid);            
+            lineBody.Children.Add(line);
+            lineBody.Children.Add(button);
+
+            this.ComponentWindow.Children.Add(lineBody);            
         }
 
         /// <summary>
