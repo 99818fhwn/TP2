@@ -147,10 +147,7 @@ namespace LogicDesigner
                 {
                     Scale = Scale + 0.05;
                     var scaleTransform = new ScaleTransform(Scale, Scale);
-                    foreach (UIElement child in this.ComponentWindow.Children)
-                    {
-                        child.RenderTransform = scaleTransform;
-                    }
+                    this.ComponentWindow.RenderTransform = scaleTransform;
                 }
                 //this.ComponentWindow.RenderTransform = scaleTransform;
             }));
@@ -172,10 +169,7 @@ namespace LogicDesigner
                 {
                     Scale = Scale - 0.05;
                     var scaleTransform = new ScaleTransform(Scale, Scale);
-                    foreach (UIElement child in this.ComponentWindow.Children)
-                    {
-                        child.RenderTransform = scaleTransform;
-                    }
+                    this.ComponentWindow.RenderTransform = scaleTransform;
                 }
             }));
         }
