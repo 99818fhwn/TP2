@@ -111,23 +111,39 @@
         <ScrollViewer Grid.Row="2">
             <StackPanel Name="CurrentSelectedComponentView">
                 <StackPanel>
-                    <TextBlock Text="Label"/>
+                    <TextBlock Text="Label:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding  Name}" TextWrapping="WrapWithOverflow"/>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="Description"/>
+                    <TextBlock Text="Description:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding Description}" TextWrapping="WrapWithOverflow"/>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="X-Pos" />
+                    <TextBlock Text="X-Pos:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding XCoord}"/>
                 </StackPanel>
                 <StackPanel>
-                    <TextBlock Text="Y-Pos"/>
+                    <TextBlock Text="Y-Pos:" FontWeight="Medium"/>
                     <TextBlock Text="{Binding YCoord}"/>
                 </StackPanel>
                 <StackPanel>
                     <Image Height="150" Stretch="Uniform" Source="{Binding Image}" VerticalAlignment="Center"></Image>
+                </StackPanel>
+                <StackPanel>
+                    <ItemsControl ItemsSource="{Binding InputPinsVM}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <Grid></Grid>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Label}"></TextBlock>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
