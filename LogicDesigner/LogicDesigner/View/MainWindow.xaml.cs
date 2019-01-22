@@ -219,6 +219,11 @@ namespace LogicDesigner
             this.CurrentMouse = new Point(0, 0);
         }
 
+        /// <summary>
+        /// Gets the parent grid component.
+        /// </summary>
+        /// <param name="uIElement">The ui element.</param>
+        /// <returns></returns>
         private ComponentVM GetParentGridComponent(UIElement uIElement)
         {
             var parent = (UIElement)VisualTreeHelper.GetParent(uIElement);
@@ -241,7 +246,6 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseMovePre(object sender, MouseEventArgs e)
         {
-            // Components are being reset, because their translation is not persistent and the temp variables are reset after letting the mouse go
             var pressedComponent = (UIElement)e.Source;
 
             var parent = (UIElement)VisualTreeHelper.GetParent(pressedComponent);
@@ -268,8 +272,7 @@ namespace LogicDesigner
                 {
                     var previousMouse = this.CurrentMouse;
                     this.CurrentMouse = Mouse.GetPosition(this.ComponentWindow);
-
-                    // Point relativePoint = pressedComponent.TransformToAncestor(ComponentWindow).Transform(new Point(0, 0));
+                    
                     if (previousMouse != new Point(0, 0) && this.CurrentMouse != previousMouse)
                     {
                         Point movepoint = new Point(this.CurrentMouse.X - previousMouse.X, this.CurrentMouse.Y - previousMouse.Y);
@@ -473,12 +476,20 @@ namespace LogicDesigner
             line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
-                        
-            Grid lineBody = new Grid();
-            
-            lineBody.Children.Add(line);
 
-            this.ComponentWindow.Children.Add(lineBody);            
+            Panel.SetZIndex(line, -100);
+
+            this.ComponentWindow.Children.Add(line);            
+        }
+
+        /// <summary>
+        /// Called when pins disconnected.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
+        public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
+        {
+
         }
 
         ///// <summary>
