@@ -7,10 +7,8 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 using LogicDesigner.Commands;
 using LogicDesigner.Model;
 using Shared;
@@ -45,14 +43,24 @@ namespace LogicDesigner.ViewModel
 
             this.StartCommand = new Command(obj =>
             {
-               Task.Run(() => {
-                   this.programManager.Run();
-               });
+                Task.Run(() =>
+                {
+                    //int progress = 0;
+                    //for (; ; )
+                    //{
+                    //    System.Threading.Thread.Sleep(1);
+                    //    progress++;
+                    //    Logger.Info(progress);
+                    //}
+                    this.programManager.Run();
+                });
+
+                //this.programManager.Run();
             });
 
             this.StepCommand = new Command(obj =>
             {
-                this.programManager.RunLoop(0); // step
+                this.programManager.RunCircle(); // step
             });
 
             this.StopCommand = new Command(obj =>
@@ -72,8 +80,21 @@ namespace LogicDesigner.ViewModel
                 nodeInFieldVM.Activate();
             });
 
+            this.executeCommand = new Command(obj =>
+            {
+                var nodeInFieldVM = obj as ComponentVM;
+                nodeInFieldVM.Activate();
+            });
+
+            //var executeCommand = new Command(obj =>
+            //{
+            //    var nodeInFieldVM = obj as ComponentVM;
+            //    nodeInFieldVM.Execute();
+            //});
+
             this.removeCommand = new Command(obj =>
             {
+                // null reference exception
                 var nodeInFieldVM = obj as ComponentVM;
                 foreach (var n in this.programManager.FieldNodes)
                 {
@@ -92,10 +113,11 @@ namespace LogicDesigner.ViewModel
 
             this.addCommand = new Command(obj =>
             {
+                // null reference exception?
                 var representationNode = obj as ComponentRepresentationVM;
                 this.PreFieldComponentAdded(this, new EventArgs());
                 var realComponent = representationNode.Node;
-                var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
+                var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());////Create new Component
                 this.programManager.FieldNodes.Add(newGenerateComp);
                 var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
                     activateCommand, removeCommand);
@@ -119,7 +141,6 @@ namespace LogicDesigner.ViewModel
         {
             if(this.selectedOutputPin == value || this.selectedInputPin == value)
             {
-                this.selectedInputPin = null;
                 this.selectedOutputPin = null;
             }
             else

@@ -9,7 +9,6 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Threading;
 
 namespace LogicDesigner.Model
 {
@@ -19,7 +18,6 @@ namespace LogicDesigner.Model
         /// The field nodes
         /// </summary>
         private ICollection<IDisplayableNode> fieldNodes;
-        private List<Tuple<IPin, IPin>> ConnectedOutputInputPairs;
 
         /// <summary>
         /// The possible nodes to choose from
@@ -30,7 +28,6 @@ namespace LogicDesigner.Model
 
         public ProgramManager()
         {
-            this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
@@ -45,9 +42,25 @@ namespace LogicDesigner.Model
             Watcher.IncludeSubdirectories = true;
             Watcher.EnableRaisingEvents = true;
             Watcher.Filter = "";
+            // test - connect pins
+            //for (int i = 0; i < this.possibleNodesToChooseFrom.Count(); i++)
+            //{
+            //    for (int g = 0; g < this.possibleNodesToChooseFrom.Count(); g++)
+            //    {
+            //        try
+            //        {
+            //            this.ConnectPins(this.possibleNodesToChooseFrom.ElementAt(i).Outputs.ElementAt(0),
+            //            this.possibleNodesToChooseFrom.ElementAt(g).Inputs.ElementAt(0));
+            //        }
+            //        catch(ArgumentOutOfRangeException)
+            //        {
+
+            //        }
+            //    }
+            //}
         }
 
-        public ProgramManager(ProgramManager old)
+        public ProgramManager (ProgramManager old)
         {
             this.Delay = old.Delay;
             this.FieldNodes = old.FieldNodes;
@@ -94,30 +107,23 @@ namespace LogicDesigner.Model
 
         public void Run()
         {
-            while (!this.Stop)
+            while(!this.Stop)
             {
-                this.RunLoop(this.Delay);
+                this.RunCircle();
             }
         }
 
-        public void RunLoop(int delay)
+        public void RunCircle()
         {
-            foreach (var t in this.ConnectedOutputInputPairs)
+            foreach(INode node in this.fieldNodes)
             {
-                t.Item2.Value.Current = t.Item1.Value.Current;
-            }
-
-            foreach (INode node in this.fieldNodes)
-            {
-                if (!this.Stop)
+                if(!this.Stop)
                 {
-                    foreach (var t in this.ConnectedOutputInputPairs)
-                    {
-                        t.Item2.Value.Current = t.Item1.Value.Current;
-                    }
-
                     node.Execute();
-                    Task.Delay(delay);
+                    //MessageBox.Show("Step made");
+                    Thread.Sleep(this.Delay);
+
+                    //this.Step();
                 }
                 else
                 {
@@ -131,7 +137,8 @@ namespace LogicDesigner.Model
             if (!this.Stop)
             {
                 node.Execute();
-                Task.Delay(this.Delay);
+                //MessageBox.Show("Step made");
+                //Thread.Sleep(this.Delay);
             }
         }
 
@@ -150,42 +157,34 @@ namespace LogicDesigner.Model
                 return false;
             }
 
-            if (outputType != inputType)
+            if(outputType != inputType)
             {
                 return false;
             }
+            
+             // if no value in both nodes - new value reference
+             // not null - int bool no null value 
+            if(output.Value.Current == null && input.Value.Current == null)
+            {
+                IValue instance = (IValue)Activator.CreateInstance(outputType);
 
-            this.UnConnectPin(input);
-            this.UnConnectPins(output, input);
-            this.ConnectedOutputInputPairs.Add(new Tuple<IPin, IPin>(output, input));
+                output.Value.Current = instance;
+                input.Value.Current = output.Value.Current;
+                return true;
+            }
 
-           
+            input.Value.Current = output.Value.Current;
+
+            //else if(output.Value.Current == null && input.Value.Current != null)
+            //{
+            //    output.Value.Current = input.Value.Current;
+            //}
+            //else if (input.Value.Current != null && output.Value.Current == null)
+            //{
+            //    input.Value.Current = output.Value.Current;
+            //}
 
             return true;
-        }
-
-        private void UnConnectPin(IPin input)
-        {
-            foreach (var t in this.ConnectedOutputInputPairs)
-            {
-                if (t.Item2 == input)
-                {
-                    this.ConnectedOutputInputPairs.Remove(t);
-                    break;
-                }
-            }
-        }
-
-        public void UnConnectPins(IPin output, IPin input)
-        {
-            foreach (var t in this.ConnectedOutputInputPairs)
-            {
-                if (t.Item1 == output && t.Item2 == input)
-                {
-                    this.ConnectedOutputInputPairs.Remove(t);
-                    break;
-                }
-            }
         }
     }
 }
