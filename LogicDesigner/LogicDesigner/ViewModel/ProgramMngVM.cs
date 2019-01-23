@@ -306,7 +306,7 @@
                     this.ConnectionsVM = new ObservableCollection<ConnectionVM>(futureHistory.Item1);
                     this.NodesVMInField = new ObservableCollection<ComponentVM>(futureHistory.Item2);
                     ////Das ist sehr wahrscheinlich nicht optimal...
-                    this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.InputPin.Pin, x.OutputPin.Pin)).ToList();
+                    this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.OutputPin.Pin, x.InputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
                 }
             });
