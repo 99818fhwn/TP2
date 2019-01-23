@@ -32,7 +32,7 @@ namespace LogicDesigner.ViewModel
         private Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>> redoHistoryStack;
 
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
-        public event EventHandler<EventArgs> PreFieldComponentAdded;
+        //public event EventHandler<EventArgs> PreFieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
         public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
@@ -87,72 +87,134 @@ namespace LogicDesigner.ViewModel
                         this.nodesVMInField.Remove(nodeInFieldVM);
                         this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
                         this.RemoveDeletedComponentConnections(nodeInFieldVM);
+                        this.UpdateUndoHistory(); ////Not sure if i have to update the program manager !!!!!!!!
                         break;
                     }
                 }
 
+                ////Or i just place it here ... but then the model isnt synced
+                this.FireOnComponentVMRemoved(nodeInFieldVM);
                 this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);
             });
 
             this.addCommand = new Command(obj =>
             {
                 var representationNode = obj as ComponentRepresentationVM;
-                this.PreFieldComponentAdded(this, new EventArgs());
+                //this.PreFieldComponentAdded(this, new EventArgs());
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
 
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), this.setPinCommand,
                     this.removeCommand);
-                this.UpdateUndoHistory();
                 this.nodesVMInField.Add(compVM);
                 this.FireOnFieldComponentAdded(compVM);
+                this.UpdateUndoHistory();
             });
 
             this.UndoCommand = new Command(obj =>
-           {
-               if (this.undoHistoryStack.Count > 0)
-               {
-                   var history = this.undoHistoryStack.Pop();
+            {
+                if (this.undoHistoryStack.Count > 0)
+                {
+                    var history = this.undoHistoryStack.Pop();
+                    this.redoHistoryStack.Push(history);
+                    var differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(history.Item2));
+                    differencesComps.AddRange(new List<ComponentVM>(history.Item2.Except(this.NodesVMInField)));
 
-                   var differencesComps = this.NodesVMInField.Except(history.Item2);
+                    if (differencesComps.Count == 0 && this.undoHistoryStack.Count > 0)
+                    {
+                        history = this.undoHistoryStack.Pop();
+                        this.redoHistoryStack.Push(history);
+                        differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(history.Item2));
+                        differencesComps.AddRange(new List<ComponentVM>(history.Item2.Except(this.NodesVMInField)));
+                    }
 
-                   foreach (var item in differencesComps)
-                   {
-                       if (!history.Item2.Contains(item))
-                       {
-                           this.FireOnComponentVMRemoved(item);
-                       }
-                       else
-                       {
-                           this.FireOnFieldComponentAdded(item);
-                       }
-                   }
+                    foreach (var item in differencesComps)
+                    {
+                        if (!history.Item2.Contains(item))
+                        {
+                            this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(item));
+                            this.RemoveDeletedComponentConnections(item);
+                        }
+                        else
+                        {
+                            this.FireOnFieldComponentAdded(item);
+                        }
+                    }
 
-                   var differencesConnects = this.ConnectionsVM.Except(history.Item1);
+                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(history.Item1));
+                    differencesConnects.AddRange(new List<ConnectionVM>(history.Item1.Except(this.ConnectionsVM)));
 
-                   foreach (var item in differencesConnects)
-                   {
-                       if (!history.Item1.Contains(item))
-                       {
-                           this.OnPinsDisconnected(this, new PinsConnectedEventArgs(item.OutputPin.Pin, item.InputPin.Pin));
-                       }
-                       else
-                       {
-                           this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(item));
-                       }
-                   }
+                    foreach (var item in differencesConnects)
+                    {
+                        if (!history.Item1.Contains(item))
+                        {
+                            this.OnPinsDisconnected(this, new PinsConnectedEventArgs(item.OutputPin.Pin, item.InputPin.Pin));
+                        }
+                        else
+                        {
+                            this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(item));
+                        }
+                    }
 
-                   this.ConnectionsVM = new ObservableCollection<ConnectionVM>(history.Item1);
-                   this.NodesVMInField = new ObservableCollection<ComponentVM>(history.Item2);
-                   this.redoHistoryStack.Push(history);
-               }
-           });
-            //    this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
-            //});
+                    this.ConnectionsVM = new ObservableCollection<ConnectionVM>(history.Item1);
+                    this.NodesVMInField = new ObservableCollection<ComponentVM>(history.Item2);
+                    //this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.))
+                }
+            });
+
+            this.RedoCommand = new Command(obj =>
+            {
+                if (this.redoHistoryStack.Count > 0)
+                {
+                    var futureHistory = this.redoHistoryStack.Pop();
+                    this.undoHistoryStack.Push(futureHistory);
+                    var differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(futureHistory.Item2));
+                    differencesComps.AddRange(new List<ComponentVM>(futureHistory.Item2.Except(this.NodesVMInField)));
+
+                    if (differencesComps.Count == 0 && this.redoHistoryStack.Count > 0)
+                    {
+                        futureHistory = this.redoHistoryStack.Pop();
+                        this.undoHistoryStack.Push(futureHistory);
+                        differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(futureHistory.Item2));
+                        differencesComps.AddRange(new List<ComponentVM>(futureHistory.Item2.Except(this.NodesVMInField)));
+                    }
+
+                    foreach (var item in differencesComps)
+                    {
+                        if (!futureHistory.Item2.Contains(item))
+                        {
+                            this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(item));
+                            this.RemoveDeletedComponentConnections(item);
+                        }
+                        else
+                        {
+                            this.FireOnFieldComponentAdded(item);
+                        }
+                    }
+
+                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(futureHistory.Item1));
+                    differencesConnects.AddRange(new List<ConnectionVM>(futureHistory.Item1.Except(this.ConnectionsVM)));
+
+                    foreach (var item in differencesConnects)
+                    {
+                        if (!futureHistory.Item1.Contains(item))
+                        {
+                            this.OnPinsDisconnected(this, new PinsConnectedEventArgs(item.OutputPin.Pin, item.InputPin.Pin));
+                        }
+                        else
+                        {
+                            this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(item));
+                        }
+                    }
+
+                    this.ConnectionsVM = new ObservableCollection<ConnectionVM>(futureHistory.Item1);
+                    this.NodesVMInField = new ObservableCollection<ComponentVM>(futureHistory.Item2);
+                }
+            });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                this.CreateUniqueName(node), setPinCommand, this.removeCommand
+                this.CreateUniqueName(node), this.setPinCommand, this.removeCommand
                 ));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
@@ -163,23 +225,19 @@ namespace LogicDesigner.ViewModel
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
 
             var connections = this.programManager.ConnectedOutputInputPairs.Select(conn =>
-            new ConnectionVM(new PinVM(conn.Item1, false, setPinCommand), 
-            new PinVM(conn.Item2, true, setPinCommand), this.NewUniqueConnectionId()));
+            new ConnectionVM(new PinVM(conn.Item1, false, this.setPinCommand),
+            new PinVM(conn.Item2, true, this.setPinCommand), this.NewUniqueConnectionId()));
 
             this.connectionsVM = new ObservableCollection<ConnectionVM>(connections);
             this.undoHistoryStack = new Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>>();
             this.redoHistoryStack = new Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>>();
+            this.UpdateUndoHistory();
             this.programManager.PinsDisconnected += this.OnPinsDisconnected;
-        }
-
-        private void FireOnComponentVMAdded(ComponentVM item)
-        {
-            throw new NotImplementedException();
         }
 
         private void FireOnComponentVMRemoved(ComponentVM item)
         {
-            throw new NotImplementedException();
+            this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(item));
         }
 
         private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
@@ -240,6 +298,11 @@ namespace LogicDesigner.ViewModel
         }
 
         public Command UndoCommand
+        {
+            get;
+            private set;
+        }
+        public Command RedoCommand
         {
             get;
             private set;
@@ -326,7 +389,7 @@ namespace LogicDesigner.ViewModel
             }));
         }
 
-        private void UpdateUndoHistory()
+        public void UpdateUndoHistory()
         {
             var oldHistory = new Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>(
                 new ObservableCollection<ConnectionVM>(this.ConnectionsVM),
@@ -378,12 +441,11 @@ namespace LogicDesigner.ViewModel
             {
                 var conn = new ConnectionVM(selectedOutputPin, selectedInputPin,
                     this.NewUniqueConnectionId());
-                this.UpdateUndoHistory(); ////If connect successful update history
                 this.connectionsVM.Add(conn);
-
+                this.UpdateUndoHistory(); ////If connect successful update history
                 this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
             }
-            
+
             this.selectedInputPin.Active = false;
             this.selectedOutputPin.Active = false;
 
@@ -456,34 +518,34 @@ namespace LogicDesigner.ViewModel
             return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
-        /// </summary>
-        /// <param name="old"> The ProgramMngVM which values should be copied. </param>
-        public ProgramMngVM(ProgramMngVM old)
-        {
-            this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
-            this.SelectedFieldComponent = old.SelectedFieldComponent;
-            this.SelectableComponents = old.SelectableComponents;
-            this.programManager = new ProgramManager(old.programManager);
-            this.StartCommand = new Command(obj =>
-            {
-                Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
-                {
-                    this.programManager.Run();
-                }));
-            });
+        ///// <summary>
+        ///// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
+        ///// </summary>
+        ///// <param name="old"> The ProgramMngVM which values should be copied. </param>
+        //public ProgramMngVM(ProgramMngVM old)
+        //{
+        //    this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
+        //    this.SelectedFieldComponent = old.SelectedFieldComponent;
+        //    this.SelectableComponents = old.SelectableComponents;
+        //    this.programManager = new ProgramManager(old.programManager);
+        //    this.StartCommand = new Command(obj =>
+        //    {
+        //        Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
+        //        {
+        //            this.programManager.Run();
+        //        }));
+        //    });
 
-            this.StepCommand = new Command(obj =>
-            {
-                this.programManager.RunLoop(0); // step
-            });
+        //    this.StepCommand = new Command(obj =>
+        //    {
+        //        this.programManager.RunLoop(0); // step
+        //    });
 
-            this.StopCommand = new Command(obj =>
-            {
-                this.programManager.StopProgram();
-            });
-        }
+        //    this.StopCommand = new Command(obj =>
+        //    {
+        //        this.programManager.StopProgram();
+        //    });
+        //}
 
         public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
         {
@@ -508,7 +570,7 @@ namespace LogicDesigner.ViewModel
             SerializationLogic serializer = new SerializationLogic();
 
             List<Tuple<ComponentVM, string>> serializationTuples = new List<Tuple<ComponentVM, string>>();
-            for (int i = 0; i< this.NodesVMInField.Count; i++)
+            for (int i = 0; i < this.NodesVMInField.Count; i++)
             {
                 bool found = false;
                 for (int j = 0; j < programManager.SerializationPathInfo.Count; j++)
@@ -531,7 +593,7 @@ namespace LogicDesigner.ViewModel
 
             List<Tuple<IDisplayableNode, string>> loadedNodes = new List<Tuple<IDisplayableNode, string>>();
             List<ComponentVM> reconstructedCompVMs = new List<ComponentVM>();
-            foreach(var result in testResult.Components)
+            foreach (var result in testResult.Components)
             {
                 if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
                 {
@@ -552,13 +614,13 @@ namespace LogicDesigner.ViewModel
                 var inparent = loadedNodes.Find(node => node.Item1.Label == connection.InputParentID);
                 var outparent = loadedNodes.Find(node => node.Item1.Label == connection.OutputParentID);
                 // Labelvergleich wirkt ziemlich ranzig
-                if (inparent != null &&  outparent != null)
+                if (inparent != null && outparent != null)
                 {
                     var inPin = inparent.Item1.Inputs.ToList().Find(pin => pin.Label == connection.InputPinID);
                     var outPin = outparent.Item1.Outputs.ToList().Find(pin => pin.Label == connection.OutputPinID);
 
-                    var inCompVM = new ComponentVM(inparent.Item1, CreateUniqueName(inparent.Item1) , setPinCommand, removeCommand);
-                    var outCompVM = new ComponentVM(outparent.Item1, CreateUniqueName(outparent.Item1) , setPinCommand, removeCommand);
+                    var inCompVM = new ComponentVM(inparent.Item1, CreateUniqueName(inparent.Item1), setPinCommand, removeCommand);
+                    var outCompVM = new ComponentVM(outparent.Item1, CreateUniqueName(outparent.Item1), setPinCommand, removeCommand);
 
                     var tempIn = new PinVM(inPin, true, setPinCommand, inCompVM);
                     var tempOut = new PinVM(outPin, false, setPinCommand, outCompVM);
@@ -588,9 +650,9 @@ namespace LogicDesigner.ViewModel
 
         public void RemoveConnectionVM(string id)
         {
-            foreach(var conn in this.connectionsVM)
+            foreach (var conn in this.connectionsVM)
             {
-                if(conn.ConnectionId == id)
+                if (conn.ConnectionId == id)
                 {
                     this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                     this.connectionsVM.Remove(conn);
