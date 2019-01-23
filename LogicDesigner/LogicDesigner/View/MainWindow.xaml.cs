@@ -538,7 +538,6 @@ namespace LogicDesigner
 
             // Remove command
             this.ProgramMngVM.FieldComponentRemoved += this.OnComponentDeleted;
-            // remove command 
             sampleBody.InputBindings.Add(
                 new MouseBinding(
                     new Command(obj =>
