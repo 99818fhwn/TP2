@@ -118,7 +118,7 @@ namespace LogicDesigner.Model
             {
                 return this.fieldNodes;
             }
-            private set
+            set
             {
                 this.fieldNodes = value;
             }
