@@ -40,6 +40,11 @@ namespace LogicDesigner
         private bool isMoving;
 
         /// <summary>
+        /// The last pressed pin.
+        /// </summary>
+        private Button lastPressedPin = new Button();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
         public MainWindow()
@@ -50,7 +55,7 @@ namespace LogicDesigner
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            ProgramMngVM programMngVM = new ProgramMngVM();
+            programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
@@ -71,6 +76,8 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
+
+        public ProgramMngVM programMngVM { get; set; }
 
         /// <summary>
         /// Gets the undo history.
@@ -112,31 +119,39 @@ namespace LogicDesigner
         /// </value>
         public Command UndoCommand
         {
-            get => new Command(new Action<object>((input) =>
+            get
             {
-                if (this.UndoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.UndoHistory.Pop();
-
-                    var current = (ProgramMngVM)this.MainGrid.DataContext;
-                    if (history.NodesVMInField == current.NodesVMInField)
-                    {
-                        this.RedoHistory.Push(history);
-                        history = this.UndoHistory.Pop();
-                    }
-
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        this.DrawNewComponent(component);
-                    }
-
-                    this.RedoHistory.Push(history);
-                }
-            }));
+                return this.programMngVM.UndoCommand;
+            }
         }
+            //    if (this.UndoHistory.Count > 0)
+            //    {
+            //        ProgramMngVM history = this.UndoHistory.Pop();
 
+            //        var current = (ProgramMngVM)this.MainGrid.DataContext;
+            //        if (history.NodesVMInField == current.NodesVMInField)
+            //        {
+            //            this.RedoHistory.Push(history);
+            //            history = this.UndoHistory.Pop();
+            //        }
+
+            //        this.ComponentWindow.Children.Clear();
+            //        this.MainGrid.DataContext = history;
+            //        foreach (var component in history.NodesVMInField)
+            //        {
+            //            this.DrawNewComponent(component);
+            //        }
+
+            //        this.RedoHistory.Push(history);
+            //    }
+            //}));
+        
+        /// <summary>
+        /// Gets the undo command.
+        /// </summary>
+        /// <value>
+        /// The undo command.
+        /// </value>
         public Command SaveCommand
         {
             get => new Command(new Action<object>((input) =>
@@ -466,9 +481,9 @@ namespace LogicDesigner
 
             this.DrawNewComponent(e.Component);
 
-            var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.RedoHistory.Clear();
-            this.RedoHistory.Push(updatedCurrentMan);
+            //var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            //this.RedoHistory.Clear();
+            //this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
@@ -545,6 +560,7 @@ namespace LogicDesigner
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
+            sampleBody.Background.Opacity = 0.97;
 
             // remove command 
             sampleBody.InputBindings.Add(
@@ -576,7 +592,7 @@ namespace LogicDesigner
 
             newComponent.Height = sampleBody.Height + label.Height + 20;
             newComponent.Width = sampleBody.Width + label.Width + 20;
-            Panel.SetZIndex(sampleBody, 0);
+            Panel.SetZIndex(sampleBody, 3);
             newComponent.Children.Add(sampleBody);
             newComponent.Children.Add(label);
 
@@ -596,11 +612,33 @@ namespace LogicDesigner
                 pinButton.Width = 20;
                 pinButton.Height = 10;
 
-                var color = componentVM.InputPinsVM[i].Color;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
+                var passiveColor = componentVM.InputPinsVM[i].PassiveColor;
+                var activeColor = componentVM.InputPinsVM[i].ActiveColor;
 
-                pinButton.CommandParameter = componentVM.InputPinsVM[i];
-                pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+
+                var pinVM = componentVM.InputPinsVM[i];
+
+                pinButton.Command = new Command(x => {
+
+                    pinVM.SetPinCommand.Execute(pinVM);
+
+                    if (pinVM.Active == false)
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+                    else
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(activeColor.R, activeColor.G, activeColor.B));
+                    }
+
+                    if (pinButton != this.lastPressedPin)
+                    {
+                        this.lastPressedPin.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+
+                    this.lastPressedPin = pinButton;
+                });
 
                 pinButton.RenderTransform = new TranslateTransform((-componentVM.Picture.Width / 2) - 10, yOffset);
 
@@ -608,8 +646,6 @@ namespace LogicDesigner
                 componentVM.InputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
 
                 yOffset += offsetStepValue;
-
-                Panel.SetZIndex(pinButton, 100);
 
                 newComponent.Children.Add(pinButton);
             }
@@ -630,28 +666,40 @@ namespace LogicDesigner
                 pinButton.Width = 20;
                 pinButton.Height = 10;
 
-                var color = componentVM.OutputPinsVM[i].Color;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
+                var passiveColor = componentVM.OutputPinsVM[i].PassiveColor;
+                var activeColor = componentVM.OutputPinsVM[i].ActiveColor;
 
-                var pin = componentVM.OutputPinsVM[i];
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
 
-                //pinButton.CommandParameter = componentVM.OutputPinsVM[i];
-                pinButton.Command = new Command(x =>
-                {
+                var pinVM = componentVM.OutputPinsVM[i];
+                
+                pinButton.Command = new Command(x => {
 
+                    pinVM.SetPinCommand.Execute(pinVM);
 
+                    if (pinVM.Active == false)
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+                    else
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(activeColor.R, activeColor.G, activeColor.B));
+                    }
 
-                    pin.SetPinCommand.Execute(pin);
-                });
+                    if (pinButton != this.lastPressedPin)
+                    {
+                        this.lastPressedPin.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+
+                    this.lastPressedPin = pinButton;
+                });  
 
                 pinButton.RenderTransform = new TranslateTransform((componentVM.Picture.Width / 2) + 10, yOffset);
                 yOffset += offsetStepValue;
 
                 componentVM.OutputPinsVM[i].XPosition = (newComponent.Width / 2) + (componentVM.Picture.Width / 2) + 10;
                 componentVM.OutputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
-
-                Panel.SetZIndex(pinButton, 100);
-
+                
                 newComponent.Children.Add(pinButton);
             }
 
@@ -671,6 +719,8 @@ namespace LogicDesigner
             }
 
             this.ComponentWindow.Children.Add(newComponent);
+
+            Panel.SetZIndex(newComponent, 100);
         }
 
         /// <summary>
@@ -731,7 +781,7 @@ namespace LogicDesigner
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
 
-            Panel.SetZIndex(line, 50);
+            Panel.SetZIndex(line, 2);
 
             this.ComponentWindow.Children.Add(line);
         }

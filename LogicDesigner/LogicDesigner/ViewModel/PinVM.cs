@@ -17,7 +17,9 @@ namespace LogicDesigner.ViewModel
         private double xposition;
         private double yposition;
         private ComponentVM parent;
-        private Color color;
+        private Color activeColor;
+        private Color passiveColor;
+        private bool isActive;
 
         public PinVM(IPin pin, bool isInputPin, Command setPinCommand, ComponentVM parent)
         {
@@ -27,7 +29,9 @@ namespace LogicDesigner.ViewModel
             this.setPinCommand = setPinCommand;
             this.xposition = 0;
             this.yposition = 0;
-            this.color = Color.Black;
+            this.activeColor = Color.Red;
+            this.passiveColor = Color.Black;
+            this.isActive = false;
         }
 
         public PinVM(IPin pin, bool isInputPin, Command setPinCommand)
@@ -108,15 +112,39 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        public Color Color
+        public Color ActiveColor
         {
             get
             {
-                return this.color;
+                return this.activeColor;
             }
             set
             {
-                this.color = value;
+                this.activeColor = value;
+            }
+        }
+
+        public Color PassiveColor
+        {
+            get
+            {
+                return this.passiveColor;
+            }
+            set
+            {
+                this.passiveColor = value;
+            }
+        }
+
+        public bool Active
+        {
+            get
+            {
+                return this.isActive;
+            }
+            set
+            {
+                this.isActive = value;
             }
         }
     }

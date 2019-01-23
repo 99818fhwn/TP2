@@ -24,7 +24,9 @@
                 </Setter.Value>
             </Setter>
         </Style>
-        <!--<Image x:Key="StepIcon" Source="ButtonPictures/step.jpg"/>-->
+        <Image x:Key="StepIcon" Source="/ButtonPictures/step.png"/>
+
+
     </Window.Resources>
 
     <!--KeyboardShortcuts-->
@@ -106,27 +108,37 @@
                 <ColumnDefinition Width="150"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Background="White" Grid.Column="1" Margin="2" 
+            <Button Background="Transparent" Grid.Column="1" Margin="2" 
                     Height="40" VerticalAlignment="Top"
                     HorizontalAlignment="Left"
                     Width="100"
                     Command="{Binding StartCommand}"
+                    
                     >
-                Start
+                <StackPanel>
+                    <Image Panel.ZIndex="100" Source="\ButtonPictures\start.png" 
+                          VerticalAlignment="Center" Height="28"></Image>
+                </StackPanel>
             </Button>
             <Button Background="White" Grid.Column="2" Margin="2"
                     Height="40" VerticalAlignment="Top"
                     HorizontalAlignment="Center"
                     Width="100"
                     Command="{Binding StepCommand}">
-                Step
+                <StackPanel>
+                    <Image Panel.ZIndex="100" Source="\ButtonPictures\step.png" 
+                           VerticalAlignment="Center" Height="35"></Image>
+                </StackPanel>
             </Button>
             <Button Background="White" Grid.Column="3" Margin="2"
                     Height="40" VerticalAlignment="Top"
                     HorizontalAlignment="Right"
                     Width="100"
                     Command="{Binding StopCommand}">
-                Stop
+                <StackPanel>
+                    <Image Panel.ZIndex="100" Source="\ButtonPictures\stop.png" 
+                           VerticalAlignment="Center" Height="30"></Image>
+                </StackPanel>
             </Button>
         </Grid>
         <Grid Grid.Row="1" Grid.RowSpan="2" Grid.Column="0">
