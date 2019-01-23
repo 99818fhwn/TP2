@@ -1,4 +1,9 @@
-﻿namespace LogicDesigner.ViewModel
+﻿//-----------------------------------------------------------------------
+// <copyright file="ProgramMngVM.cs" company="FH">
+//     Company copyright tag.
+// </copyright>
+//-----------------------------------------------------------------------
+namespace LogicDesigner.ViewModel
 {
     using System;
     using System.Collections.Generic;
@@ -21,11 +26,31 @@
     using Shared;
 
     /// <summary>
-    /// The main vm class.
+    /// The main class.
     /// </summary>
     /// <seealso cref="System.ComponentModel.INotifyPropertyChanged" />
     public class ProgramMngVM : INotifyPropertyChanged
     {
+        /// <summary>
+        /// The remove command.
+        /// </summary>
+        private readonly Command removeCommand;
+
+        /// <summary>
+        /// The set pin command.
+        /// </summary>
+        private readonly Command setPinCommand;
+
+        /// <summary>
+        /// The add command.
+        /// </summary>
+        private readonly Command addCommand;
+
+        /// <summary>
+        /// The configuration.
+        /// </summary>
+        private readonly ConfigurationLogic config;
+
         /// <summary>
         /// The program manager.
         /// </summary>
@@ -82,55 +107,8 @@
         private int newUniqueConnectionId;
 
         /// <summary>
-        /// The remove command.
+        /// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
         /// </summary>
-        private readonly Command removeCommand;
-
-        /// <summary>
-        /// The set pin command.
-        /// </summary>
-        private readonly Command setPinCommand;
-
-        /// <summary>
-        /// The add command.
-        /// </summary>
-        private readonly Command addCommand;
-
-        /// <summary>
-        /// The configuration.
-        /// </summary>
-        private readonly ConfigurationLogic config;
-
-        /// <summary>
-        /// Occurs when field component is added.
-        /// </summary>
-        public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
-
-        /// <summary>
-        /// Occurs when field component is removed.
-        /// </summary>
-        public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
-
-        /// <summary>
-        /// Occurs when field component is changed.
-        /// </summary>
-        public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
-
-        /// <summary>
-        /// Occurs when pins are connected.
-        /// </summary>
-        public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
-
-        /// <summary>
-        /// Occurs when pins are disconnected.
-        /// </summary>
-        public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
-
-        /// <summary>
-        /// Fired when property changed.
-        /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
-
         public ProgramMngVM()
         {
             this.programManager = new ProgramManager();
@@ -192,6 +170,7 @@
             this.addCommand = new Command(obj =>
             {
                 var representationNode = obj as ComponentRepresentationVM;
+
                 // this.PreFieldComponentAdded(this, new EventArgs());
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
@@ -250,7 +229,8 @@
 
                     this.ConnectionsVM = new ObservableCollection<ConnectionVM>(history.Item1);
                     this.NodesVMInField = new ObservableCollection<ComponentVM>(history.Item2);
-                    //this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.))
+
+                    // this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.))
                 }
             });
 
@@ -304,9 +284,7 @@
                 }
             });
 
-            var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                this.CreateUniqueName(node), this.setPinCommand, this.removeCommand, this.config
-                ));
+            var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node, this.CreateUniqueName(node), this.setPinCommand, this.removeCommand, this.config));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
@@ -315,9 +293,13 @@
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
 
-            var connections = this.programManager.ConnectedOutputInputPairs.Select(conn =>
-            new ConnectionVM(new PinVM(conn.Item1, false, this.setPinCommand),
-            new PinVM(conn.Item2, true, this.setPinCommand), this.NewUniqueConnectionId()));
+            var connections = this.programManager.ConnectedOutputInputPairs.Select(conn => new ConnectionVM(
+                new PinVM(
+                    conn.Item1,
+                    false,
+                    this.setPinCommand),
+                new PinVM(conn.Item2, true, this.setPinCommand),
+                this.NewUniqueConnectionId()));
 
             this.connectionsVM = new ObservableCollection<ConnectionVM>(connections);
             this.undoHistoryStack = new Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>>();
@@ -327,62 +309,35 @@
         }
 
         /// <summary>
-        /// Fires the on component vm removed event.
+        /// Occurs when field component is added.
         /// </summary>
-        /// <param name="item">The item.</param>
-        private void FireOnComponentVMRemoved(ComponentVM item)
-        {
-            this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(item));
-        }
+        public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
 
         /// <summary>
-        /// Removes the deleted component connections.
+        /// Occurs when field component is removed.
         /// </summary>
-        /// <param name="removedComponentVM">The removed component vm.</param>
-        private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
-        {
-            foreach (var pinVM in removedComponentVM.OutputPinsVM)
-            {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
-                {
-                    var conn = this.connectionsVM[i];
-                    if (pinVM == conn.OutputPin)
-                    {
-                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
-                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
-                        this.connectionsVM.Remove(conn);
-                    }
-                }
-            }
-
-            foreach (var pinVM in removedComponentVM.InputPinsVM)
-            {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
-                {
-                    var conn = this.connectionsVM[i];
-                    if (pinVM == conn.InputPin)
-                    {
-                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
-                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
-                        this.connectionsVM.Remove(conn);
-                    }
-                }
-            }
-
-        }
-
+        public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
 
         /// <summary>
-        /// Creates new uniqueconnectionid.
+        /// Occurs when field component is changed.
         /// </summary>
-        /// <returns>The id.</returns>
-        private string NewUniqueConnectionId()
-        {
-            string s = "Connection" + this.newUniqueConnectionId.ToString();
-            this.newUniqueConnectionId++;
-            return s;
-        }
+        public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
 
+        /// <summary>
+        /// Occurs when pins are connected.
+        /// </summary>
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
+
+        /// <summary>
+        /// Occurs when pins are disconnected.
+        /// </summary>
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
+
+        /// <summary>
+        /// Fired when property changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
+        
         /// <summary>
         /// Gets the start command.
         /// </summary>
@@ -464,10 +419,10 @@
         }
 
         /// <summary>
-        /// Gets the nodes vm in field.
+        /// Gets the nodes in field.
         /// </summary>
         /// <value>
-        /// The nodes vm in field.
+        /// The nodes in field.
         /// </value>
         public ObservableCollection<ComponentVM> NodesVMInField
         {
@@ -475,6 +430,7 @@
             {
                 return this.nodesVMInField;
             }
+
             private set
             {
                 this.nodesVMInField = value;
@@ -494,6 +450,7 @@
             {
                 return this.selectableComponents;
             }
+
             set
             {
                 this.selectableComponents = value;
@@ -502,10 +459,10 @@
         }
 
         /// <summary>
-        /// Gets or sets the connections vm.
+        /// Gets or sets the connections.
         /// </summary>
         /// <value>
-        /// The connections vm.
+        /// The connections.
         /// </value>
         public ObservableCollection<ConnectionVM> ConnectionsVM
         {
@@ -513,6 +470,7 @@
             {
                 return this.connectionsVM;
             }
+
             set
             {
                 this.connectionsVM = value;
@@ -543,7 +501,6 @@
         {
             get => new Command(new Action<object>((input) =>
             {
-
             }));
         }
 
@@ -578,7 +535,7 @@
                 {
                     this.selectedOutputPin = value;
                 }
-                else
+                                else
                 {
                     this.selectedInputPin = value;
                 }
@@ -610,88 +567,11 @@
         }
 
         /// <summary>
-        /// Connects the pins.
-        /// </summary>
-        /// <param name="selectedOutputPin">The selected output pin.</param>
-        /// <param name="selectedInputPin">The selected input pin.</param>
-        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
-        {
-            if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
-            {
-                var conn = new ConnectionVM(selectedOutputPin, selectedInputPin,
-                    this.NewUniqueConnectionId());
-                this.connectionsVM.Add(conn);
-                this.UpdateUndoHistory(); ////If connect successful update history
-                this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
-            }
-
-            this.selectedInputPin.Active = false;
-            this.selectedOutputPin.Active = false;
-
-            this.selectedInputPin = null;
-            this.selectedOutputPin = null;
-        }
-
-        /// <summary>
-        /// Refreshes the view models, in case a step in program manager finished.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data in this case not necesary.</param>
-        private void RefreshVM(object sender, EventArgs e)
-        {
-            var oldTemp = this.SelectedFieldComponent;
-            this.SelectedFieldComponent = null;
-            this.SelectedFieldComponent = oldTemp;
-        }
-
-        /// <summary>
-        /// Creates an unique name by adding a serial number to the label ending.
-        /// </summary>
-        /// <param name="node">The node.</param>
-        /// <returns>The identifier will be returned.</returns>
-        private string CreateUniqueName(IDisplayableNode node)
-        {
-            this.uniqueNodeId++;
-            return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
-        }
-
-        /// <summary>
-        /// Triggers the the initialization prozess to refresh all Selectable components in view.
-        /// </summary>
-        /// <param name="sender">The sender of the event, program manager.</param>
-        /// <param name="e">The <see cref="FileSystemEventArgs"/> instance containing the event data.</param>
-        private void NewModuleAdded(object sender, FileSystemEventArgs e)
-        {
-            //this.programManager = new ProgramManager();
-            //this.programManager.Watcher.Created += NewModuleAdded;
-            this.programManager.InitializeNodesToChooseFromVoid();
-
-            //var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
-            var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
-
-            // hässlich, aber konnte keinen besseren Weg finden
-            //App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
-            //{
-            //    this.SelectableComponents.Clear();
-            //});
-            //foreach (var item in nodesToChoose)
-            //{
-            //    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
-            //    {
-            //        this.SelectableComponents.Add(item);
-            //    });
-            //}
-
-            App.Current.Dispatcher.Invoke(() =>
-            this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose));
-        }
-
-        /// <summary>
         /// Creates the name tag from Label and can add additional string to the end, it removes all chars except the letters.
         /// </summary>
         /// <param name="preName">Name of the element.</param>
         /// <param name="additional">The additional string ending.</param>
-        /// <returns></returns>
+        /// <returns>The tag.</returns>
         public string CreateNameTag(string preName, string additional)
         {
             return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
@@ -701,8 +581,8 @@
         ///// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
         ///// </summary>
         ///// <param name="old"> The ProgramMngVM which values should be copied. </param>
-        //public ProgramMngVM(ProgramMngVM old)
-        //{
+        // public ProgramMngVM(ProgramMngVM old)
+        // {
         //    this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
         //    this.SelectedFieldComponent = old.SelectedFieldComponent;
         //    this.SelectableComponents = old.SelectableComponents;
@@ -714,17 +594,15 @@
         //            this.programManager.Run();
         //        }));
         //    });
-
         //    this.StepCommand = new Command(obj =>
         //    {
-        //        this.programManager.RunLoop(0); // step
+        //        this.programManager.RunLoop(0);
         //    });
-
         //    this.StopCommand = new Command(obj =>
         //    {
         //        this.programManager.StopProgram();
         //    });
-        //}
+        // }
 
         /// <summary>
         /// Called when pins get connected.
@@ -746,18 +624,8 @@
             var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
             this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
             this.connectionsVM.Remove(conn);
-
         }
-
-        /// <summary>
-        /// Fires the on property changed event.
-        /// </summary>
-        /// <param name="name">The name.</param>
-        protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-
+        
         /// <summary>
         /// Saves the status.
         /// </summary>
@@ -779,15 +647,15 @@
                     }
                 }
             }
-            serializer.SerializeComponent(path, serializationTuples, (ICollection<ConnectionVM>)this.ConnectionsVM);
 
+            serializer.SerializeComponent(path, serializationTuples, (ICollection<ConnectionVM>)this.ConnectionsVM);
         }
 
         /// <summary>
         /// Loads the status.
         /// </summary>
         /// <param name="path">The path.</param>
-        /// <returns></returns>
+        /// <returns>The tuple.</returns>
         public Tuple<List<ConnectionVM>, List<ComponentVM>> LoadStatus(string path)
         {
             SerializationLogic serializer = new SerializationLogic();
@@ -797,17 +665,18 @@
             List<ComponentVM> reconstructedCompVMs = new List<ComponentVM>();
             foreach (var result in testResult.Components)
             {
-                //if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
-                //{
-                    foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
-                    {
-                        loadedNodes.Add(component);
-                        var tempVM = new ComponentVM(component.Item1, result.UniqueName, this.setPinCommand, this.removeCommand, this.config);
-                        tempVM.XCoord = result.XPos;
-                        tempVM.YCoord = result.YPos;
-                        reconstructedCompVMs.Add(tempVM);
-                    }
-               // }
+                // if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
+                // {
+                foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
+                {
+                    loadedNodes.Add(component);
+                    var tempVM = new ComponentVM(component.Item1, result.UniqueName, this.setPinCommand, this.removeCommand, this.config);
+                    tempVM.XCoord = result.XPos;
+                    tempVM.YCoord = result.YPos;
+                    reconstructedCompVMs.Add(tempVM);
+                }
+
+                // }
             }
 
             List<ConnectionVM> reconstructedConns = new List<ConnectionVM>();
@@ -815,6 +684,7 @@
             {
                 var inparent = loadedNodes.Find(node => node.Item1.Label == connection.InputParentID);
                 var outparent = loadedNodes.Find(node => node.Item1.Label == connection.OutputParentID);
+
                 // Labelvergleich wirkt ziemlich ranzig
                 if (inparent != null && outparent != null)
                 {
@@ -846,7 +716,8 @@
                 {
                     this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(existingComponent));
                     this.NodesVMInField.Remove(existingComponent);
-                    // Insert visual remove
+
+                    // Insert visual remove.
                 }
             });
 
@@ -859,8 +730,8 @@
         /// <param name="loadedComponent">The loaded component.</param>
         public void AddLoadedComponent(ComponentVM loadedComponent)
         {
-            NodesVMInField.Add(loadedComponent);
-            programManager.FieldNodes.Add(loadedComponent.Node);
+            this.NodesVMInField.Add(loadedComponent);
+            this.programManager.FieldNodes.Add(loadedComponent.Node);
             this.FieldComponentAdded?.Invoke(this, new FieldComponentEventArgs(loadedComponent));
         }
 
@@ -870,23 +741,13 @@
         /// <param name="loadedConnection">The loaded connection.</param>
         public void AddLoadedConnection(ConnectionVM loadedConnection)
         {
-            ConnectionsVM.Add(loadedConnection);
-            programManager.ConnectPins(loadedConnection.OutputPin.Pin, loadedConnection.InputPin.Pin);
+            this.ConnectionsVM.Add(loadedConnection);
+            this.programManager.ConnectPins(loadedConnection.OutputPin.Pin, loadedConnection.InputPin.Pin);
             this.PinsConnected?.Invoke(this, new PinVMConnectionChangedEventArgs(loadedConnection));
         }
-
+        
         /// <summary>
-        /// Fires the on component vm changed, this seemes obsolete because the event when fired already contains the entire component.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
-        protected virtual void FireOnComponentVMChanged(object sender, FieldComponentEventArgs e)
-        {
-            this.FieldComponentChanged?.Invoke(this, e);
-        }
-
-        /// <summary>
-        /// Removes the connection vm.
+        /// Removes the connection.
         /// </summary>
         /// <param name="id">The identifier.</param>
         public void RemoveConnectionVM(string id)
@@ -900,6 +761,158 @@
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Fires the on property changed event.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
+        {
+            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        /// <summary>
+        /// Fires the on component changed, this is obsolete because the event when fired already contains the entire component.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
+        protected virtual void FireOnComponentVMChanged(object sender, FieldComponentEventArgs e)
+        {
+            this.FieldComponentChanged?.Invoke(this, e);
+        }
+
+        /// <summary>
+        /// Fires the on component removed event.
+        /// </summary>
+        /// <param name="item">The item.</param>
+        private void FireOnComponentVMRemoved(ComponentVM item)
+        {
+            this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(item));
+        }
+
+        /// <summary>
+        /// Removes the deleted component connections.
+        /// </summary>
+        /// <param name="removedComponentVM">The removed component</param>
+        private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
+        {
+            foreach (var pinVM in removedComponentVM.OutputPinsVM)
+            {
+                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                {
+                    var conn = this.connectionsVM[i];
+                    if (pinVM == conn.OutputPin)
+                    {
+                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
+                        this.connectionsVM.Remove(conn);
+                    }
+                }
+            }
+
+            foreach (var pinVM in removedComponentVM.InputPinsVM)
+            {
+                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                {
+                    var conn = this.connectionsVM[i];
+                    if (pinVM == conn.InputPin)
+                    {
+                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
+                        this.connectionsVM.Remove(conn);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates new id.
+        /// </summary>
+        /// <returns>The id.</returns>
+        private string NewUniqueConnectionId()
+        {
+            string s = "Connection" + this.newUniqueConnectionId.ToString();
+            this.newUniqueConnectionId++;
+            return s;
+        }
+
+        /// <summary>
+        /// Connects the pins.
+        /// </summary>
+        /// <param name="selectedOutputPin">The selected output pin.</param>
+        /// <param name="selectedInputPin">The selected input pin.</param>
+        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
+        {
+            if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+            {
+                var conn = new ConnectionVM(
+                    selectedOutputPin,
+                    selectedInputPin,
+                    this.NewUniqueConnectionId());
+                this.connectionsVM.Add(conn);
+                this.UpdateUndoHistory(); // If connect successful update history
+                this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
+            }
+
+            this.selectedInputPin.Active = false;
+            this.selectedOutputPin.Active = false;
+
+            this.selectedInputPin = null;
+            this.selectedOutputPin = null;
+        }
+
+        /// <summary>
+        /// Refreshes the view models, in case a step in program manager finished.
+        /// </summary>
+        /// <param name="sender">The sender of the event.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        private void RefreshVM(object sender, EventArgs e)
+        {
+            var oldTemp = this.SelectedFieldComponent;
+            this.SelectedFieldComponent = null;
+            this.SelectedFieldComponent = oldTemp;
+        }
+
+        /// <summary>
+        /// Creates an unique name by adding a serial number to the label ending.
+        /// </summary>
+        /// <param name="node">The node.</param>
+        /// <returns>The identifier will be returned.</returns>
+        private string CreateUniqueName(IDisplayableNode node)
+        {
+            this.uniqueNodeId++;
+            return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
+        }
+
+        /// <summary>
+        /// Triggers the the initialization process to refresh all selectable components in view.
+        /// </summary>
+        /// <param name="sender">The sender of the event, program manager.</param>
+        /// <param name="e">The <see cref="FileSystemEventArgs"/> instance containing the event data.</param>
+        private void NewModuleAdded(object sender, FileSystemEventArgs e)
+        {
+            // this.programManager = new ProgramManager();
+            // this.programManager.Watcher.Created += NewModuleAdded;
+            this.programManager.InitializeNodesToChooseFromVoid();
+
+            // var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
+            var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
+
+            // hässlich, aber konnte keinen besseren Weg finden
+            // App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+            // {
+            //    this.SelectableComponents.Clear();
+            // });
+            // foreach (var item in nodesToChoose)
+            // {
+            //    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
+            //    {
+            //        this.SelectableComponents.Add(item);
+            //    });
+            // }
+            App.Current.Dispatcher.Invoke(() =>
+            this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose));
         }
     }
 }
