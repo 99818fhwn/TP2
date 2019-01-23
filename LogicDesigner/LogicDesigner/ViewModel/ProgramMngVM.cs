@@ -1,25 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Threading;
-using LogicDesigner.Commands;
-using LogicDesigner.Model;
-using LogicDesigner.Model.Configuration;
-using LogicDesigner.Model.Serialization;
-using Shared;
+﻿
 
 namespace LogicDesigner.ViewModel
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
+    using System.ComponentModel;
+    using System.Drawing;
+    using System.IO;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
+    using System.Text;
+    using System.Text.RegularExpressions;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using System.Windows;
+    using System.Windows.Threading;
+    using LogicDesigner.Commands;
+    using LogicDesigner.Model;
+    using LogicDesigner.Model.Configuration;
+    using LogicDesigner.Model.Serialization;
+    using Shared;
+
     public class ProgramMngVM : INotifyPropertyChanged
     {
         private ProgramManager programManager;
@@ -66,7 +68,10 @@ namespace LogicDesigner.ViewModel
 
             this.StepCommand = new Command(obj =>
             {
-                this.programManager.RunLoop(0); // step
+                if (!this.programManager.Stop)
+                {
+                    this.programManager.RunLoop(0); // step
+                }
             });
 
             this.StopCommand = new Command(obj =>
