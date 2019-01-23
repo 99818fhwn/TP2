@@ -31,6 +31,8 @@ namespace LogicDesigner.Model
         private readonly string path;
         public event EventHandler<PinsConnectedEventArgs> PinsDisconnected;
 
+        public ICollection<Tuple<IDisplayableNode, string>> SerializationPathInfo { get; set; }
+
         private readonly string componentDirectory;
 
         private readonly string logDirectory;
@@ -50,8 +52,17 @@ namespace LogicDesigner.Model
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
             this.InitializeNodesToChooseFrom();
+             this.SerializationPathInfo = this.InitializeNodesToChooseFrom();
 
             if (!Directory.Exists(Path.GetDirectoryName(this.componentDirectory)))
+            List<IDisplayableNode> moduleList = new List<IDisplayableNode>();
+            foreach (var module in SerializationPathInfo)
+            {
+                moduleList.Add(module.Item1);
+            }
+            this.possibleNodesToChooseFrom = (ICollection<IDisplayableNode>)moduleList;
+
+            if (!Directory.Exists(Path.GetDirectoryName(componentDirectory)))
             {
                 Directory.CreateDirectory(this.componentDirectory);
             }
@@ -62,7 +73,7 @@ namespace LogicDesigner.Model
                 this.logFileName = "Log_" + DateTime.Now.ToString("ddd d MMM yyyy HH mm ss").Replace(" ", "_") + ".txt";
                 if (!File.Exists(Path.Combine(this.logDirectory, this.logFileName)))
                 {
-                    using (File.Create(Path.Combine(this.logDirectory, this.logFileName)));
+                    using (File.Create(Path.Combine(this.logDirectory, this.logFileName))) ;
                 }
 
                 this.WriteToLog(new string[] { "Log initialized" });
@@ -131,6 +142,11 @@ namespace LogicDesigner.Model
             private set;
         }
 
+        private ICollection<Tuple<IDisplayableNode, string>> InitializeNodesToChooseFrom()
+        {
+            return new NodesLoader().GetNodes(componentDirectory);
+        }
+
         public void InitializeNodesToChooseFrom()
         {
             this.PossibleNodesToChooseFrom = new NodesLoader().GetNodes(this.componentDirectory);
@@ -177,7 +193,7 @@ namespace LogicDesigner.Model
             }
             catch (Exception e)
             {
-                List<string> message = new List<string>() { "Error:" , "Time: " + DateTime.Now.ToString("H:mm:ss") 
+                List<string> message = new List<string>() { "Error:" , "Time: " + DateTime.Now.ToString("H:mm:ss")
                     , "Source: " + e.Source, "ErrorType:" + e.GetType().ToString() , "ErrorMessage: " + e.Message, "" };
                 this.WriteToLog(message.ToArray());
             }
@@ -226,7 +242,7 @@ namespace LogicDesigner.Model
             this.UnConnectPins(output, input);
             this.ConnectedOutputInputPairs.Add(new Tuple<IPin, IPin>(output, input));
 
-           
+
 
             return true;
         }
@@ -260,6 +276,18 @@ namespace LogicDesigner.Model
         protected void OnDisconnectedPins(object source, PinsConnectedEventArgs e)
         {
             this.PinsDisconnected?.Invoke(source, e);
+        }
+
+        public void RemoveConnection(IPin outputPin, IPin inputPin)
+        {
+            foreach (var conn in this.connectedOutputInputPairs)
+            {
+                if (conn.Item1 == outputPin && conn.Item2 == inputPin)
+                {
+                    this.connectedOutputInputPairs.Remove(conn);
+                    break;
+                }
+            }
         }
     }
 }

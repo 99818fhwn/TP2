@@ -1,9 +1,14 @@
-﻿namespace LogicDesigner.Model
+﻿namespace LogicDesigner.Model.Serialization
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Xml;
+    using System.Xml.Serialization;
+    using LogicDesigner.ViewModel;
+    using Polenter.Serialization;
 
     /// <summary>
     /// Class handling serialization logic.
@@ -14,14 +19,14 @@
         /// <summary>
         /// The formatter that handles serialization/deserialization.
         /// </summary>
-        private readonly BinaryFormatter formatter;
+        private readonly XmlSerializer formatter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializationLogic"/> class.
         /// </summary>
         public SerializationLogic()
         {
-            this.formatter = new BinaryFormatter();
+            this.formatter = new XmlSerializer(typeof(SerializedObject));
         }
         #endregion
 
@@ -31,7 +36,7 @@
         /// </summary>
         /// <param name="path"> Path for the binary file output (without extension). </param>
         /// <param name="serializableObject"> Object to be serialized. </param>
-        public void SerializeObject(string path, object serializableObject)
+        public void SerializeComponent(string path, ICollection<Tuple<ComponentVM, string>> serializableObject, ICollection<ConnectionVM> connections)
         {
             if (serializableObject == null)
             {
@@ -43,13 +48,35 @@
             {
                 throw new ArgumentException("Path not found.");
             }
-
             using (Stream writer = new FileStream(path, FileMode.Create))
-            //using (BinaryWriter binWriter = new BinaryWriter(writer))
             {
                 try
                 {
-                    this.formatter.Serialize(writer, serializableObject);
+                    //List<string> paths = new List<string>();
+                    List<SerializedComponentVM> components = new List<SerializedComponentVM>();
+                    foreach (var element in serializableObject)
+                    {
+                        //if (!paths.Contains(element.Item2))
+                        //{
+                        //    paths.Add(element.Item2);
+                        //}
+                        //element.Item1.IsInField = true;
+
+                        //foreach(ConnectionVM vm in connections)
+                        //{
+                        //    var input = vm.InputPin;
+                        //    var output = vm.OutputPin;
+                        //}
+                        components.Add(new SerializedComponentVM(element.Item1, element.Item2));
+                    }
+
+                    List<SerializedConnectionVM> sconnections = new List<SerializedConnectionVM>();
+                    foreach(var connection in connections)
+                    {
+                        sconnections.Add(new SerializedConnectionVM(connection.InputPin.Pin.Label, connection.OutputPin.Pin.Label, connection.InputPin.Parent.Label, connection.OutputPin.Parent.Label));
+                    }
+                    var serializableElement = new SerializedObject(components, sconnections);
+                    this.formatter.Serialize(writer, serializableElement);
                 }
                 catch (SerializationException ex)
                 {
@@ -67,7 +94,6 @@
         /// <returns> The constructed object. </returns>
         public object DeserializeObject(string path)
         {
-            path += ".ldf";
             if (!File.Exists(path))
             {
                 throw new FileNotFoundException($"File not found at {path}.");
