@@ -1,14 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using Shared;
-
+﻿// -----------------------------------------------------------------------     
+// <copyright file="ComponentLoader.cs" company="FHWN">    
+// Copyright (c) FHWN. All rights reserved.    
+// </copyright>    
+// <summary>The component loader.</summary>
+// -----------------------------------------------------------------------
 namespace LogicDesigner.Model
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Reflection;
+    using Shared;
+
+    /// <summary>
+    /// The component loader class.
+    /// </summary>
     public class ComponentLoader
     {
+        /// <summary>
+        /// Gets the node.
+        /// </summary>
+        /// <param name="paths">The paths.</param>
+        /// <returns>List of nodes.</returns>
+        /// <exception cref="Exception">Assembly exception.</exception>
         public List<IDisplayableNode> GetNode(string[] paths)
         {
             var nodes = new List<IDisplayableNode>();
@@ -19,6 +34,7 @@ namespace LogicDesigner.Model
                 {
                     Directory.CreateDirectory(path);
                 }
+
                 if (File.Exists(path))
                 {
                     try
