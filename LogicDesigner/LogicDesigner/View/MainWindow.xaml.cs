@@ -186,8 +186,8 @@ namespace LogicDesigner
                             foreach (var existingComponent in manager.NodesVMInField)
                             {
                                 manager.NodesVMInField.Remove(existingComponent);
-                            // Insert visual remove
-                        }
+                                // Insert visual remove
+                            }
                         });
 
 
@@ -199,7 +199,16 @@ namespace LogicDesigner
                                 this.DrawNewComponent(loadedComponent);
                             }
                         });
+
+                        foreach (var conn in loadResult.Item1)
+                        {
+
+                            manager.ConnectionsVM.Add(conn);
+                            manager.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
+                        }
                     }
+
+
                 }
                 catch
                 { }
@@ -281,7 +290,7 @@ namespace LogicDesigner
                         this.DrawNewComponent(component);
                     }
 
-                    this.UndoHistory.Push(history);                    
+                    this.UndoHistory.Push(history);
                 }
             }));
         }
@@ -613,7 +622,7 @@ namespace LogicDesigner
             {
                 offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.OutputPinsVM.Count - 1);
             }
-            
+
             // Draw output pins
             for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
             {
@@ -627,12 +636,13 @@ namespace LogicDesigner
                 var pin = componentVM.OutputPinsVM[i];
 
                 //pinButton.CommandParameter = componentVM.OutputPinsVM[i];
-                pinButton.Command = new Command(x => {
+                pinButton.Command = new Command(x =>
+                {
 
 
 
                     pin.SetPinCommand.Execute(pin);
-                });  
+                });
 
                 pinButton.RenderTransform = new TranslateTransform((componentVM.Picture.Width / 2) + 10, yOffset);
                 yOffset += offsetStepValue;
