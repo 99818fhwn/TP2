@@ -73,7 +73,7 @@
                     List<SerializedConnectionVM> sconnections = new List<SerializedConnectionVM>();
                     foreach(var connection in connections)
                     {
-                        sconnections.Add(new SerializedConnectionVM(connection.InputPin.Pin.Label, connection.OutputPin.Pin.Label, connection.InputPin.Parent.Label, connection.OutputPin.Parent.Label));
+                        sconnections.Add(new SerializedConnectionVM(connection.InputPin.Pin.Label, connection.OutputPin.Pin.Label, connection.InputPin.Parent.Label, connection.OutputPin.Parent.Label, connection.InputPin.XPosition, connection.InputPin.YPosition, connection.OutputPin.XPosition, connection.OutputPin.YPosition));
                     }
                     var serializableElement = new SerializedObject(components, sconnections);
                     this.formatter.Serialize(writer, serializableElement);

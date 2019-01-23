@@ -201,8 +201,8 @@ namespace LogicDesigner
                             foreach (var existingComponent in manager.NodesVMInField)
                             {
                                 manager.NodesVMInField.Remove(existingComponent);
-                            // Insert visual remove
-                        }
+                                // Insert visual remove
+                            }
                         });
 
 
@@ -214,7 +214,16 @@ namespace LogicDesigner
                                 this.DrawNewComponent(loadedComponent);
                             }
                         });
+
+                        foreach (var conn in loadResult.Item1)
+                        {
+
+                            manager.ConnectionsVM.Add(conn);
+                            manager.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
+                        }
                     }
+
+
                 }
                 catch
                 { }
@@ -296,7 +305,7 @@ namespace LogicDesigner
                         this.DrawNewComponent(component);
                     }
 
-                    this.UndoHistory.Push(history);                    
+                    this.UndoHistory.Push(history);
                 }
             }));
         }
@@ -649,7 +658,7 @@ namespace LogicDesigner
             {
                 offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.OutputPinsVM.Count - 1);
             }
-            
+
             // Draw output pins
             for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
             {

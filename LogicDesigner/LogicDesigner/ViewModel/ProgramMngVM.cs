@@ -560,11 +560,15 @@ namespace LogicDesigner.ViewModel
                     var inCompVM = new ComponentVM(inparent.Item1, CreateUniqueName(inparent.Item1) , setPinCommand, removeCommand);
                     var outCompVM = new ComponentVM(outparent.Item1, CreateUniqueName(outparent.Item1) , setPinCommand, removeCommand);
 
-
                     var tempIn = new PinVM(inPin, true, setPinCommand, inCompVM);
                     var tempOut = new PinVM(outPin, false, setPinCommand, outCompVM);
 
                     var tempConnection = new ConnectionVM(tempOut, tempIn, this.NewUniqueConnectionId());
+                    tempConnection.InputPin.XPosition = connection.InputX;
+                    tempConnection.InputPin.YPosition = connection.InputY;
+
+                    tempConnection.OutputPin.XPosition = connection.OutputX;
+                    tempConnection.OutputPin.YPosition = connection.OutputY;
                     reconstructedConns.Add(tempConnection);
                 }
             }
