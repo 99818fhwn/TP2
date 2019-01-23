@@ -30,14 +30,17 @@ namespace LogicDesigner.Model.Configuration
                 .AddJsonFile("config.json")
                 .Build();
 
-                this.pinActiveColor = Color.FromName(conf.GetSection("Config")["PinActive"]);
-                this.pinPassiveColor = Color.FromName(conf.GetSection("Config")["PinPassive"]);
-                this.lineActiveColor = Color.FromName(conf.GetSection("Config")["LineActive"]);
-                this.linePassiveColor = Color.FromName(conf.GetSection("Config")["LinePassive"]);
+                this.PinActiveColor = Color.FromName(conf.GetSection("Config")["PinActive"]);
+                this.PinPassiveColor = Color.FromName(conf.GetSection("Config")["PinPassive"]);
+                this.LineActiveColor = Color.FromName(conf.GetSection("Config")["LineActive"]);
+                this.LinePassiveColor = Color.FromName(conf.GetSection("Config")["LinePassive"]);
                 this.modulPath = conf.GetSection("Config")["Path"];
-                
-
             }
         }
+
+        public Color PinPassiveColor { get => pinPassiveColor; set => pinPassiveColor = value; }
+        public Color PinActiveColor { get => pinActiveColor; set => pinActiveColor = value; }
+        public Color LinePassiveColor { get => linePassiveColor; set => linePassiveColor = value; }
+        public Color LineActiveColor { get => lineActiveColor; set => lineActiveColor = value; }
     }
 }
