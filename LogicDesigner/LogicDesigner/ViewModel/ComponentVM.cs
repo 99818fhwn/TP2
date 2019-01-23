@@ -1,4 +1,5 @@
 ﻿using LogicDesigner.Commands;
+using LogicDesigner.Model.Configuration;
 using Shared;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,8 @@ namespace LogicDesigner.ViewModel
         [NonSerialized]
         private readonly Command removeCommand;
 
+        private readonly ConfigurationLogic config;
+
         private double xCoord;
         private double yCoord;
         private readonly string uniqueName;
@@ -33,11 +36,12 @@ namespace LogicDesigner.ViewModel
         public event EventHandler<FieldComponentEventArgs> ComponentPropertyChanged;
 
         public ComponentVM(IDisplayableNode realComponent, string uniqueName, 
-            Command setPinCommand, Command removeCommand)
+            Command setPinCommand, Command removeCommand, ConfigurationLogic configurationLogic)
         {
             this.node = realComponent;
             this.uniqueName = uniqueName;
             this.removeCommand = removeCommand;
+            this.config = configurationLogic;
 
             this.node.PictureChanged += this.OnPictureChanged;
 
@@ -48,7 +52,7 @@ namespace LogicDesigner.ViewModel
             {
                 if(pin != null)
                 {
-                    this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand, this));
+                    this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
                     //this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand));
                 }
 
@@ -58,7 +62,7 @@ namespace LogicDesigner.ViewModel
             {
                 if (pin != null)
                 {
-                    this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand, this));
+                    this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
                     //this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand));
                 }
             }

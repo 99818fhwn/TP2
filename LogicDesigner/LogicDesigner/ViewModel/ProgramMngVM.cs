@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Threading;
 using LogicDesigner.Commands;
 using LogicDesigner.Model;
+using LogicDesigner.Model.Configuration;
 using LogicDesigner.Model.Serialization;
 using Shared;
 
@@ -45,12 +46,15 @@ namespace LogicDesigner.ViewModel
         private readonly Command removeCommand;
         private readonly Command setPinCommand;
         private readonly Command addCommand;
+        private readonly ConfigurationLogic config;
 
         public ProgramMngVM()
         {
             this.programManager = new ProgramManager();
             this.programManager.Watcher.Created += this.NewModuleAdded;
             this.programManager.StepFinished += this.RefreshVM;
+
+            this.config = new ConfigurationLogic();
 
             this.StartCommand = new Command(obj =>
             {
@@ -103,7 +107,7 @@ namespace LogicDesigner.ViewModel
                 this.programManager.FieldNodes.Add(newGenerateComp);
 
                 var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
-                    this.removeCommand);
+                    this.removeCommand, this.config);
                 this.UpdateUndoHistory();
                 this.nodesVMInField.Add(compVM);
                 this.FireOnFieldComponentAdded(compVM);
@@ -152,7 +156,7 @@ namespace LogicDesigner.ViewModel
             //});
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
-                this.CreateUniqueName(node), setPinCommand, this.removeCommand
+                this.CreateUniqueName(node), setPinCommand, this.removeCommand, this.config
                 ));
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
@@ -538,7 +542,7 @@ namespace LogicDesigner.ViewModel
                     foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
                     {
                         loadedNodes.Add(component);
-                        var tempVM = new ComponentVM(component.Item1, CreateUniqueName(component.Item1), setPinCommand, removeCommand);
+                        var tempVM = new ComponentVM(component.Item1, CreateUniqueName(component.Item1), setPinCommand, removeCommand, this.config);
                         tempVM.XCoord = result.XPos;
                         tempVM.YCoord = result.YPos;
                         reconstructedCompVMs.Add(tempVM);
@@ -557,11 +561,11 @@ namespace LogicDesigner.ViewModel
                     var inPin = inparent.Item1.Inputs.ToList().Find(pin => pin.Label == connection.InputPinID);
                     var outPin = outparent.Item1.Outputs.ToList().Find(pin => pin.Label == connection.OutputPinID);
 
-                    var inCompVM = new ComponentVM(inparent.Item1, CreateUniqueName(inparent.Item1) , setPinCommand, removeCommand);
-                    var outCompVM = new ComponentVM(outparent.Item1, CreateUniqueName(outparent.Item1) , setPinCommand, removeCommand);
+                    var inCompVM = new ComponentVM(inparent.Item1, CreateUniqueName(inparent.Item1) , setPinCommand, removeCommand, this.config);
+                    var outCompVM = new ComponentVM(outparent.Item1, CreateUniqueName(outparent.Item1) , setPinCommand, removeCommand, this.config);
 
-                    var tempIn = new PinVM(inPin, true, setPinCommand, inCompVM);
-                    var tempOut = new PinVM(outPin, false, setPinCommand, outCompVM);
+                    var tempIn = new PinVM(inPin, true, setPinCommand, inCompVM, this.config.PinActiveColor, config.PinPassiveColor);
+                    var tempOut = new PinVM(outPin, false, setPinCommand, outCompVM, this.config.PinActiveColor, config.PinPassiveColor);
 
                     var tempConnection = new ConnectionVM(tempOut, tempIn, this.NewUniqueConnectionId());
                     tempConnection.InputPin.XPosition = connection.InputX;
