@@ -55,7 +55,7 @@ namespace LogicDesigner
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            ProgramMngVM programMngVM = new ProgramMngVM();
+            programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
@@ -76,6 +76,8 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
+
+        public ProgramMngVM programMngVM { get; set; }
 
         /// <summary>
         /// Gets the undo history.
@@ -117,31 +119,39 @@ namespace LogicDesigner
         /// </value>
         public Command UndoCommand
         {
-            get => new Command(new Action<object>((input) =>
+            get
             {
-                if (this.UndoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.UndoHistory.Pop();
-
-                    var current = (ProgramMngVM)this.MainGrid.DataContext;
-                    if (history.NodesVMInField == current.NodesVMInField)
-                    {
-                        this.RedoHistory.Push(history);
-                        history = this.UndoHistory.Pop();
-                    }
-
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        this.DrawNewComponent(component);
-                    }
-
-                    this.RedoHistory.Push(history);
-                }
-            }));
+                return this.programMngVM.UndoCommand;
+            }
         }
+            //    if (this.UndoHistory.Count > 0)
+            //    {
+            //        ProgramMngVM history = this.UndoHistory.Pop();
 
+            //        var current = (ProgramMngVM)this.MainGrid.DataContext;
+            //        if (history.NodesVMInField == current.NodesVMInField)
+            //        {
+            //            this.RedoHistory.Push(history);
+            //            history = this.UndoHistory.Pop();
+            //        }
+
+            //        this.ComponentWindow.Children.Clear();
+            //        this.MainGrid.DataContext = history;
+            //        foreach (var component in history.NodesVMInField)
+            //        {
+            //            this.DrawNewComponent(component);
+            //        }
+
+            //        this.RedoHistory.Push(history);
+            //    }
+            //}));
+        
+        /// <summary>
+        /// Gets the undo command.
+        /// </summary>
+        /// <value>
+        /// The undo command.
+        /// </value>
         public Command SaveCommand
         {
             get => new Command(new Action<object>((input) =>
@@ -191,8 +201,8 @@ namespace LogicDesigner
                             foreach (var existingComponent in manager.NodesVMInField)
                             {
                                 manager.NodesVMInField.Remove(existingComponent);
-                            // Insert visual remove
-                        }
+                                // Insert visual remove
+                            }
                         });
 
 
@@ -204,7 +214,16 @@ namespace LogicDesigner
                                 this.DrawNewComponent(loadedComponent);
                             }
                         });
+
+                        foreach (var conn in loadResult.Item1)
+                        {
+
+                            manager.ConnectionsVM.Add(conn);
+                            manager.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
+                        }
                     }
+
+
                 }
                 catch
                 { }
@@ -286,7 +305,7 @@ namespace LogicDesigner
                         this.DrawNewComponent(component);
                     }
 
-                    this.UndoHistory.Push(history);                    
+                    this.UndoHistory.Push(history);
                 }
             }));
         }
@@ -462,9 +481,9 @@ namespace LogicDesigner
 
             this.DrawNewComponent(e.Component);
 
-            var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.RedoHistory.Clear();
-            this.RedoHistory.Push(updatedCurrentMan);
+            //var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            //this.RedoHistory.Clear();
+            //this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
@@ -639,7 +658,7 @@ namespace LogicDesigner
             {
                 offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.OutputPinsVM.Count - 1);
             }
-            
+
             // Draw output pins
             for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
             {
