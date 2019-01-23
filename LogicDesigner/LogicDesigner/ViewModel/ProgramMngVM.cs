@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Threading;
 using LogicDesigner.Commands;
 using LogicDesigner.Model;
+using LogicDesigner.Model.Serialization;
 using Shared;
 
 namespace LogicDesigner.ViewModel
@@ -40,6 +41,7 @@ namespace LogicDesigner.ViewModel
         private int newUniqueConnectionId;
 
         private readonly Command removeCommand;
+        private readonly Command setPinCommand;
         private readonly Command addCommand;
 
         public ProgramMngVM()
@@ -66,10 +68,10 @@ namespace LogicDesigner.ViewModel
                 this.programManager.StopProgram();
             });
 
-            var setPinCommand = new Command(obj =>
+            this.setPinCommand = new Command(obj =>
             {
                 var pin = obj as PinVM;
-                SetSelectedPin(pin);
+                this.SetSelectedPin(pin);
             });
 
             this.removeCommand = new Command(obj =>
@@ -110,8 +112,8 @@ namespace LogicDesigner.ViewModel
 
             this.nodesVMInField = new ObservableCollection<ComponentVM>(nodesInField);
 
-            var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(
-                node => new ComponentRepresentationVM(this.addCommand, node));
+            var nodesToChoose = this.programManager.SerializationPathInfo.Select(
+                node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
 
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose);
 
@@ -339,7 +341,7 @@ namespace LogicDesigner.ViewModel
             this.programManager = new ProgramManager();
             this.programManager.Watcher.Created += NewModuleAdded;
 
-            var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
+            var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
 
             // hässlich, aber konnte keinen besseren Weg finden
             App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
@@ -399,13 +401,70 @@ namespace LogicDesigner.ViewModel
         public void SaveStatus(string path)
         {
             SerializationLogic serializer = new SerializationLogic();
-            serializer.SerializeObject(path, NodesVMInField);
+
+            List<Tuple<ComponentVM, string>> serializationTuples = new List<Tuple<ComponentVM, string>>();
+            for (int i = 0; i< this.NodesVMInField.Count; i++)
+            {
+                bool found = false;
+                for (int j = 0; j < programManager.SerializationPathInfo.Count; j++)
+                {
+                    if (!found && NodesVMInField[i].Node.Label == programManager.SerializationPathInfo.ElementAt(j).Item1.Label)
+                    {
+                        serializationTuples.Add(new Tuple<ComponentVM, string>(NodesVMInField[i], programManager.SerializationPathInfo.ElementAt(j).Item2));
+                        found = true;
+                    }
+                }
+            }
+            serializer.SerializeComponent(path, serializationTuples, (ICollection<ConnectionVM>)ConnectionsVM);
+
         }
 
-        public void LoadStatus(string path)
+        public Tuple<List<ConnectionVM>, List<ComponentVM>> LoadStatus(string path)
         {
             SerializationLogic serializer = new SerializationLogic();
-            this.nodesVMInField = (ObservableCollection<ComponentVM>)serializer.DeserializeObject(path);
+            var testResult = (SerializedObject)serializer.DeserializeObject(path);
+
+            List<Tuple<IDisplayableNode, string>> loadedNodes = new List<Tuple<IDisplayableNode, string>>();
+            List<ComponentVM> reconstructedCompVMs = new List<ComponentVM>();
+            foreach(var result in testResult.Components)
+            {
+                if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
+                {
+                    foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
+                    {
+                        loadedNodes.Add(component);
+                        var tempVM = new ComponentVM(component.Item1, CreateUniqueName(component.Item1), setPinCommand, removeCommand);
+                        tempVM.XCoord = result.XPos;
+                        tempVM.YCoord = result.YPos;
+                        reconstructedCompVMs.Add(tempVM);
+                    }
+                }
+            }
+
+            List<ConnectionVM> reconstructedConns = new List<ConnectionVM>();
+            foreach (var connection in testResult.Connections)
+            {
+                var inparent = loadedNodes.Find(node => node.Item1.Label == connection.InputParentID);
+                var outparent = loadedNodes.Find(node => node.Item1.Label == connection.OutputParentID);
+                // Labelvergleich wirkt ziemlich ranzig
+                if (inparent != null &&  outparent != null)
+                {
+                    var inPin = inparent.Item1.Inputs.ToList().Find(pin => pin.Label == connection.InputPinID);
+                    var outPin = outparent.Item1.Outputs.ToList().Find(pin => pin.Label == connection.OutputPinID);
+
+                    var inCompVM = new ComponentVM(inparent.Item1, CreateUniqueName(inparent.Item1) , setPinCommand, removeCommand);
+                    var outCompVM = new ComponentVM(outparent.Item1, CreateUniqueName(outparent.Item1) , setPinCommand, removeCommand);
+
+
+                    var tempIn = new PinVM(inPin, true, setPinCommand, inCompVM);
+                    var tempOut = new PinVM(outPin, false, setPinCommand, outCompVM);
+
+                    var tempConnection = new ConnectionVM(tempOut, tempIn, this.NewUniqueConnectionId());
+                    reconstructedConns.Add(tempConnection);
+                }
+            }
+
+            return new Tuple<List<ConnectionVM>, List<ComponentVM>>(reconstructedConns, reconstructedCompVMs);
         }
 
         /// <summary>

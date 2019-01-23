@@ -18,8 +18,12 @@ namespace LogicDesigner.ViewModel
 {
     public class ComponentVM : INotifyPropertyChanged, ISerializable
     {
+        [NonSerialized]
         private IDisplayableNode node;
+
+        [NonSerialized]
         private readonly Command removeCommand;
+
         private double xCoord;
         private double yCoord;
         private readonly string uniqueName;
@@ -60,6 +64,11 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        public ComponentVM()
+        {
+
+        }
+
         public string Label
         {
             get { return this.node.Label; }
@@ -74,6 +83,12 @@ namespace LogicDesigner.ViewModel
         {
             get { return this.node.Outputs.ElementAt(0).Value.ToString(); }
         }
+
+        public string Identifier
+        {
+            get => this.uniqueName;
+        }
+
 
         public double XCoord
         {

@@ -20,9 +20,9 @@
         ///   The file path.
         /// </param>
         /// <returns></returns>
-        public List<IDisplayableNode> GetNodes(string filePath)
+        public List<Tuple<IDisplayableNode,string>> GetNodes(string filePath)
         {
-            List<IDisplayableNode> nodes = new List<IDisplayableNode>();
+            List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
 
             if (Directory.Exists(filePath))
             {
@@ -61,9 +61,9 @@
                                     {
                                         IDisplayableNode node = (IDisplayableNode)Activator.CreateInstance(type);
 
-                                        if (this.ValidateNode(node))
+                                        if (ValidateNode(node))
                                         {
-                                            nodes.Add(node);
+                                            nodes.Add(new Tuple<IDisplayableNode, string>(node, file.FullName));
                                         }
                                     }
                                     catch (Exception)
@@ -90,11 +90,60 @@
         }
 
         /// <summary>
+        ///   Gets a single node.
+        /// </summary>
+        /// <param name="filePath">
+        ///   The file path.
+        /// </param>
+        /// <returns></returns>
+        public static List<Tuple<IDisplayableNode, string>> LoadSingleAssembly(string filePath)
+        {
+            List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
+
+            if (File.Exists(filePath) && (Path.GetExtension(filePath) == ".dll" || Path.GetExtension(filePath) == ".exe"))
+            {
+                    try
+                    {
+                        Assembly ass = Assembly.LoadFrom(filePath);
+                        //Assembly ass = Assembly.Load(file.FullName);
+
+                        foreach (var type in ass.GetExportedTypes())
+                        {
+                            foreach (var interfc in type.GetInterfaces())
+                            {
+                                if (interfc == typeof(IDisplayableNode))
+                                {
+                                    try
+                                    {
+                                        IDisplayableNode node = (IDisplayableNode)Activator.CreateInstance(type);
+
+                                        if (ValidateNode(node))
+                                        {
+                                            nodes.Add(new Tuple<IDisplayableNode, string>(node, filePath));
+                                        }
+                                    }
+                                    catch (Exception)
+                                    {
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception)
+                    {
+
+                    }
+                }
+            return nodes;
+        }
+
+        /// <summary>
         /// Validates the node content and checks for missing necessary properties.
         /// </summary>
         /// <param name="node">The node that contiants the data of a electric component.</param>
         /// <returns>Returns true wether the node is valid or retruns false if not.</returns>
-        private bool ValidateNode(IDisplayableNode node)
+        private static bool ValidateNode(IDisplayableNode node)
         {
             if (node.Description == null || node.Description == string.Empty)
             {

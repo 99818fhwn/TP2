@@ -30,6 +30,8 @@ namespace LogicDesigner.Model
         private readonly string path;
         public event EventHandler<PinsConnectedEventArgs> PinsDisconnected;
 
+        public ICollection<Tuple<IDisplayableNode, string>> SerializationPathInfo { get; set; }
+
         private readonly string componentDirectory;
 
         public FileSystemWatcher Watcher { get; set; }
@@ -45,7 +47,14 @@ namespace LogicDesigner.Model
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
-            this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
+             this.SerializationPathInfo = this.InitializeNodesToChooseFrom();
+
+            List<IDisplayableNode> moduleList = new List<IDisplayableNode>();
+            foreach (var module in SerializationPathInfo)
+            {
+                moduleList.Add(module.Item1);
+            }
+            this.possibleNodesToChooseFrom = (ICollection<IDisplayableNode>)moduleList;
 
             if (!Directory.Exists(Path.GetDirectoryName(componentDirectory)))
             {
@@ -109,7 +118,7 @@ namespace LogicDesigner.Model
             private set;
         }
 
-        private ICollection<IDisplayableNode> InitializeNodesToChooseFrom()
+        private ICollection<Tuple<IDisplayableNode, string>> InitializeNodesToChooseFrom()
         {
             return new NodesLoader().GetNodes(componentDirectory);
         }
