@@ -55,22 +55,22 @@ namespace LogicDesigner
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            programMngVM = new ProgramMngVM();
-            this.MainGrid.DataContext = programMngVM;
+            this.programMngVM = new ProgramMngVM();
+            this.MainGrid.DataContext = this.programMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
             this.CurrentSelectedComponentView.SetBinding(MainWindow.DataContextProperty, selectBind);
 
-            this.InputBindings.Add(new InputBinding(programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
-            this.InputBindings.Add(new InputBinding(programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
+            this.InputBindings.Add(new InputBinding(this.programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
+            this.InputBindings.Add(new InputBinding(this.programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
 
-            programMngVM.FieldComponentAdded += this.OnComponentAdded;
-            programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            this.programMngVM.FieldComponentAdded += this.OnComponentAdded;
+            this.programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
-            programMngVM.PinsConnected += this.OnPinsConnected;
-            programMngVM.PinsDisconnected += this.OnPinsDisconnected;
+            this.programMngVM.PinsConnected += this.OnPinsConnected;
+            this.programMngVM.PinsDisconnected += this.OnPinsDisconnected;
 
-            programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
+            this.programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
@@ -124,36 +124,31 @@ namespace LogicDesigner
                 return this.programMngVM.UndoCommand;
             }
         }
-            //    if (this.UndoHistory.Count > 0)
-            //    {
-            //        ProgramMngVM history = this.UndoHistory.Pop();
+        //    if (this.UndoHistory.Count > 0)
+        //    {
+        //        ProgramMngVM history = this.UndoHistory.Pop();
 
-            //        var current = (ProgramMngVM)this.MainGrid.DataContext;
-            //        if (history.NodesVMInField == current.NodesVMInField)
-            //        {
-            //            this.RedoHistory.Push(history);
-            //            history = this.UndoHistory.Pop();
-            //        }
+        //        var current = (ProgramMngVM)this.MainGrid.DataContext;
+        //        if (history.NodesVMInField == current.NodesVMInField)
+        //        {
+        //            this.RedoHistory.Push(history);
+        //            history = this.UndoHistory.Pop();
+        //        }
 
-            //        this.ComponentWindow.Children.Clear();
-            //        this.MainGrid.DataContext = history;
-            //        foreach (var component in history.NodesVMInField)
-            //        {
-            //            this.DrawNewComponent(component);
-            //        }
+        //        this.ComponentWindow.Children.Clear();
+        //        this.MainGrid.DataContext = history;
+        //        foreach (var component in history.NodesVMInField)
+        //        {
+        //            this.DrawNewComponent(component);
+        //        }
 
-            //        this.RedoHistory.Push(history);
-            //    }
-            //}));
-        
-        /// <summary>
-        /// Gets the undo command.
-        /// </summary>
-        /// <value>
-        /// The undo command.
-        /// </value>
+        //        this.RedoHistory.Push(history);
+        //    }
+        //}));
+
         public Command SaveCommand
         {
+            // TODO: Make serialized path relative, so projects can be shared!!!
             get => new Command(new Action<object>((input) =>
             {
                 try
@@ -172,8 +167,10 @@ namespace LogicDesigner
                         manager.SaveStatus(filename);
                     }
                 }
-                catch
-                { }
+                catch (Exception e)
+                {
+                    MessageBox.Show($"File could not be saved, please try again. \r{e.Message}");
+                }
             }));
         }
 
@@ -194,39 +191,36 @@ namespace LogicDesigner
                     {
                         var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
 
-                        var loadResult = manager.LoadStatus(filename);
-
-                        App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                        MessageBoxResult messageBoxResult = MessageBoxResult.Yes;
+                        if (this.ComponentWindow.Children.Count > 0)
                         {
-                            foreach (var existingComponent in manager.NodesVMInField)
+                            messageBoxResult = MessageBox.Show("Created Progress will be lost. \rLoad anyways?", "Load overwrite warning", System.Windows.MessageBoxButton.YesNo);
+                        }
+
+                        if (messageBoxResult == MessageBoxResult.Yes)
+                        {
+                            this.ComponentWindow.Children.Clear();
+                            var loadResult = manager.LoadStatus(filename);
+
+                            App.Current.Dispatcher.Invoke((Action)delegate
                             {
-                                manager.NodesVMInField.Remove(existingComponent);
-                                // Insert visual remove
-                            }
-                        });
+                                foreach (var loadedComponent in loadResult.Item2)
+                                {
+                                    manager.AddLoadedComponent(loadedComponent);
+                                }
+                            });
 
-
-                        App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
-                        {
-                            foreach (var loadedComponent in loadResult.Item2)
+                            foreach (var conn in loadResult.Item1)
                             {
-                                manager.NodesVMInField.Add(loadedComponent);
-                                this.DrawNewComponent(loadedComponent);
+                                manager.AddLoadedConnection(conn);
                             }
-                        });
-
-                        foreach (var conn in loadResult.Item1)
-                        {
-
-                            manager.ConnectionsVM.Add(conn);
-                            manager.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
                         }
                     }
-
-
                 }
-                catch
-                { }
+                catch (Exception e)
+                {
+                    MessageBox.Show($"File could not be loaded, please try again. \r{e.Message}");
+                }
             }));
         }
 
@@ -433,12 +427,12 @@ namespace LogicDesigner
 
                             if (connectionVM != null)
                             {
-                                if (connectionVM.InputPin.Parent == componentToMove || connectionVM.OutputPin.Parent == componentToMove)
-                                {
-                                    this.OnPinsDisconnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
-                                    this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
-                                    return;
-                                }
+                                //if (connectionVM.InputPin.Parent == componentToMove || connectionVM.OutputPin.Parent == componentToMove)
+                                //{
+                                this.OnPinsDisconnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
+                                this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
+                                return;
+                                //}
                             }
                         }
                     }
@@ -619,7 +613,8 @@ namespace LogicDesigner
 
                 var pinVM = componentVM.InputPinsVM[i];
 
-                pinButton.Command = new Command(x => {
+                pinButton.Command = new Command(x =>
+                {
 
                     pinVM.SetPinCommand.Execute(pinVM);
 
@@ -672,8 +667,9 @@ namespace LogicDesigner
                 pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
 
                 var pinVM = componentVM.OutputPinsVM[i];
-                
-                pinButton.Command = new Command(x => {
+
+                pinButton.Command = new Command(x =>
+                {
 
                     pinVM.SetPinCommand.Execute(pinVM);
 
@@ -692,14 +688,14 @@ namespace LogicDesigner
                     }
 
                     this.lastPressedPin = pinButton;
-                });  
+                });
 
                 pinButton.RenderTransform = new TranslateTransform((componentVM.Picture.Width / 2) + 10, yOffset);
                 yOffset += offsetStepValue;
 
                 componentVM.OutputPinsVM[i].XPosition = (newComponent.Width / 2) + (componentVM.Picture.Width / 2) + 10;
                 componentVM.OutputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
-                
+
                 newComponent.Children.Add(pinButton);
             }
 
@@ -729,6 +725,10 @@ namespace LogicDesigner
         /// <param name="component">The component.</param>
         private void OnComponentRightClick(object component)
         {
+            // Die Methode ist komisch, warum wird ein object übergeben, obwohl es sowies ein grid sein muss?
+            // Und es ist ja auch kein wirkliches Event, ich find den Namen etwas verwirrend
+            // Des weiteren sollte es fixer Teil der Remove-Eventchain sein
+            // LG Moe :3
             if (component.GetType() == typeof(Grid))
             {
                 this.ComponentWindow.Children.Remove((Grid)component);
@@ -784,6 +784,7 @@ namespace LogicDesigner
             Panel.SetZIndex(line, 2);
 
             this.ComponentWindow.Children.Add(line);
+            this.ComponentWindow.UpdateLayout();
         }
 
         /// <summary>
@@ -802,6 +803,34 @@ namespace LogicDesigner
 
                 this.ComponentWindow.Children.Remove(l);
             }
+        }
+
+        public Command ToggleGridCommand
+        {
+            get => new Command(new Action<object>(param =>
+            {
+                DrawingBrush brush = new DrawingBrush();
+                brush.TileMode = TileMode.Tile;
+                brush.ViewportUnits = BrushMappingMode.Absolute;
+                brush.Viewport = new Rect(-15, -15, 15, 15);
+
+                GeometryDrawing geometry = new GeometryDrawing();
+                //geometry.Brush = new SolidColorBrush(Color.FromRgb(222, 0, 222));
+                geometry.Geometry = new RectangleGeometry(new Rect(0,0,50,50));
+                geometry.Pen = new Pen(new SolidColorBrush(Color.FromRgb(41,49,51)), 1);
+
+                brush.Drawing = geometry;
+
+                if (this.ComponentWindow.Background != null)
+                {
+                    this.ComponentWindow.Background = null;
+                }
+                else
+                {
+                    this.ComponentWindow.Background = brush;
+                }
+                this.ComponentWindow.UpdateLayout();
+            }));
         }
 
         /// <summary>
