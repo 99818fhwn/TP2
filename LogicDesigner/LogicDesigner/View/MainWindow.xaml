@@ -175,10 +175,10 @@
 
                 </RowDefinition>
             </Grid.RowDefinitions>
-            <ListView Grid.Row="0" ItemsSource="{Binding SelectableComponents}">
+            <ListView Grid.Row="0" ItemsSource="{Binding SelectableComponents}" HorizontalContentAlignment="Stretch">
                 <ListView.View>
                     <GridView>
-                        <GridViewColumn Width="auto" Header="Component"  >
+                        <GridViewColumn Width="auto" Header="Component">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <Grid>
