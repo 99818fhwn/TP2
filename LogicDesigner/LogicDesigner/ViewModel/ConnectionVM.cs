@@ -18,6 +18,11 @@ namespace LogicDesigner.ViewModel
             this.InputPin = input;
         }
 
+        public ConnectionVM()
+        {
+
+        }
+
         public PinVM OutputPin
         {
             get;

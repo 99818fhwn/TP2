@@ -35,6 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Polenter.SharpSerializer, Version=3.0.1.0, Culture=neutral, PublicKeyToken=8f4f20011571ee5f, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpSerializer.3.0.1\lib\net452\Polenter.SharpSerializer.dll</HintPath>
+    </Reference>
     <Reference Include="Shared, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\Shared.dll</HintPath>
@@ -71,7 +74,10 @@
     <Compile Include="Model\ComponentLoader.cs" />
     <Compile Include="Model\NodesLoader.cs" />
     <Compile Include="Model\ProgramManager.cs" />
-    <Compile Include="Model\SerializationLogic.cs" />
+    <Compile Include="Model\Serialization\SerializationLogic.cs" />
+    <Compile Include="Model\Serialization\SerializedObject.cs" />
+    <Compile Include="Model\Serialization\SerializedComponentVM.cs" />
+    <Compile Include="Model\Serialization\SerializedConnectionVM.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -108,6 +114,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

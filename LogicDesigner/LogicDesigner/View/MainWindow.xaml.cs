@@ -8,6 +8,7 @@ namespace LogicDesigner
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -37,6 +38,11 @@ namespace LogicDesigner
         /// If a component is being dragged.
         /// </summary>
         private bool isMoving;
+
+        /// <summary>
+        /// The last pressed pin.
+        /// </summary>
+        private Button lastPressedPin = new Button();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
@@ -128,7 +134,7 @@ namespace LogicDesigner
                     this.MainGrid.DataContext = history;
                     foreach (var component in history.NodesVMInField)
                     {
-                        DrawNewComponent(component);
+                        this.DrawNewComponent(component);
                     }
 
                     this.RedoHistory.Push(history);
@@ -136,27 +142,72 @@ namespace LogicDesigner
             }));
         }
 
-        /// <summary>
-        /// Gets the undo command.
-        /// </summary>
-        /// <value>
-        /// The undo command.
-        /// </value>
         public Command SaveCommand
         {
             get => new Command(new Action<object>((input) =>
             {
-                SaveFileDialog filepicker = new SaveFileDialog();
+                try
+                {
+                    SaveFileDialog filepicker = new SaveFileDialog();
+                    //filepicker.CheckFileExists = false;
+                    filepicker.Filter = "LogicDesigner files (*.ldf)|*.ldf|All files (*.*)|*.*";
+                    filepicker.DefaultExt = ".ldf";
+                    filepicker.ShowDialog();
 
-                filepicker.DefaultExt = ".ldf";
+                    string filename = filepicker.FileName;
 
-                filepicker.ShowDialog();
+                    if (Directory.Exists(System.IO.Path.GetDirectoryName(filename)))
+                    {
+                        var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                        manager.SaveStatus(filename);
+                    }
+                }
+                catch
+                { }
+            }));
+        }
 
-                string filename = filepicker.FileName;
-                var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
-                manager.SaveStatus(filename);
+        public Command LoadCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                try
+                {
+                    OpenFileDialog filepicker = new OpenFileDialog();
+                    //filepicker.CheckFileExists = false;
+                    filepicker.Filter = "LogicDesigner files (*.ldf)|*.ldf|All files (*.*)|*.*";
+                    filepicker.DefaultExt = ".ldf";
+                    filepicker.ShowDialog();
 
-                manager.LoadStatus(filename);
+                    string filename = filepicker.FileName;
+                    if (File.Exists(filename))
+                    {
+                        var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+
+                        var loadResult = manager.LoadStatus(filename);
+
+                        App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                        {
+                            foreach (var existingComponent in manager.NodesVMInField)
+                            {
+                                manager.NodesVMInField.Remove(existingComponent);
+                            // Insert visual remove
+                        }
+                        });
+
+
+                        App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                        {
+                            foreach (var loadedComponent in loadResult.Item2)
+                            {
+                                manager.NodesVMInField.Add(loadedComponent);
+                                this.DrawNewComponent(loadedComponent);
+                            }
+                        });
+                    }
+                }
+                catch
+                { }
             }));
         }
 
@@ -232,7 +283,7 @@ namespace LogicDesigner
 
                     foreach (var component in history.NodesVMInField)
                     {
-                        DrawNewComponent(component);
+                        this.DrawNewComponent(component);
                     }
 
                     this.UndoHistory.Push(history);                    
@@ -423,7 +474,7 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentChanged(object sender, FieldComponentEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            this.Dispatcher.Invoke(() =>
             {
                 var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
 
@@ -490,6 +541,7 @@ namespace LogicDesigner
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
+            sampleBody.Background.Opacity = 0.97;
 
             // remove command 
             sampleBody.InputBindings.Add(
@@ -521,7 +573,7 @@ namespace LogicDesigner
 
             newComponent.Height = sampleBody.Height + label.Height + 20;
             newComponent.Width = sampleBody.Width + label.Width + 20;
-            Panel.SetZIndex(sampleBody, 0);
+            Panel.SetZIndex(sampleBody, 3);
             newComponent.Children.Add(sampleBody);
             newComponent.Children.Add(label);
 
@@ -541,11 +593,33 @@ namespace LogicDesigner
                 pinButton.Width = 20;
                 pinButton.Height = 10;
 
-                var color = componentVM.InputPinsVM[i].Color;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
+                var passiveColor = componentVM.InputPinsVM[i].PassiveColor;
+                var activeColor = componentVM.InputPinsVM[i].ActiveColor;
 
-                pinButton.CommandParameter = componentVM.InputPinsVM[i];
-                pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+
+                var pinVM = componentVM.InputPinsVM[i];
+
+                pinButton.Command = new Command(x => {
+
+                    pinVM.SetPinCommand.Execute(pinVM);
+
+                    if (pinVM.Active == false)
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+                    else
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(activeColor.R, activeColor.G, activeColor.B));
+                    }
+
+                    if (pinButton != this.lastPressedPin)
+                    {
+                        this.lastPressedPin.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+
+                    this.lastPressedPin = pinButton;
+                });
 
                 pinButton.RenderTransform = new TranslateTransform((-componentVM.Picture.Width / 2) - 10, yOffset);
 
@@ -553,8 +627,6 @@ namespace LogicDesigner
                 componentVM.InputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
 
                 yOffset += offsetStepValue;
-
-                Panel.SetZIndex(pinButton, 100);
 
                 newComponent.Children.Add(pinButton);
             }
@@ -575,17 +647,32 @@ namespace LogicDesigner
                 pinButton.Width = 20;
                 pinButton.Height = 10;
 
-                var color = componentVM.OutputPinsVM[i].Color;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
+                var passiveColor = componentVM.OutputPinsVM[i].PassiveColor;
+                var activeColor = componentVM.OutputPinsVM[i].ActiveColor;
 
-                var pin = componentVM.OutputPinsVM[i];
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
 
-                //pinButton.CommandParameter = componentVM.OutputPinsVM[i];
+                var pinVM = componentVM.OutputPinsVM[i];
+                
                 pinButton.Command = new Command(x => {
 
+                    pinVM.SetPinCommand.Execute(pinVM);
 
+                    if (pinVM.Active == false)
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+                    else
+                    {
+                        pinButton.Background = new SolidColorBrush(Color.FromRgb(activeColor.R, activeColor.G, activeColor.B));
+                    }
 
-                    pin.SetPinCommand.Execute(pin);
+                    if (pinButton != this.lastPressedPin)
+                    {
+                        this.lastPressedPin.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                    }
+
+                    this.lastPressedPin = pinButton;
                 });  
 
                 pinButton.RenderTransform = new TranslateTransform((componentVM.Picture.Width / 2) + 10, yOffset);
@@ -593,13 +680,28 @@ namespace LogicDesigner
 
                 componentVM.OutputPinsVM[i].XPosition = (newComponent.Width / 2) + (componentVM.Picture.Width / 2) + 10;
                 componentVM.OutputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
-
-                Panel.SetZIndex(pinButton, 100);
-
+                
                 newComponent.Children.Add(pinButton);
             }
 
+            if (componentVM.XCoord != 0 && componentVM.YCoord == 0)
+            {
+                newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, 0);
+            }
+
+            if (componentVM.YCoord != 0 && componentVM.XCoord == 0)
+            {
+                newComponent.RenderTransform = new TranslateTransform(0, componentVM.YCoord);
+            }
+
+            if (componentVM.YCoord != 0 && componentVM.XCoord != 0)
+            {
+                newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, componentVM.YCoord);
+            }
+
             this.ComponentWindow.Children.Add(newComponent);
+
+            Panel.SetZIndex(newComponent, 100);
         }
 
         /// <summary>
@@ -660,7 +762,7 @@ namespace LogicDesigner
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
 
-            Panel.SetZIndex(line, 50);
+            Panel.SetZIndex(line, 2);
 
             this.ComponentWindow.Children.Add(line);
         }

@@ -35,10 +35,11 @@ namespace LogicDesigner.ViewModel
         /// </summary>
         /// <param name="addCommand">The add command for adding real components to the designer field.</param>
         /// <param name="node">The node that will be added then.</param>
-        public ComponentRepresentationVM(Command addCommand, IDisplayableNode node)
+        public ComponentRepresentationVM(Command addCommand, IDisplayableNode node, string assemblyPath)
         {
             this.AddComponentCommand = addCommand;
             this.node = node;
+            this.AssemblyPath = assemblyPath;
         }
 
         /// <summary>
@@ -96,6 +97,12 @@ namespace LogicDesigner.ViewModel
         public string Label
         {
             get { return this.node.Label; }
+        }
+
+        public string AssemblyPath
+        {
+            get;
+            set;
         }
     }
 }
