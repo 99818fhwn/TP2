@@ -55,20 +55,20 @@ namespace LogicDesigner
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            this.programMngVM = new ProgramMngVM();
-            this.MainGrid.DataContext = this.programMngVM;
+            this.ProgramMngVM = new ProgramMngVM();
+            this.MainGrid.DataContext = this.ProgramMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
             this.CurrentSelectedComponentView.SetBinding(MainWindow.DataContextProperty, selectBind);
 
-            this.InputBindings.Add(new InputBinding(this.programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
-            this.InputBindings.Add(new InputBinding(this.programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
+            this.InputBindings.Add(new InputBinding(this.ProgramMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
+            this.InputBindings.Add(new InputBinding(this.ProgramMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
 
-            this.programMngVM.FieldComponentAdded += this.OnComponentAdded;
-            this.programMngVM.FieldComponentRemoved += this.OnComponentDeleted;
+            this.ProgramMngVM.FieldComponentAdded += this.OnComponentAdded;
+            this.ProgramMngVM.FieldComponentRemoved += this.OnComponentDeleted;
 
-            this.programMngVM.PinsConnected += this.OnPinsConnected;
-            this.programMngVM.PinsDisconnected += this.OnPinsDisconnected;
+            this.ProgramMngVM.PinsConnected += this.OnPinsConnected;
+            this.ProgramMngVM.PinsDisconnected += this.OnPinsDisconnected;
 
             //programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
 
