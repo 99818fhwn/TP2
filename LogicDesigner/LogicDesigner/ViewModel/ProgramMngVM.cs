@@ -1,6 +1,4 @@
-﻿
-
-namespace LogicDesigner.ViewModel
+﻿namespace LogicDesigner.ViewModel
 {
     using System;
     using System.Collections.Generic;
@@ -22,33 +20,116 @@ namespace LogicDesigner.ViewModel
     using LogicDesigner.Model.Serialization;
     using Shared;
 
+    /// <summary>
+    /// The main vm class.
+    /// </summary>
+    /// <seealso cref="System.ComponentModel.INotifyPropertyChanged" />
     public class ProgramMngVM : INotifyPropertyChanged
     {
+        /// <summary>
+        /// The program manager.
+        /// </summary>
         private ProgramManager programManager;
+
+        /// <summary>
+        /// The connections.
+        /// </summary>
         private ObservableCollection<ConnectionVM> connectionsVM;
+
+        /// <summary>
+        /// The nodes in field.
+        /// </summary>
         private ObservableCollection<ComponentVM> nodesVMInField;
+
+        /// <summary>
+        /// The selectable components.
+        /// </summary>
         private ObservableCollection<ComponentRepresentationVM> selectableComponents;
+
+        /// <summary>
+        /// The unique node identifier.
+        /// </summary>
         private int uniqueNodeId;
+
+        /// <summary>
+        /// The selected output pin.
+        /// </summary>
         private PinVM selectedOutputPin;
+
+        /// <summary>
+        /// The selected input pin.
+        /// </summary>
         private PinVM selectedInputPin;
+
+        /// <summary>
+        /// The undo history stack.
+        /// </summary>
         private Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>> undoHistoryStack;
+
+        /// <summary>
+        /// The redo history stack.
+        /// </summary>
         private Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>> redoHistoryStack;
-
-        public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
-        //public event EventHandler<EventArgs> PreFieldComponentAdded;
-        public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
-        public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
-        public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
-        public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
-        public event PropertyChangedEventHandler PropertyChanged;
-
+                
+        /// <summary>
+        /// The selected field component
+        /// </summary>
         private ComponentVM selectedFieldComponent;
+
+        /// <summary>
+        /// The new unique connection identifier
+        /// </summary>
         private int newUniqueConnectionId;
 
+        /// <summary>
+        /// The remove command.
+        /// </summary>
         private readonly Command removeCommand;
+
+        /// <summary>
+        /// The set pin command.
+        /// </summary>
         private readonly Command setPinCommand;
+
+        /// <summary>
+        /// The add command.
+        /// </summary>
         private readonly Command addCommand;
+
+        /// <summary>
+        /// The configuration.
+        /// </summary>
         private readonly ConfigurationLogic config;
+
+        /// <summary>
+        /// Occurs when field component is added.
+        /// </summary>
+        public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
+
+        /// <summary>
+        /// Occurs when field component is removed.
+        /// </summary>
+        public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
+
+        /// <summary>
+        /// Occurs when field component is changed.
+        /// </summary>
+        public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
+
+        /// <summary>
+        /// Occurs when pins are connected.
+        /// </summary>
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
+
+        /// <summary>
+        /// Occurs when pins are disconnected.
+        /// </summary>
+        public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
+
+        /// <summary>
+        /// Fired when property changed.
+        /// </summary>
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public ProgramMngVM()
         {
@@ -98,7 +179,7 @@ namespace LogicDesigner.ViewModel
                         this.nodesVMInField.Remove(nodeInFieldVM);
                         this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
                         this.RemoveDeletedComponentConnections(nodeInFieldVM);
-                        this.UpdateUndoHistory(); ////Not sure if i have to update the program manager !!!!!!!!
+                        this.UpdateUndoHistory(); // Not sure if i have to update the program manager!
                         break;
                     }
                 }
@@ -111,13 +192,12 @@ namespace LogicDesigner.ViewModel
             this.addCommand = new Command(obj =>
             {
                 var representationNode = obj as ComponentRepresentationVM;
-                //this.PreFieldComponentAdded(this, new EventArgs());
+                // this.PreFieldComponentAdded(this, new EventArgs());
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
 
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), this.setPinCommand,
-                    this.removeCommand, this.config);
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), this.setPinCommand, this.removeCommand, this.config);
                 this.nodesVMInField.Add(compVM);
                 this.FireOnFieldComponentAdded(compVM);
                 this.UpdateUndoHistory();
@@ -246,11 +326,19 @@ namespace LogicDesigner.ViewModel
             this.programManager.PinsDisconnected += this.OnPinsDisconnected;
         }
 
+        /// <summary>
+        /// Fires the on component vm removed event.
+        /// </summary>
+        /// <param name="item">The item.</param>
         private void FireOnComponentVMRemoved(ComponentVM item)
         {
             this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(item));
         }
 
+        /// <summary>
+        /// Removes the deleted component connections.
+        /// </summary>
+        /// <param name="removedComponentVM">The removed component vm.</param>
         private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
         {
             foreach (var pinVM in removedComponentVM.OutputPinsVM)
@@ -283,6 +371,11 @@ namespace LogicDesigner.ViewModel
 
         }
 
+
+        /// <summary>
+        /// Creates new uniqueconnectionid.
+        /// </summary>
+        /// <returns>The id.</returns>
         private string NewUniqueConnectionId()
         {
             string s = "Connection" + this.newUniqueConnectionId.ToString();
@@ -290,35 +383,72 @@ namespace LogicDesigner.ViewModel
             return s;
         }
 
+        /// <summary>
+        /// Gets the start command.
+        /// </summary>
+        /// <value>
+        /// The start command.
+        /// </value>
         public Command StartCommand
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the step command.
+        /// </summary>
+        /// <value>
+        /// The step command.
+        /// </value>
         public Command StepCommand
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the stop command.
+        /// </summary>
+        /// <value>
+        /// The stop command.
+        /// </value>
         public Command StopCommand
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets the undo command.
+        /// </summary>
+        /// <value>
+        /// The undo command.
+        /// </value>
         public Command UndoCommand
         {
             get;
             private set;
         }
+
+        /// <summary>
+        /// Gets the redo command.
+        /// </summary>
+        /// <value>
+        /// The redo command.
+        /// </value>
         public Command RedoCommand
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Gets or sets the selected field component.
+        /// </summary>
+        /// <value>
+        /// The selected field component.
+        /// </value>
         public ComponentVM SelectedFieldComponent
         {
             get
@@ -333,7 +463,12 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-
+        /// <summary>
+        /// Gets the nodes vm in field.
+        /// </summary>
+        /// <value>
+        /// The nodes vm in field.
+        /// </value>
         public ObservableCollection<ComponentVM> NodesVMInField
         {
             get
@@ -347,6 +482,12 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        /// <summary>
+        /// Gets or sets the selectable components.
+        /// </summary>
+        /// <value>
+        /// The selectable components.
+        /// </value>
         public ObservableCollection<ComponentRepresentationVM> SelectableComponents
         {
             get
@@ -360,6 +501,12 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        /// <summary>
+        /// Gets or sets the connections vm.
+        /// </summary>
+        /// <value>
+        /// The connections vm.
+        /// </value>
         public ObservableCollection<ConnectionVM> ConnectionsVM
         {
             get
@@ -400,6 +547,9 @@ namespace LogicDesigner.ViewModel
             }));
         }
 
+        /// <summary>
+        /// Updates the undo history.
+        /// </summary>
         public void UpdateUndoHistory()
         {
             var oldHistory = new Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>(
@@ -409,6 +559,10 @@ namespace LogicDesigner.ViewModel
             this.redoHistoryStack.Clear();
         }
 
+        /// <summary>
+        /// Sets the selected pin.
+        /// </summary>
+        /// <param name="value">The value.</param>
         public void SetSelectedPin(PinVM value)
         {
             value.Active = (value.Active == true) ? false : true;
@@ -436,16 +590,30 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        /// <summary>
+        /// Fires the on field component added event.
+        /// </summary>
+        /// <param name="addedComponent">The added component.</param>
         public void FireOnFieldComponentAdded(ComponentVM addedComponent)
         {
             this.FieldComponentAdded?.Invoke(this, new FieldComponentEventArgs(addedComponent));
         }
 
+        /// <summary>
+        /// Called when field component is removed.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="LogicDesigner.ViewModel.FieldComponentEventArgs" /> instance containing the event data.</param>
         public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentRemoved?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// Connects the pins.
+        /// </summary>
+        /// <param name="selectedOutputPin">The selected output pin.</param>
+        /// <param name="selectedInputPin">The selected input pin.</param>
         private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
         {
             if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
@@ -558,11 +726,21 @@ namespace LogicDesigner.ViewModel
         //    });
         //}
 
+        /// <summary>
+        /// Called when pins get connected.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="LogicDesigner.ViewModel.PinVMConnectionChangedEventArgs" /> instance containing the event data.</param>
         public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
         {
             this.PinsConnected?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// Called when pins get disconnected.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="LogicDesigner.ViewModel.PinsConnectedEventArgs" /> instance containing the event data.</param>
         public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
         {
             var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
@@ -571,11 +749,19 @@ namespace LogicDesigner.ViewModel
 
         }
 
+        /// <summary>
+        /// Fires the on property changed event.
+        /// </summary>
+        /// <param name="name">The name.</param>
         protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        /// <summary>
+        /// Saves the status.
+        /// </summary>
+        /// <param name="path">The path.</param>
         public void SaveStatus(string path)
         {
             SerializationLogic serializer = new SerializationLogic();
@@ -597,6 +783,11 @@ namespace LogicDesigner.ViewModel
 
         }
 
+        /// <summary>
+        /// Loads the status.
+        /// </summary>
+        /// <param name="path">The path.</param>
+        /// <returns></returns>
         public Tuple<List<ConnectionVM>, List<ComponentVM>> LoadStatus(string path)
         {
             SerializationLogic serializer = new SerializationLogic();
@@ -662,6 +853,10 @@ namespace LogicDesigner.ViewModel
             return new Tuple<List<ConnectionVM>, List<ComponentVM>>(reconstructedConns, reconstructedCompVMs);
         }
 
+        /// <summary>
+        /// Adds the loaded component.
+        /// </summary>
+        /// <param name="loadedComponent">The loaded component.</param>
         public void AddLoadedComponent(ComponentVM loadedComponent)
         {
             NodesVMInField.Add(loadedComponent);
@@ -669,6 +864,10 @@ namespace LogicDesigner.ViewModel
             this.FieldComponentAdded?.Invoke(this, new FieldComponentEventArgs(loadedComponent));
         }
 
+        /// <summary>
+        /// Adds the loaded connection.
+        /// </summary>
+        /// <param name="loadedConnection">The loaded connection.</param>
         public void AddLoadedConnection(ConnectionVM loadedConnection)
         {
             ConnectionsVM.Add(loadedConnection);
@@ -686,6 +885,10 @@ namespace LogicDesigner.ViewModel
             this.FieldComponentChanged?.Invoke(this, e);
         }
 
+        /// <summary>
+        /// Removes the connection vm.
+        /// </summary>
+        /// <param name="id">The identifier.</param>
         public void RemoveConnectionVM(string id)
         {
             foreach (var conn in this.connectionsVM)
