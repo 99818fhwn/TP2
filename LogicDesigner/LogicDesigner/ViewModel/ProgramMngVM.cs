@@ -258,7 +258,7 @@ namespace LogicDesigner.ViewModel
 
         public void SetSelectedPin(PinVM value)
         {
-            value.Color = Color.Red;
+            value.Active = (value.Active == true) ? false : true;
 
             if (this.selectedOutputPin == value || this.selectedInputPin == value)
             {
@@ -303,10 +303,12 @@ namespace LogicDesigner.ViewModel
 
                 this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
             }
+            
+            this.selectedInputPin.Active = false;
+            this.selectedOutputPin.Active = false;
 
             this.selectedInputPin = null;
             this.selectedOutputPin = null;
-
         }
 
         /// <summary>
