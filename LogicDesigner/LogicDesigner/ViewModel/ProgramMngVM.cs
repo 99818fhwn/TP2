@@ -423,7 +423,7 @@ namespace LogicDesigner.ViewModel
         {
             //this.programManager = new ProgramManager();
             //this.programManager.Watcher.Created += NewModuleAdded;
-            this.programManager.InitializeNodesToChooseFrom();
+            this.programManager.InitializeNodesToChooseFromVoid();
 
             //var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
             var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));

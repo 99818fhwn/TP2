@@ -51,18 +51,20 @@ namespace LogicDesigner.Model
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
-            this.InitializeNodesToChooseFrom();
+            this.InitializeNodesToChooseFromVoid();
              this.SerializationPathInfo = this.InitializeNodesToChooseFrom();
 
             if (!Directory.Exists(Path.GetDirectoryName(this.componentDirectory)))
-            List<IDisplayableNode> moduleList = new List<IDisplayableNode>();
-            foreach (var module in SerializationPathInfo)
             {
-                moduleList.Add(module.Item1);
+                List<IDisplayableNode> moduleList = new List<IDisplayableNode>();
+                foreach (var module in this.SerializationPathInfo)
+                {
+                    moduleList.Add(module.Item1);
+                }
+                this.possibleNodesToChooseFrom = (ICollection<IDisplayableNode>)moduleList;
             }
-            this.possibleNodesToChooseFrom = (ICollection<IDisplayableNode>)moduleList;
 
-            if (!Directory.Exists(Path.GetDirectoryName(componentDirectory)))
+            if (!Directory.Exists(Path.GetDirectoryName(this.componentDirectory)))
             {
                 Directory.CreateDirectory(this.componentDirectory);
             }
@@ -144,12 +146,19 @@ namespace LogicDesigner.Model
 
         private ICollection<Tuple<IDisplayableNode, string>> InitializeNodesToChooseFrom()
         {
-            return new NodesLoader().GetNodes(componentDirectory);
+            return new NodesLoader().GetNodes(this.componentDirectory);
         }
 
-        public void InitializeNodesToChooseFrom()
+        public void InitializeNodesToChooseFromVoid()
         {
-            this.PossibleNodesToChooseFrom = new NodesLoader().GetNodes(this.componentDirectory);
+            var moduleList = new List<IDisplayableNode>();
+
+            foreach (var module in new NodesLoader().GetNodes(this.componentDirectory))
+            {
+                moduleList.Add(module.Item1);
+            }
+
+            this.PossibleNodesToChooseFrom = moduleList;
         }
 
         public void Run()
