@@ -75,7 +75,7 @@ namespace LogicDesigner.Model
                 this.logFileName = "Log_" + DateTime.Now.ToString("ddd d MMM yyyy HH mm ss").Replace(" ", "_") + ".txt";
                 if (!File.Exists(Path.Combine(this.logDirectory, this.logFileName)))
                 {
-                    using (File.Create(Path.Combine(this.logDirectory, this.logFileName))) ;
+                    using (File.Create(Path.Combine(this.logDirectory, this.logFileName))) { };
                 }
 
                 this.WriteToLog(new string[] { "Log initialized" });
@@ -87,6 +87,10 @@ namespace LogicDesigner.Model
             this.Watcher.Filter = "";
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ProgramManager"/> class.
+        /// </summary>
+        /// <param name="old">The old.</param>
         public ProgramManager(ProgramManager old)
         {
             this.Delay = old.Delay;
