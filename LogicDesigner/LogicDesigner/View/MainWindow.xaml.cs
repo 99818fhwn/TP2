@@ -229,12 +229,13 @@ namespace LogicDesigner
 
                     this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
+
                     foreach (var component in history.NodesVMInField)
                     {
                         DrawNewComponent(component);
                     }
 
-                    this.UndoHistory.Push(history);
+                    this.UndoHistory.Push(history);                    
                 }
             }));
         }
@@ -481,6 +482,7 @@ namespace LogicDesigner
             Button sampleBody = new Button();
 
             newComponent.Name = componentVM.Name;
+            newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, componentVM.YCoord);
             sampleBody.Name = componentVM.Name + "Body";
             sampleBody.Height = componentVM.Picture.Height; // Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
