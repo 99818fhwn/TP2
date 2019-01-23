@@ -70,14 +70,14 @@ namespace LogicDesigner
             this.programMngVM.PinsConnected += this.OnPinsConnected;
             this.programMngVM.PinsDisconnected += this.OnPinsDisconnected;
 
-            this.programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
+            //programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
 
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
 
-        public ProgramMngVM programMngVM { get; set; }
+        public ProgramMngVM ProgramMngVM { get; set; }
 
         /// <summary>
         /// Gets the undo history.
@@ -121,30 +121,9 @@ namespace LogicDesigner
         {
             get
             {
-                return this.programMngVM.UndoCommand;
+                return this.ProgramMngVM.UndoCommand;
             }
         }
-        //    if (this.UndoHistory.Count > 0)
-        //    {
-        //        ProgramMngVM history = this.UndoHistory.Pop();
-
-        //        var current = (ProgramMngVM)this.MainGrid.DataContext;
-        //        if (history.NodesVMInField == current.NodesVMInField)
-        //        {
-        //            this.RedoHistory.Push(history);
-        //            history = this.UndoHistory.Pop();
-        //        }
-
-        //        this.ComponentWindow.Children.Clear();
-        //        this.MainGrid.DataContext = history;
-        //        foreach (var component in history.NodesVMInField)
-        //        {
-        //            this.DrawNewComponent(component);
-        //        }
-
-        //        this.RedoHistory.Push(history);
-        //    }
-        //}));
 
         public Command SaveCommand
         {
@@ -216,6 +195,7 @@ namespace LogicDesigner
                             }
                         }
                     }
+                    this.ProgramMngVM.UpdateUndoHistory();
                 }
                 catch (Exception e)
                 {
@@ -278,30 +258,10 @@ namespace LogicDesigner
         /// </value>
         public Command RedoCommand
         {
-            get => new Command(new Action<object>((input) =>
+            get
             {
-                if (this.RedoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.RedoHistory.Pop();
-
-                    var current = (ProgramMngVM)this.MainGrid.DataContext;
-                    if (history.NodesVMInField == current.NodesVMInField)
-                    {
-                        this.UndoHistory.Push(history);
-                        history = this.RedoHistory.Pop();
-                    }
-
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        this.DrawNewComponent(component);
-                    }
-
-                    this.UndoHistory.Push(history);
-                }
-            }));
+                return this.ProgramMngVM.RedoCommand;
+            }
         }
 
         /// <summary>
@@ -527,10 +487,30 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
-            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+
+            this.Dispatcher.Invoke(() =>
+            {
+                var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
+
+                foreach (var child in compOld)
+                {
+                    if (child.GetType() == typeof(Grid))
+                    {
+
+                        var grid = (Grid)child;
+
+                        if (grid.Name == e.Component.Name)
+                        {
+                            this.ComponentWindow.Children.Remove(grid);
+                            break;
+                        }
+                    }
+                }
+            });
+
             e.Component.ComponentPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
-            this.UndoHistory.Push(currentMan);
-            this.RedoHistory.Clear();
+            //this.UndoHistory.Push(currentMan);
+            //this.RedoHistory.Clear();
         }
 
         /// <summary>
@@ -556,6 +536,8 @@ namespace LogicDesigner
             sampleBody.Background = imageBrush;
             sampleBody.Background.Opacity = 0.97;
 
+            // Remove command
+            this.ProgramMngVM.FieldComponentRemoved += this.OnComponentDeleted;
             // remove command 
             sampleBody.InputBindings.Add(
                 new MouseBinding(
@@ -615,7 +597,6 @@ namespace LogicDesigner
 
                 pinButton.Command = new Command(x =>
                 {
-
                     pinVM.SetPinCommand.Execute(pinVM);
 
                     if (pinVM.Active == false)
@@ -838,11 +819,11 @@ namespace LogicDesigner
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void PreComponentAdded(object sender, EventArgs e)
-        {
-            var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.UndoHistory.Push(currentMan);
-            this.RedoHistory.Clear();
-        }
+        //private void PreComponentAdded(object sender, EventArgs e)
+        //{
+        //    //var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+        //    //this.UndoHistory.Push(currentMan);
+        //    //this.RedoHistory.Clear();
+        //}
     }
 }

@@ -1,0 +1,9 @@
+{
+  "Config": {
+    "PinPassive": "Black",
+    "PinActive": "Cyan",
+    "LinePassive": "Black",
+    "LineActive": "Cyan",
+    "Path": "./Components"
+  }
+}

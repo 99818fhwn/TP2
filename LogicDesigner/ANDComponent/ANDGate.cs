@@ -125,14 +125,14 @@ namespace ANDComponent
             {
                 foreach (var o in this.Outputs)
                 {
-                    o.Value.Current = false;
+                    o.Value.Current = true;
                 }
             }
             else
             {
                 foreach (var o in this.Outputs)
                 {
-                    o.Value.Current = true;
+                    o.Value.Current = false;
                 }
             }
         }
