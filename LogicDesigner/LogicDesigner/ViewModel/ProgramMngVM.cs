@@ -131,13 +131,17 @@ namespace LogicDesigner.ViewModel
                     this.redoHistoryStack.Push(history);
                     var differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(history.Item2));
                     differencesComps.AddRange(new List<ComponentVM>(history.Item2.Except(this.NodesVMInField)));
+                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(history.Item1));
+                    differencesConnects.AddRange(new List<ConnectionVM>(history.Item1.Except(this.ConnectionsVM)));
 
-                    if (differencesComps.Count == 0 && this.undoHistoryStack.Count > 0)
+                    if (differencesComps.Count == 0 && this.undoHistoryStack.Count > 0 && differencesConnects.Count == 0)
                     {
                         history = this.undoHistoryStack.Pop();
                         this.redoHistoryStack.Push(history);
                         differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(history.Item2));
                         differencesComps.AddRange(new List<ComponentVM>(history.Item2.Except(this.NodesVMInField)));
+                        differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(history.Item1));
+                        differencesConnects.AddRange(new List<ConnectionVM>(history.Item1.Except(this.ConnectionsVM)));
                     }
 
                     foreach (var item in differencesComps)
@@ -153,9 +157,6 @@ namespace LogicDesigner.ViewModel
                         }
                     }
 
-                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(history.Item1));
-                    differencesConnects.AddRange(new List<ConnectionVM>(history.Item1.Except(this.ConnectionsVM)));
-
                     foreach (var item in differencesConnects)
                     {
                         if (!history.Item1.Contains(item))
@@ -170,7 +171,8 @@ namespace LogicDesigner.ViewModel
 
                     this.ConnectionsVM = new ObservableCollection<ConnectionVM>(history.Item1);
                     this.NodesVMInField = new ObservableCollection<ComponentVM>(history.Item2);
-                    //this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.))
+                    this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.InputPin.Pin, x.OutputPin.Pin)).ToList();
+                    this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
                 }
             });
 
@@ -182,13 +184,18 @@ namespace LogicDesigner.ViewModel
                     this.undoHistoryStack.Push(futureHistory);
                     var differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(futureHistory.Item2));
                     differencesComps.AddRange(new List<ComponentVM>(futureHistory.Item2.Except(this.NodesVMInField)));
+                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(futureHistory.Item1));
+                    differencesConnects.AddRange(new List<ConnectionVM>(futureHistory.Item1.Except(this.ConnectionsVM)));
 
-                    if (differencesComps.Count == 0 && this.redoHistoryStack.Count > 0)
+
+                    if (differencesComps.Count == 0 && this.redoHistoryStack.Count > 0 && differencesConnects.Count == 0)
                     {
                         futureHistory = this.redoHistoryStack.Pop();
                         this.undoHistoryStack.Push(futureHistory);
                         differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(futureHistory.Item2));
                         differencesComps.AddRange(new List<ComponentVM>(futureHistory.Item2.Except(this.NodesVMInField)));
+                        differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(futureHistory.Item1));
+                        differencesConnects.AddRange(new List<ConnectionVM>(futureHistory.Item1.Except(this.ConnectionsVM)));
                     }
 
                     foreach (var item in differencesComps)
@@ -204,9 +211,6 @@ namespace LogicDesigner.ViewModel
                         }
                     }
 
-                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(futureHistory.Item1));
-                    differencesConnects.AddRange(new List<ConnectionVM>(futureHistory.Item1.Except(this.ConnectionsVM)));
-
                     foreach (var item in differencesConnects)
                     {
                         if (!futureHistory.Item1.Contains(item))
@@ -221,6 +225,9 @@ namespace LogicDesigner.ViewModel
 
                     this.ConnectionsVM = new ObservableCollection<ConnectionVM>(futureHistory.Item1);
                     this.NodesVMInField = new ObservableCollection<ComponentVM>(futureHistory.Item2);
+                    ////Das ist sehr wahrscheinlich nicht optimal...
+                    this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.InputPin.Pin, x.OutputPin.Pin)).ToList();
+                    this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
                 }
             });
 
@@ -528,35 +535,6 @@ namespace LogicDesigner.ViewModel
         {
             return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
         }
-
-        ///// <summary>
-        ///// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
-        ///// </summary>
-        ///// <param name="old"> The ProgramMngVM which values should be copied. </param>
-        //public ProgramMngVM(ProgramMngVM old)
-        //{
-        //    this.nodesVMInField = new ObservableCollection<ComponentVM>(old.NodesVMInField); ////Can be solved by  new ObservableCollection<ComponentVM>(old.nodesVMInField);
-        //    this.SelectedFieldComponent = old.SelectedFieldComponent;
-        //    this.SelectableComponents = old.SelectableComponents;
-        //    this.programManager = new ProgramManager(old.programManager);
-        //    this.StartCommand = new Command(obj =>
-        //    {
-        //        Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
-        //        {
-        //            this.programManager.Run();
-        //        }));
-        //    });
-
-        //    this.StepCommand = new Command(obj =>
-        //    {
-        //        this.programManager.RunLoop(0); // step
-        //    });
-
-        //    this.StopCommand = new Command(obj =>
-        //    {
-        //        this.programManager.StopProgram();
-        //    });
-        //}
 
         public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
         {
