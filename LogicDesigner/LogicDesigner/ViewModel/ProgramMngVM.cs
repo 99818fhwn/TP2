@@ -382,5 +382,10 @@ namespace LogicDesigner.ViewModel
         {
             this.FieldComponentChanged?.Invoke(this, e);
         }
+
+        internal void RemoveConnectionLine(string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

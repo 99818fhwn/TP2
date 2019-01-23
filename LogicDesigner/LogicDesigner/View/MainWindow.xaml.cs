@@ -565,39 +565,18 @@ namespace LogicDesigner
             var inputPin = e.Connection.InputPin;
             var outputPin = e.Connection.OutputPin;
 
-            //var connectionToRemove = this.connectionLines.Where(l => l.Item2.ConnectionId == e.Connection.ConnectionId).First();
-            //Line lineToRemove = connectionToRemove.Item1;
-
             foreach (var child in this.ComponentWindow.Children)
             {
-                //try
-                //{
-                    //Grid grid = child as Grid;
-
-                    //foreach (var gridChild in grid.Children)
-                    //{
-                        try
-                        {
-                            Line l = (Line)child;
-                            //Line l = (Line)gridChild;
-                            if (l.Name == e.Connection.ConnectionId)
-                            {
-                            //this.connectionLines.Remove(connectionToRemove);
-                            //grid.Children.Remove((Line)gridChild);
-                                this.ComponentWindow.Children.Remove((Line)child);
-                            break;
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            continue;
-                        }
-                //    }
-                //}
-                //catch (Exception)
-                //{
-                //    continue;
-                //}
+                if (child.GetType() == typeof(Line))
+                {
+                    Line l = (Line)child;
+                    
+                    if (l.Name == e.Connection.ConnectionId)
+                    {
+                        this.ComponentWindow.Children.Remove((Line)child);
+                        break;
+                    }
+                }
             }
         }
 
@@ -609,6 +588,7 @@ namespace LogicDesigner
 
             Line line = new Line();
             line.Name = e.Connection.ConnectionId;
+            line.MouseLeftButtonUp += this.OnConnectionLineClicked;
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
             line.Stroke = Brushes.Black;
@@ -622,49 +602,19 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(line);
         }
 
-        ///// <summary>
-        ///// Called when pins disconnected.
-        ///// </summary>
-        ///// <param name="sender">The sender.</param>
-        ///// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
-        //public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
-        //{
+        private void OnConnectionLineClicked(object sender, MouseButtonEventArgs e)
+        {
+            var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+            if(sender.GetType() == typeof(Line))
+            {
+                Line l = (Line)sender;
+                manager.RemoveConnectionLine(l.Name);
 
-        //    Grid lineBody = new Grid();
+                this.ComponentWindow.Children.Remove(l);
+            }
+        }
 
-        //    lineBody.Children.Add(line);
-
-        //    this.ComponentWindow.Children.Add(lineBody);
-
-        //    //this.connectionLines.Add(new Tuple<Line, ConnectionVM>(line, e.Connection));
-        //}
-        // Commented by Katja, connectionVM 
-
-        /// <summary>
-        /// Called when [pins connected].
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="PinsConnectedEventArgs"/> instance containing the event data.</param>
-        //public void OnPinsConnected(object sender, PinsConnectedEventArgs e)
-        //{
-        //var inputPin = e.InputPinVM;
-        //var outputPin = e.OutputPinVM;
-
-        //Line line = new Line();
-        //line.Visibility = Visibility.Visible;
-        //line.StrokeThickness = 4;
-        //line.Stroke = Brushes.Black;
-        //line.X1 = inputPin.XPosition;
-        //line.X2 = outputPin.XPosition;
-        //line.Y1 = inputPin.YPosition;
-        //line.Y2 = outputPin.YPosition;
-
-        //Grid lineBody = new Grid();
-
-        //lineBody.Children.Add(line);
-
-        //this.ComponentWindow.Children.Add(lineBody);            
-        //}
+       
 
         ///// <summary>
         ///// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 
