@@ -37,7 +37,7 @@ namespace LogicDesigner
         /// If a component is being dragged.
         /// </summary>
         private bool isMoving;
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -54,7 +54,7 @@ namespace LogicDesigner
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
             this.CurrentSelectedComponentView.SetBinding(MainWindow.DataContextProperty, selectBind);
-            
+
             this.InputBindings.Add(new InputBinding(programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
             this.InputBindings.Add(new InputBinding(programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
 
@@ -159,7 +159,7 @@ namespace LogicDesigner
                 manager.LoadStatus(filename);
             }));
         }
-        
+
         /// <summary>
         /// Gets the zoom in command.
         /// </summary>
@@ -329,7 +329,7 @@ namespace LogicDesigner
                 {
                     return;
                 }
-                
+
                 if (!this.isMoving)
                 {
                     return;
@@ -345,7 +345,7 @@ namespace LogicDesigner
                         this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
 
                         parent.RenderTransform = new TranslateTransform(this.CurrentMove.X + componentToMove.XCoord, this.CurrentMove.Y + componentToMove.YCoord);
-                        
+
                         componentToMove.XCoord += this.CurrentMove.X;
                         componentToMove.YCoord += this.CurrentMove.Y;
                     }
@@ -385,7 +385,7 @@ namespace LogicDesigner
             if (Keyboard.Modifiers != ModifierKeys.Control)
             {
                 return;
-            }                
+            }
 
             if (e.Delta > 0)
             {
@@ -482,7 +482,7 @@ namespace LogicDesigner
 
             newComponent.Name = componentVM.Name;
             sampleBody.Name = componentVM.Name + "Body";
-            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
+            sampleBody.Height = componentVM.Picture.Height; // Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
@@ -490,11 +490,14 @@ namespace LogicDesigner
             sampleBody.Background = imageBrush;
 
             // remove command 
-            sampleBody.InputBindings.Add(new MouseBinding(new Command(obj =>
-            {
-                this.OnComponentRightClick(newComponent);
-                componentVM.RemoveComponentCommand.Execute(componentVM);
-            }), new MouseGesture(MouseAction.RightClick)));
+            sampleBody.InputBindings.Add(
+                new MouseBinding(
+                    new Command(obj =>
+                    {
+                        this.OnComponentRightClick(newComponent);
+                        componentVM.RemoveComponentCommand.Execute(componentVM);
+                    }),
+                new MouseGesture(MouseAction.RightClick)));
 
             // Add the label
             string text = componentVM.Label;
@@ -586,6 +589,10 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(newComponent);
         }
 
+        /// <summary>
+        /// Called when component is right clicked.
+        /// </summary>
+        /// <param name="component">The component.</param>
         private void OnComponentRightClick(object component)
         {
             if (component.GetType() == typeof(Grid))
@@ -609,7 +616,7 @@ namespace LogicDesigner
                 if (child.GetType() == typeof(Line))
                 {
                     Line l = (Line)child;
-                    
+
                     if (l.Name == e.Connection.ConnectionId)
                     {
                         this.ComponentWindow.Children.Remove((Line)child);
