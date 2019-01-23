@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -70,7 +71,7 @@ namespace LogicDesigner.ViewModel
             this.setPinCommand = new Command(obj =>
             {
                 var pin = obj as PinVM;
-                SetSelectedPin(pin);
+                this.SetSelectedPin(pin);
             });
 
             this.removeCommand = new Command(obj =>
@@ -82,8 +83,8 @@ namespace LogicDesigner.ViewModel
                     {
                         this.programManager.FieldNodes.Remove(n);
                         this.nodesVMInField.Remove(nodeInFieldVM);
-                        OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
-
+                        this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
+                        this.RemoveDeletedComponentConnections(nodeInFieldVM);
                         break;
                     }
                 }
@@ -98,12 +99,11 @@ namespace LogicDesigner.ViewModel
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
-                //var compVM = new ComponentVM(newGenerateComp, CreateUniqueName(realComponent), setPinCommand,
-                //    this.activateCommand, this.removeCommand);
+
                 var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
                     removeCommand);
                 this.nodesVMInField.Add(compVM);
-                OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
+                this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
@@ -124,6 +124,38 @@ namespace LogicDesigner.ViewModel
             this.connectionsVM = new ObservableCollection<ConnectionVM>(connections);
 
             this.programManager.PinsDisconnected += this.OnPinsDisconnected;
+        }
+
+        private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
+        {
+            foreach (var pinVM in removedComponentVM.OutputPinsVM)
+            {
+                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                {
+                    var conn = this.connectionsVM[i];
+                    if (pinVM == conn.OutputPin)
+                    {
+                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
+                        this.connectionsVM.Remove(conn);
+                    }
+                }
+            }
+
+            foreach (var pinVM in removedComponentVM.InputPinsVM)
+            {
+                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                {
+                    var conn = this.connectionsVM[i];
+                    if (pinVM == conn.InputPin)
+                    {
+                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
+                        this.connectionsVM.Remove(conn);
+                    }
+                }
+            }
+
         }
 
         private string NewUniqueConnectionId()
@@ -186,7 +218,7 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        ObservableCollection<ConnectionVM> ConnectionsVM
+        public ObservableCollection<ConnectionVM> ConnectionsVM
         {
             get
             {
@@ -228,6 +260,8 @@ namespace LogicDesigner.ViewModel
 
         public void SetSelectedPin(PinVM value)
         {
+            value.Color = Color.Red;
+
             if (this.selectedOutputPin == value || this.selectedInputPin == value)
             {
                 this.selectedInputPin = null;
@@ -351,8 +385,7 @@ namespace LogicDesigner.ViewModel
 
         public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
         {
-            //System.InvalidOperationException: Sequence contains no elements
-            var conn = this.connectionsVM.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).First();
+            var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
             this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
             this.connectionsVM.Remove(conn);
 
@@ -440,6 +473,19 @@ namespace LogicDesigner.ViewModel
         protected virtual void FireOnComponentVMChanged(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentChanged?.Invoke(this, e);
+        }
+
+        public void RemoveConnectionVM(string id)
+        {
+            foreach(var conn in this.connectionsVM)
+            {
+                if(conn.ConnectionId == id)
+                {
+                    this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+                    this.connectionsVM.Remove(conn);
+                    break;
+                }
+            }
         }
     }
 }
