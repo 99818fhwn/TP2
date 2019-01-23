@@ -68,7 +68,7 @@ namespace LogicDesigner.ViewModel
             var setPinCommand = new Command(obj =>
             {
                 var pin = obj as PinVM;
-                SetSelectedPin(pin);
+                this.SetSelectedPin(pin);
             });
 
             this.removeCommand = new Command(obj =>
