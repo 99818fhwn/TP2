@@ -184,7 +184,7 @@ namespace LogicDesigner.ViewModel
             }
         }
 
-        ObservableCollection<ConnectionVM> ConnectionsVM
+        public ObservableCollection<ConnectionVM> ConnectionsVM
         {
             get
             {
