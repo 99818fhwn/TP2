@@ -490,13 +490,11 @@ namespace LogicDesigner
             sampleBody.Background = imageBrush;
 
             // remove command 
-            MouseBinding rightClickMouseBinding = new MouseBinding();
-            rightClickMouseBinding.Gesture = new MouseGesture(MouseAction.RightClick);
-            rightClickMouseBinding.Command = componentVM.RemoveComponentCommand;
-            rightClickMouseBinding.CommandParameter = componentVM;
-
-            sampleBody.InputBindings.Add(rightClickMouseBinding);
-            sampleBody.MouseRightButtonUp += this.OnComponentRightClick;
+            sampleBody.InputBindings.Add(new MouseBinding(new Command(obj =>
+            {
+                this.OnComponentRightClick(newComponent);
+                componentVM.RemoveComponentCommand.Execute(componentVM);
+            }), new MouseGesture(MouseAction.RightClick)));
 
             // Add the label
             string text = componentVM.Label;
@@ -588,21 +586,11 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(newComponent);
         }
 
-        /// <summary>
-        /// Called when the component is right clicked.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void OnComponentRightClick(object sender, MouseButtonEventArgs e)
+        private void OnComponentRightClick(object component)
         {
-            if (sender.GetType() == typeof(Grid))
+            if (component.GetType() == typeof(Grid))
             {
-                this.ComponentWindow.Children.Remove((Grid)sender);
-            }
-
-            if (sender.GetType() == typeof(Button))
-            {
-                this.ComponentWindow.Children.Remove((Button)sender);
+                this.ComponentWindow.Children.Remove((Grid)component);
             }
         }
 
