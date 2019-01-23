@@ -70,13 +70,15 @@ namespace LogicDesigner
             this.ProgramMngVM.PinsConnected += this.OnPinsConnected;
             this.ProgramMngVM.PinsDisconnected += this.OnPinsDisconnected;
 
-            //programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
-
+            // programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
 
+        /// <summary>
+        /// Gets or sets the program manager.
+        /// </summary>
         public ProgramMngVM ProgramMngVM { get; set; }
 
         /// <summary>
@@ -125,6 +127,9 @@ namespace LogicDesigner
             }
         }
 
+        /// <summary>
+        /// Gets the save command.
+        /// </summary>
         public Command SaveCommand
         {
             // TODO: Make serialized path relative, so projects can be shared!!!
@@ -133,7 +138,8 @@ namespace LogicDesigner
                 try
                 {
                     SaveFileDialog filepicker = new SaveFileDialog();
-                    //filepicker.CheckFileExists = false;
+
+                    // filepicker.CheckFileExists = false;
                     filepicker.Filter = "LogicDesigner files (*.ldf)|*.ldf|All files (*.*)|*.*";
                     filepicker.DefaultExt = ".ldf";
                     filepicker.ShowDialog();
@@ -153,6 +159,40 @@ namespace LogicDesigner
             }));
         }
 
+        /// <summary>
+        /// Gets a grid as the background.
+        /// </summary>
+        public Command ToggleGridCommand
+        {
+            get => new Command(new Action<object>(param =>
+            {
+                DrawingBrush brush = new DrawingBrush();
+                brush.TileMode = TileMode.Tile;
+                brush.ViewportUnits = BrushMappingMode.Absolute;
+                brush.Viewport = new Rect(-15, -15, 15, 15);
+
+                GeometryDrawing geometry = new GeometryDrawing();
+                geometry.Geometry = new RectangleGeometry(new Rect(0, 0, 50, 50));
+                geometry.Pen = new Pen(new SolidColorBrush(Color.FromArgb(100, 41, 49, 51)), 1);
+
+                brush.Drawing = geometry;
+
+                if (this.ComponentWindow.Background != null)
+                {
+                    this.ComponentWindow.Background = null;
+                }
+                else
+                {
+                    this.ComponentWindow.Background = brush;
+                }
+
+                this.ComponentWindow.UpdateLayout();
+            }));
+        }
+
+        /// <summary>
+        /// Gets the load command.
+        /// </summary>
         public Command LoadCommand
         {
             get => new Command(new Action<object>((input) =>
@@ -160,7 +200,8 @@ namespace LogicDesigner
                 try
                 {
                     OpenFileDialog filepicker = new OpenFileDialog();
-                    //filepicker.CheckFileExists = false;
+
+                    // filepicker.CheckFileExists = false;
                     filepicker.Filter = "LogicDesigner files (*.ldf)|*.ldf|All files (*.*)|*.*";
                     filepicker.DefaultExt = ".ldf";
                     filepicker.ShowDialog();
@@ -195,6 +236,7 @@ namespace LogicDesigner
                             }
                         }
                     }
+
                     this.ProgramMngVM.UpdateUndoHistory();
                 }
                 catch (Exception e)
@@ -330,7 +372,7 @@ namespace LogicDesigner
 
             return null;
         }
-
+        
         /// <summary>
         /// Called when the button is moved.
         /// </summary>
@@ -387,12 +429,9 @@ namespace LogicDesigner
 
                             if (connectionVM != null)
                             {
-                                //if (connectionVM.InputPin.Parent == componentToMove || connectionVM.OutputPin.Parent == componentToMove)
-                                //{
                                 this.OnPinsDisconnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
                                 this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
                                 return;
-                                //}
                             }
                         }
                     }
@@ -435,9 +474,9 @@ namespace LogicDesigner
 
             this.DrawNewComponent(e.Component);
 
-            //var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            //this.RedoHistory.Clear();
-            //this.RedoHistory.Push(updatedCurrentMan);
+            // var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            // this.RedoHistory.Clear();
+            // this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
@@ -487,7 +526,6 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentDeleted(object sender, FieldComponentEventArgs e)
         {
-
             this.Dispatcher.Invoke(() =>
             {
                 var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
@@ -496,7 +534,6 @@ namespace LogicDesigner
                 {
                     if (child.GetType() == typeof(Grid))
                     {
-
                         var grid = (Grid)child;
 
                         if (grid.Name == e.Component.Name)
@@ -509,8 +546,9 @@ namespace LogicDesigner
             });
 
             e.Component.ComponentPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
-            //this.UndoHistory.Push(currentMan);
-            //this.RedoHistory.Clear();
+
+            // this.UndoHistory.Push(currentMan);
+            // this.RedoHistory.Clear();
         }
 
         /// <summary>
@@ -538,7 +576,6 @@ namespace LogicDesigner
 
             // Remove command
             this.ProgramMngVM.FieldComponentRemoved += this.OnComponentDeleted;
-            // remove command 
             sampleBody.InputBindings.Add(
                 new MouseBinding(
                     new Command(obj =>
@@ -651,7 +688,6 @@ namespace LogicDesigner
 
                 pinButton.Command = new Command(x =>
                 {
-
                     pinVM.SetPinCommand.Execute(pinVM);
 
                     if (pinVM.Active == false)
@@ -784,46 +820,6 @@ namespace LogicDesigner
 
                 this.ComponentWindow.Children.Remove(l);
             }
-        }
-
-        public Command ToggleGridCommand
-        {
-            get => new Command(new Action<object>(param =>
-            {
-                DrawingBrush brush = new DrawingBrush();
-                brush.TileMode = TileMode.Tile;
-                brush.ViewportUnits = BrushMappingMode.Absolute;
-                brush.Viewport = new Rect(-15, -15, 15, 15);
-
-                GeometryDrawing geometry = new GeometryDrawing();
-                //geometry.Brush = new SolidColorBrush(Color.FromRgb(222, 0, 222));
-                geometry.Geometry = new RectangleGeometry(new Rect(0,0,50,50));
-                geometry.Pen = new Pen(new SolidColorBrush(Color.FromRgb(41,49,51)), 1);
-
-                brush.Drawing = geometry;
-
-                if (this.ComponentWindow.Background != null)
-                {
-                    this.ComponentWindow.Background = null;
-                }
-                else
-                {
-                    this.ComponentWindow.Background = brush;
-                }
-                this.ComponentWindow.UpdateLayout();
-            }));
-        }
-
-        /// <summary>
-        /// On component added.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        //private void PreComponentAdded(object sender, EventArgs e)
-        //{
-        //    //var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-        //    //this.UndoHistory.Push(currentMan);
-        //    //this.RedoHistory.Clear();
-        //}
+        }        
     }
 }
