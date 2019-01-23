@@ -229,8 +229,8 @@ namespace LogicDesigner.ViewModel
                         }
                     }
 
-                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(history.Item1));
-                    differencesConnects.AddRange(new List<ConnectionVM>(history.Item1.Except(this.ConnectionsVM)));
+                    //var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(history.Item1));
+                    //differencesConnects.AddRange(new List<ConnectionVM>(history.Item1.Except(this.ConnectionsVM)));
 
                     foreach (var item in differencesConnects)
                     {
@@ -286,8 +286,8 @@ namespace LogicDesigner.ViewModel
                         }
                     }
 
-                    var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(futureHistory.Item1));
-                    differencesConnects.AddRange(new List<ConnectionVM>(futureHistory.Item1.Except(this.ConnectionsVM)));
+ 
+                    //differencesConnects.AddRange(new List<ConnectionVM>(futureHistory.Item1.Except(this.ConnectionsVM)));
 
                     foreach (var item in differencesConnects)
                     {
@@ -379,15 +379,15 @@ namespace LogicDesigner.ViewModel
             this.ConnectionVMUpdated?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
         }
 
-        /// <summary>
-        /// Occurs when field component is added.
-        /// </summary>
-        public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
+        ///// <summary>
+        ///// Occurs when field component is added.
+        ///// </summary>
+        //public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
 
         /// <summary>
         /// Occurs when field component is removed.
         /// </summary>
-        public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
+        //public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
 
         private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
         {
@@ -418,22 +418,23 @@ namespace LogicDesigner.ViewModel
                     }
                 }
             }
+        }
 
         /// <summary>
         /// Occurs when pins are connected.
         /// </summary>
-        public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
+        //public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
 
 
         /// <summary>
         /// Occurs when pins are disconnected.
         /// </summary>
-        public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
+        //public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
 
         /// <summary>
         /// Fired when property changed.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        //public event PropertyChangedEventHandler PropertyChanged;
 
         private string NewUniqueConnectionId()
         {
@@ -948,10 +949,10 @@ namespace LogicDesigner.ViewModel
         /// Fires the on property changed event.
         /// </summary>
         /// <param name="name">The name.</param>
-        protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
-        {
-            this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
+        //protected virtual void FireOnPropertyChanged([CallerMemberName]string name = null)
+        //{
+        //    this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        //}
 
         /// <summary>
         /// Fires the on component changed, this is obsolete because the event when fired already contains the entire component.
@@ -972,141 +973,141 @@ namespace LogicDesigner.ViewModel
             this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(item));
         }
 
-        public void RemoveConnectionVM(string id)
-        {
-            foreach (var conn in this.connectionsVM)
-            {
-                if (conn.ConnectionId == id)
-                {
-                    this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
-                    this.connectionsVM.Remove(conn);
-                    break;
-                }
-            }
-        }
+        //public void RemoveConnectionVM(string id)
+        //{
+        //    foreach (var conn in this.connectionsVM)
+        //    {
+        //        if (conn.ConnectionId == id)
+        //        {
+        //            this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+        //            this.connectionsVM.Remove(conn);
+        //            break;
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Removes the deleted component connections.
         /// </summary>
         /// <param name="removedComponentVM">The removed component</param>
-        private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
-        {
-            foreach (var pinVM in removedComponentVM.OutputPinsVM)
-            {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
-                {
-                    var conn = this.connectionsVM[i];
-                    if (pinVM == conn.OutputPin)
-                    {
-                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
-                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
-                        this.connectionsVM.Remove(conn);
-                    }
-                }
-            }
+        //private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
+        //{
+        //    foreach (var pinVM in removedComponentVM.OutputPinsVM)
+        //    {
+        //        for (int i = 0; i < this.connectionsVM.Count(); i++)
+        //        {
+        //            var conn = this.connectionsVM[i];
+        //            if (pinVM == conn.OutputPin)
+        //            {
+        //                this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+        //                this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
+        //                this.connectionsVM.Remove(conn);
+        //            }
+        //        }
+        //    }
 
-            foreach (var pinVM in removedComponentVM.InputPinsVM)
-            {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
-                {
-                    var conn = this.connectionsVM[i];
-                    if (pinVM == conn.InputPin)
-                    {
-                        this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
-                        this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
-                        this.connectionsVM.Remove(conn);
-                    }
-                }
-            }
-        }
+        //    foreach (var pinVM in removedComponentVM.InputPinsVM)
+        //    {
+        //        for (int i = 0; i < this.connectionsVM.Count(); i++)
+        //        {
+        //            var conn = this.connectionsVM[i];
+        //            if (pinVM == conn.InputPin)
+        //            {
+        //                this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+        //                this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
+        //                this.connectionsVM.Remove(conn);
+        //            }
+        //        }
+        //    }
+        //}
 
         /// <summary>
         /// Creates new id.
         /// </summary>
         /// <returns>The id.</returns>
-        private string NewUniqueConnectionId()
-        {
-            string s = "Connection" + this.newUniqueConnectionId.ToString();
-            this.newUniqueConnectionId++;
-            return s;
-        }
+        //private string NewUniqueConnectionId()
+        //{
+        //    string s = "Connection" + this.newUniqueConnectionId.ToString();
+        //    this.newUniqueConnectionId++;
+        //    return s;
+        //}
 
         /// <summary>
         /// Connects the pins.
         /// </summary>
         /// <param name="selectedOutputPin">The selected output pin.</param>
         /// <param name="selectedInputPin">The selected input pin.</param>
-        private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
-        {
-            if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
-            {
-                var conn = new ConnectionVM(
-                    selectedOutputPin,
-                    selectedInputPin,
-                    this.NewUniqueConnectionId());
-                this.connectionsVM.Add(conn);
-                this.UpdateUndoHistory(); // If connect successful update history
-                this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
-            }
+        //private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
+        //{
+        //    if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+        //    {
+        //        var conn = new ConnectionVM(
+        //            selectedOutputPin,
+        //            selectedInputPin,
+        //            this.NewUniqueConnectionId());
+        //        this.connectionsVM.Add(conn);
+        //        this.UpdateUndoHistory(); // If connect successful update history
+        //        this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
+        //    }
 
-            this.selectedInputPin.Active = false;
-            this.selectedOutputPin.Active = false;
+        //    this.selectedInputPin.Active = false;
+        //    this.selectedOutputPin.Active = false;
 
-            this.selectedInputPin = null;
-            this.selectedOutputPin = null;
-        }
+        //    this.selectedInputPin = null;
+        //    this.selectedOutputPin = null;
+        //}
 
         /// <summary>
         /// Refreshes the view models, in case a step in program manager finished.
         /// </summary>
         /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        private void RefreshVM(object sender, EventArgs e)
-        {
-            var oldTemp = this.SelectedFieldComponent;
-            this.SelectedFieldComponent = null;
-            this.SelectedFieldComponent = oldTemp;
-        }
+        //private void RefreshVM(object sender, EventArgs e)
+        //{
+        //    var oldTemp = this.SelectedFieldComponent;
+        //    this.SelectedFieldComponent = null;
+        //    this.SelectedFieldComponent = oldTemp;
+        //}
 
         /// <summary>
         /// Creates an unique name by adding a serial number to the label ending.
         /// </summary>
         /// <param name="node">The node.</param>
         /// <returns>The identifier will be returned.</returns>
-        private string CreateUniqueName(IDisplayableNode node)
-        {
-            this.uniqueNodeId++;
-            return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
-        }
+        //private string CreateUniqueName(IDisplayableNode node)
+        //{
+        //    this.uniqueNodeId++;
+        //    return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
+        //}
 
         /// <summary>
         /// Triggers the the initialization process to refresh all selectable components in view.
         /// </summary>
         /// <param name="sender">The sender of the event, program manager.</param>
         /// <param name="e">The <see cref="FileSystemEventArgs"/> instance containing the event data.</param>
-        private void NewModuleAdded(object sender, FileSystemEventArgs e)
-        {
-            // this.programManager = new ProgramManager();
-            // this.programManager.Watcher.Created += NewModuleAdded;
-            this.programManager.InitializeNodesToChooseFromVoid();
+        //private void NewModuleAdded(object sender, FileSystemEventArgs e)
+        //{
+        //    // this.programManager = new ProgramManager();
+        //    // this.programManager.Watcher.Created += NewModuleAdded;
+        //    this.programManager.InitializeNodesToChooseFromVoid();
 
-            // var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
-            var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
+        //    // var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
+        //    var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
 
-            // hässlich, aber konnte keinen besseren Weg finden
-            // App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
-            // {
-            //    this.SelectableComponents.Clear();
-            // });
-            // foreach (var item in nodesToChoose)
-            // {
-            //    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
-            //    {
-            //        this.SelectableComponents.Add(item);
-            //    });
-            // }
-            App.Current.Dispatcher.Invoke(() =>
-            this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose));
-        }
+        //    // hässlich, aber konnte keinen besseren Weg finden
+        //    // App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+        //    // {
+        //    //    this.SelectableComponents.Clear();
+        //    // });
+        //    // foreach (var item in nodesToChoose)
+        //    // {
+        //    //    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
+        //    //    {
+        //    //        this.SelectableComponents.Add(item);
+        //    //    });
+        //    // }
+        //    App.Current.Dispatcher.Invoke(() =>
+        //    this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose));
+        //}
     }
 }
