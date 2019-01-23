@@ -5,10 +5,10 @@ namespace LogicDesigner.ViewModel
 {
     public class PinsConnectedEventArgs :  EventArgs
     {
-        public PinsConnectedEventArgs(IPin outputPinVM, IPin inputPinVM)
+        public PinsConnectedEventArgs(IPin outputPin, IPin inputPin)
         {
-            this.OutputPin = outputPinVM;
-            this.InputPin = inputPinVM;
+            this.OutputPin = outputPin;
+            this.InputPin = inputPin;
         }
 
         public IPin OutputPin

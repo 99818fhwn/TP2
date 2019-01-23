@@ -40,6 +40,8 @@ namespace LogicDesigner.ViewModel
         public event EventHandler<FieldComponentEventArgs> FieldComponentChanged;
         public event EventHandler<PinVMConnectionChangedEventArgs> PinsConnected;
         public event EventHandler<PinVMConnectionChangedEventArgs> PinsDisconnected;
+
+        public event EventHandler<PinVMConnectionChangedEventArgs> ConnectionVMUpdated; 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private ComponentVM selectedFieldComponent;
@@ -244,6 +246,50 @@ namespace LogicDesigner.ViewModel
             this.redoHistoryStack = new Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>>();
             this.UpdateUndoHistory();
             this.programManager.PinsDisconnected += this.OnPinsDisconnected;
+            this.programManager.ConnectionUpdated += this.OnConnectionUpdated;
+        }
+
+        private void OnConnectionUpdated(object sender, PinsConnectedEventArgs e)
+        {
+            var conn = this.connectionsVM?.Where(
+                a => a.OutputPin.Pin == e.OutputPin && a.InputPin.Pin == e.InputPin).FirstOrDefault();
+
+
+            if (e.OutputPin.Value.Current.GetType() == typeof(bool))
+            {
+                if ((bool)e.OutputPin.Value.Current == true)
+                {
+                    conn.LineColor = System.Windows.Media.Brushes.Red;
+                }
+                else
+                {
+                    conn.LineColor = System.Windows.Media.Brushes.Black;
+                }
+            }
+            else if (e.OutputPin.Value.Current.GetType() == typeof(string))
+            {
+                if (!string.IsNullOrEmpty((string)e.OutputPin.Value.Current))
+                {
+                    conn.LineColor = System.Windows.Media.Brushes.Red;
+                }
+                else
+                {
+                    conn.LineColor = System.Windows.Media.Brushes.Black;
+                }
+            }
+            else if (e.OutputPin.Value.Current.GetType() == typeof(int))
+            {
+                if ((int)e.OutputPin.Value.Current != 0)
+                {
+                    conn.LineColor = System.Windows.Media.Brushes.Red;
+                }
+                else
+                {
+                    conn.LineColor = System.Windows.Media.Brushes.Black;
+                }
+            }
+
+            this.ConnectionVMUpdated?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
         }
 
         private void FireOnComponentVMRemoved(ComponentVM item)

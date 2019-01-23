@@ -30,6 +30,7 @@ namespace LogicDesigner.Model
         private ICollection<IDisplayableNode> possibleNodesToChooseFrom;
         private readonly string path;
         public event EventHandler<PinsConnectedEventArgs> PinsDisconnected;
+        public event EventHandler<PinsConnectedEventArgs> ConnectionUpdated;
 
         public ICollection<Tuple<IDisplayableNode, string>> SerializationPathInfo { get; set; }
 
@@ -187,6 +188,33 @@ namespace LogicDesigner.Model
                         foreach (var t in this.ConnectedOutputInputPairs)
                         {
                             t.Item2.Value.Current = t.Item1.Value.Current;
+
+                            this.OnConnectionUpdated(t.Item1, t.Item2);
+
+                            //if(t.Item2.Value.Current.GetType() == typeof(bool))
+                            //{
+                            //    if((bool)t.Item2.Value.Current == true)
+                            //    {
+                            //        // fire event on connection change color to VM
+                                    
+                            //    }
+                            //}
+                            //else if (t.Item2.Value.Current.GetType() == typeof(string))
+                            //{
+                            //    if (!string.IsNullOrEmpty((string)t.Item2.Value.Current))
+                            //    {
+                            //        // fire event on connection change color to VM
+                            //        this.OnConnectionUpdated(t.Item2, t.Item1);
+                            //    }
+                            //}
+                            //else if (t.Item2.Value.Current.GetType() == typeof(int))
+                            //{
+                            //    if ((int)t.Item2.Value.Current != 0)
+                            //    {
+                            //        // fire event on connection change color to VM
+                            //        this.OnConnectionUpdated(t.Item2, t.Item1);
+                            //    }
+                            //}
                         }
 
                         node.Execute();
@@ -215,7 +243,12 @@ namespace LogicDesigner.Model
 
         protected virtual void FireOnStepFinished()
         {
-            this.StepFinished?.Invoke(this, new EventArgs());
+            this.StepFinished?.Invoke(this, new EventArgs()); 
+        }
+
+        protected virtual void OnConnectionUpdated(IPin output, IPin input)
+        {
+            this.ConnectionUpdated?.Invoke(this, new PinsConnectedEventArgs(output, input));
         }
 
         public void Step(INode node)

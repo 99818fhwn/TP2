@@ -69,11 +69,31 @@ namespace LogicDesigner
 
             this.ProgramMngVM.PinsConnected += this.OnPinsConnected;
             this.ProgramMngVM.PinsDisconnected += this.OnPinsDisconnected;
+            this.ProgramMngVM.ConnectionVMUpdated += this.OnConnectionUpdated;
 
             // programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
+        }
+
+        private void OnConnectionUpdated(object sender, PinVMConnectionChangedEventArgs e)
+        {
+            // find the line with name == id -> change its color
+
+            foreach (var child in this.ComponentWindow.Children)
+            {
+                if (child.GetType() == typeof(Line))
+                {
+                    Line l = (Line)child;
+
+                    if (l.Name == e.Connection.ConnectionId)
+                    {
+                        l.Stroke = e.Connection.LineColor;
+                        break;
+                    }
+                }
+            }
         }
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace LogicDesigner.ViewModel
         public ConnectionVM(PinVM output, PinVM input, string connectionId)
         {
             this.ConnectionId = connectionId;
-            this.LineColor = Color.Black;
+            this.LineColor = System.Windows.Media.Brushes.Black;
             this.OutputPin = output;
             this.InputPin = input;
         }
@@ -41,7 +41,7 @@ namespace LogicDesigner.ViewModel
             set;
         }
 
-        public Color LineColor
+        public System.Windows.Media.Brush LineColor
         {
             get;
             set;
