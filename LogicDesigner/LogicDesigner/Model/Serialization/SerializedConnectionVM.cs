@@ -13,20 +13,23 @@ namespace LogicDesigner.Model.Serialization
         public string InputParentID { get; set; }
         public string OutputParentID { get; set; }
 
+        public string ConnectionID { get; set; }
+
         public double InputX { get; set; }
         public double InputY { get; set; }
 
         public double OutputX { get; set; }
         public double OutputY { get; set; }
 
-
         public SerializedConnectionVM(string input, string output, string inputParentID, string outputParentID, 
-            double inputX, double inputY, double outputX, double outputY)
+            double inputX, double inputY, double outputX, double outputY, string connectionID)
         {
             this.InputPinID = input;
             this.OutputPinID = output;
             this.InputParentID = inputParentID;
             this.OutputParentID = outputParentID;
+
+            this.ConnectionID = connectionID;
 
             this.InputX = inputX;
             this.InputY = inputY;

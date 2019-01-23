@@ -797,17 +797,17 @@
             List<ComponentVM> reconstructedCompVMs = new List<ComponentVM>();
             foreach (var result in testResult.Components)
             {
-                if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
-                {
+                //if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
+                //{
                     foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
                     {
                         loadedNodes.Add(component);
-                        var tempVM = new ComponentVM(component.Item1, this.CreateUniqueName(component.Item1), this.setPinCommand, this.removeCommand, this.config);
+                        var tempVM = new ComponentVM(component.Item1, result.UniqueName, this.setPinCommand, this.removeCommand, this.config);
                         tempVM.XCoord = result.XPos;
                         tempVM.YCoord = result.YPos;
                         reconstructedCompVMs.Add(tempVM);
                     }
-                }
+               // }
             }
 
             List<ConnectionVM> reconstructedConns = new List<ConnectionVM>();
@@ -821,8 +821,8 @@
                     var inPin = inparent.Item1.Inputs.ToList().Find(pin => pin.Label == connection.InputPinID);
                     var outPin = outparent.Item1.Outputs.ToList().Find(pin => pin.Label == connection.OutputPinID);
 
-                    var inCompVM = new ComponentVM(inparent.Item1, this.CreateUniqueName(inparent.Item1), this.setPinCommand, this.removeCommand, this.config);
-                    var outCompVM = new ComponentVM(outparent.Item1, this.CreateUniqueName(outparent.Item1), this.setPinCommand, this.removeCommand, this.config);
+                    var inCompVM = new ComponentVM(inparent.Item1, connection.ConnectionID, this.setPinCommand, this.removeCommand, this.config);
+                    var outCompVM = new ComponentVM(outparent.Item1, connection.ConnectionID, this.setPinCommand, this.removeCommand, this.config);
 
                     var tempIn = new PinVM(inPin, true, this.setPinCommand, inCompVM, this.config.PinActiveColor, this.config.PinPassiveColor);
                     var tempOut = new PinVM(outPin, false, this.setPinCommand, outCompVM, this.config.PinActiveColor, this.config.PinPassiveColor);
