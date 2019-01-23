@@ -55,11 +55,17 @@ namespace ComponentLibrary
 
         public event EventHandler PictureChanged;
 
+        /// <summary>
+        /// Activates this instance.
+        /// </summary>
         public void Activate()
         {
             return;
         }
 
+        /// <summary>
+        /// Executes this instance.
+        /// </summary>
         public void Execute()
         {
             if (!this.Inputs.Any(x => (bool)x.Value.Current == false))
