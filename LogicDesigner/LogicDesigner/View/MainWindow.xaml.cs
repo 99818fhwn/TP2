@@ -23,11 +23,6 @@ namespace LogicDesigner
     using System.Windows.Shapes;
     using System.Windows.Threading;
     using LogicDesigner.Commands;
-
-    // Will be restructured
-    using LogicDesigner.Model;
-    //
-
     using LogicDesigner.ViewModel;
     using Microsoft.Win32;
 
@@ -43,7 +38,6 @@ namespace LogicDesigner
         /// </summary>
         private bool isMoving;
 
-        //private List<Tuple<Line, ConnectionVM>> connectionLines;
         /// <summary>
         /// Initializes a new instance of the <see cref="MainWindow"/> class.
         /// </summary>
@@ -51,7 +45,6 @@ namespace LogicDesigner
         {
             this.Scale = 1;
             this.InitializeComponent();
-            //this.connectionLines = new List<Tuple<Line, ConnectionVM>>();
             this.UndoHistory = new Stack<ProgramMngVM>();
             this.RedoHistory = new Stack<ProgramMngVM>();
 
@@ -60,9 +53,7 @@ namespace LogicDesigner
             this.MainGrid.DataContext = programMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
-            this.CurrentSelectedComponentView.SetBinding(DataContextProperty, selectBind);
-
-            //this.UndoHistory.Push(new ProgramMngVM(programMngVM));
+            this.CurrentSelectedComponentView.SetBinding(MainWindow.DataContextProperty, selectBind);
 
             this.InputBindings.Add(new InputBinding(programMngVM.CopyCommand, new KeyGesture(Key.C, ModifierKeys.Control)));
             this.InputBindings.Add(new InputBinding(programMngVM.PasteCommand, new KeyGesture(Key.V, ModifierKeys.Control)));
@@ -156,7 +147,7 @@ namespace LogicDesigner
             get => new Command(new Action<object>((input) =>
             {
                 SaveFileDialog filepicker = new SaveFileDialog();
-                //filepicker.CheckFileExists = false;
+
                 filepicker.DefaultExt = ".ldf";
 
                 filepicker.ShowDialog();
@@ -166,27 +157,7 @@ namespace LogicDesigner
                 manager.SaveStatus(filename);
 
                 manager.LoadStatus(filename);
-
             }));
-        }
-
-        /// <summary>
-        /// Handles zooming with mouse wheel.
-        /// </summary>
-        private void MouseWheelZoom(object sender, MouseWheelEventArgs e)
-        {
-            if (Keyboard.Modifiers != ModifierKeys.Control)
-                return;
-
-            if (e.Delta > 0)
-            {
-                this.ZoomInCommand.Execute(null);
-            }
-
-            if (e.Delta < 0)
-            {
-                this.ZoomOutCommand.Execute(null);
-            }
         }
 
         /// <summary>
@@ -205,11 +176,16 @@ namespace LogicDesigner
                     var scaleTransform = new ScaleTransform(this.Scale, this.Scale);
                     this.ComponentWindow.RenderTransform = scaleTransform;
                 }
-                //this.ComponentWindow.RenderTransform = scaleTransform;
             }));
         }
 
-        private double Scale { get; set; }
+        /// <summary>
+        /// Gets the scale.
+        /// </summary>
+        /// <value>
+        /// The scale.
+        /// </value>
+        public double Scale { get; private set; }
 
         /// <summary>
         /// Gets the zoom out command.
@@ -253,12 +229,13 @@ namespace LogicDesigner
 
                     this.ComponentWindow.Children.Clear();
                     this.MainGrid.DataContext = history;
+
                     foreach (var component in history.NodesVMInField)
                     {
                         DrawNewComponent(component);
                     }
 
-                    this.UndoHistory.Push(history);
+                    this.UndoHistory.Push(history);                    
                 }
             }));
         }
@@ -276,7 +253,7 @@ namespace LogicDesigner
             if (parentType == typeof(Grid))
             {
                 var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
-                var temp = GetParentGridComponent(pressedComponent);
+                var temp = this.GetParentGridComponent(pressedComponent);
 
                 if (temp == null)
                 {
@@ -294,6 +271,7 @@ namespace LogicDesigner
 
                     return;
                 }
+
                 this.isMoving = true;
             }
         }
@@ -312,11 +290,11 @@ namespace LogicDesigner
         /// <summary>
         /// Gets the parent grid component.
         /// </summary>
-        /// <param name="uIElement">The ui element.</param>
-        /// <returns></returns>
-        private ComponentVM GetParentGridComponent(UIElement uIElement)
+        /// <param name="element">The element.</param>
+        /// <returns>The parent.</returns>
+        private ComponentVM GetParentGridComponent(UIElement element)
         {
-            var parent = (UIElement)VisualTreeHelper.GetParent(uIElement);
+            var parent = (UIElement)VisualTreeHelper.GetParent(element);
 
             if (parent.GetType() == typeof(Grid))
             {
@@ -336,7 +314,7 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseMovePre(object sender, MouseEventArgs e)
         {
-            var componentToMove = GetParentGridComponent((UIElement)e.Source);
+            var componentToMove = this.GetParentGridComponent((UIElement)e.Source);
             this.CurrentMove = new Point(0, 0);
             var pressedComponent = (UIElement)e.Source;
 
@@ -352,7 +330,7 @@ namespace LogicDesigner
                 {
                     return;
                 }
-                
+
                 if (!this.isMoving)
                 {
                     return;
@@ -368,14 +346,14 @@ namespace LogicDesigner
                         this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
 
                         parent.RenderTransform = new TranslateTransform(this.CurrentMove.X + componentToMove.XCoord, this.CurrentMove.Y + componentToMove.YCoord);
-                        
+
                         componentToMove.XCoord += this.CurrentMove.X;
                         componentToMove.YCoord += this.CurrentMove.Y;
                     }
 
                     var currentDataContext = (ProgramMngVM)this.MainGrid.DataContext;
 
-                    // Check if connection exists, redraw it if it do
+                    // Check if connection exists, redraw it if it does.
                     foreach (var uiElement in this.ComponentWindow.Children)
                     {
                         if (uiElement.GetType() == typeof(Line))
@@ -399,13 +377,36 @@ namespace LogicDesigner
         }
 
         /// <summary>
+        /// Handles the zoom.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseWheelEventArgs"/> instance containing the event data.</param>
+        private void MouseWheelZoom(object sender, MouseWheelEventArgs e)
+        {
+            if (Keyboard.Modifiers != ModifierKeys.Control)
+            {
+                return;
+            }
+
+            if (e.Delta > 0)
+            {
+                this.ZoomInCommand.Execute(null);
+            }
+
+            if (e.Delta < 0)
+            {
+                this.ZoomOutCommand.Execute(null);
+            }
+        }
+
+        /// <summary>
         /// Called when when a component is added.
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentAdded(object sender, FieldComponentEventArgs e)
         {
-            //Not sure if I broke it or not, maybe was a different event
+            // Not sure if I broke it or not, maybe was a different event
             e.Component.ComponentPropertyChanged += this.OnComponentChanged;
 
             this.DrawNewComponent(e.Component);
@@ -441,8 +442,8 @@ namespace LogicDesigner
                                     var compToChange = (Button)item;
                                     if (compToChange.Name == (e.Component.Name + "Body"))
                                     {
-                                        ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(),
-                                            IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+                                        ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+
                                         imageBrush.Stretch = Stretch.Fill;
                                         compToChange.Background = imageBrush;
                                         compToChange.UpdateLayout();
@@ -481,8 +482,9 @@ namespace LogicDesigner
             Button sampleBody = new Button();
 
             newComponent.Name = componentVM.Name;
+            newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, componentVM.YCoord);
             sampleBody.Name = componentVM.Name + "Body";
-            sampleBody.Height = componentVM.Picture.Height; ////Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
+            sampleBody.Height = componentVM.Picture.Height; // Can throw an exception i no picture is set the manager has to check for valid, is now solved(21-01-2019) by validator
             sampleBody.Width = componentVM.Picture.Width;
 
             ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(componentVM.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
@@ -490,11 +492,14 @@ namespace LogicDesigner
             sampleBody.Background = imageBrush;
 
             // remove command 
-            sampleBody.InputBindings.Add(new MouseBinding(new Command(obj =>
-            {
-                this.OnComponentRightClick(newComponent);
-                componentVM.RemoveComponentCommand.Execute(componentVM);
-            }), new MouseGesture(MouseAction.RightClick)));
+            sampleBody.InputBindings.Add(
+                new MouseBinding(
+                    new Command(obj =>
+                    {
+                        this.OnComponentRightClick(newComponent);
+                        componentVM.RemoveComponentCommand.Execute(componentVM);
+                    }),
+                new MouseGesture(MouseAction.RightClick)));
 
             // Add the label
             string text = componentVM.Label;
@@ -540,7 +545,7 @@ namespace LogicDesigner
                 pinButton.CommandParameter = componentVM.InputPinsVM[i];
                 pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
 
-                pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2 - 10, yOffset);
+                pinButton.RenderTransform = new TranslateTransform((-componentVM.Picture.Width / 2) - 10, yOffset);
 
                 componentVM.InputPinsVM[i].XPosition = (newComponent.Width / 2) - (componentVM.Picture.Width / 2) - 10;
                 componentVM.InputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
@@ -572,7 +577,7 @@ namespace LogicDesigner
                 pinButton.CommandParameter = componentVM.OutputPinsVM[i];
                 pinButton.Command = componentVM.OutputPinsVM[i].SetPinCommand;
 
-                pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2 + 10, yOffset);
+                pinButton.RenderTransform = new TranslateTransform((componentVM.Picture.Width / 2) + 10, yOffset);
                 yOffset += offsetStepValue;
 
                 componentVM.OutputPinsVM[i].XPosition = (newComponent.Width / 2) + (componentVM.Picture.Width / 2) + 10;
@@ -586,6 +591,10 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(newComponent);
         }
 
+        /// <summary>
+        /// Called when component is right clicked.
+        /// </summary>
+        /// <param name="component">The component.</param>
         private void OnComponentRightClick(object component)
         {
             if (component.GetType() == typeof(Grid))
@@ -594,8 +603,12 @@ namespace LogicDesigner
             }
         }
 
-        // OnPinsDisconnected with ConnectionVM
-        public void OnPinsDisconnected(object sender, PinVMConnectionChangedEventArgs e)
+        /// <summary>
+        /// Called when pins get disconnected.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="PinVMConnectionChangedEventArgs"/> instance containing the event data.</param>
+        private void OnPinsDisconnected(object sender, PinVMConnectionChangedEventArgs e)
         {
             var inputPin = e.Connection.InputPin;
             var outputPin = e.Connection.OutputPin;
@@ -605,7 +618,7 @@ namespace LogicDesigner
                 if (child.GetType() == typeof(Line))
                 {
                     Line l = (Line)child;
-                    
+
                     if (l.Name == e.Connection.ConnectionId)
                     {
                         this.ComponentWindow.Children.Remove((Line)child);
@@ -615,8 +628,12 @@ namespace LogicDesigner
             }
         }
 
-        //new OnPinsConnected with ConnectionVM
-        public void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
+        /// <summary>
+        /// Called when when pins get connected.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="PinVMConnectionChangedEventArgs"/> instance containing the event data.</param>
+        private void OnPinsConnected(object sender, PinVMConnectionChangedEventArgs e)
         {
             var inputPin = e.Connection.InputPin;
             var outputPin = e.Connection.OutputPin;
@@ -637,10 +654,16 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(line);
         }
 
+        /// <summary>
+        /// Called when the connection is clicked.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void OnConnectionLineClicked(object sender, MouseButtonEventArgs e)
         {
             var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
-            if(sender.GetType() == typeof(Line))
+
+            if (sender.GetType() == typeof(Line))
             {
                 Line l = (Line)sender;
                 manager.RemoveConnectionVM(l.Name);
@@ -649,20 +672,11 @@ namespace LogicDesigner
             }
         }
 
-       
-
-        ///// <summary>
-        ///// Handles the Loaded event of the ScrollViewer control. Sets the view to the middle. 
-        ///// </summary>
-        ///// <param name="sender">The source of the event.</param>
-        ///// <param name="e">The <see cref="System.Windows.RoutedEventArgs" /> instance containing the event data.</param>
-        ////private void ScrollViewerLoaded(object sender, RoutedEventArgs e)
-        ////{
-        ////    var scrollbar = (ScrollViewer)e.Source;
-        ////    scrollbar.ScrollToVerticalOffset(scrollbar.ScrollableHeight / 2);
-        ////    scrollbar.ScrollToHorizontalOffset(scrollbar.ScrollableWidth / 2);
-        ////}
-
+        /// <summary>
+        /// On component added.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         private void PreComponentAdded(object sender, EventArgs e)
         {
             var currentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
