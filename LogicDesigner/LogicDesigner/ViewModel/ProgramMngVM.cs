@@ -80,7 +80,7 @@ namespace LogicDesigner.ViewModel
                     {
                         this.programManager.FieldNodes.Remove(n);
                         this.nodesVMInField.Remove(nodeInFieldVM);
-                        OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
+                        this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
 
                         break;
                     }
@@ -101,7 +101,7 @@ namespace LogicDesigner.ViewModel
                 var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), setPinCommand, 
                     removeCommand);
                 this.nodesVMInField.Add(compVM);
-                OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
+                this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
             });
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
