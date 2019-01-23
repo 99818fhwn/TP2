@@ -349,8 +349,7 @@ namespace LogicDesigner.ViewModel
 
         public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
         {
-            //System.InvalidOperationException: Sequence contains no elements
-            var conn = this.connectionsVM.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).First();
+            var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).First();
             this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
             this.connectionsVM.Remove(conn);
 
@@ -385,7 +384,6 @@ namespace LogicDesigner.ViewModel
 
         public void RemoveConnectionVM(string name)
         {
-            //throw new NotImplementedException();
             foreach(var conn in this.connectionsVM)
             {
                 if(conn.ConnectionId == name)

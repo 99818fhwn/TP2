@@ -473,6 +473,15 @@ namespace LogicDesigner
             imageBrush.Stretch = Stretch.Fill;
             sampleBody.Background = imageBrush;
 
+            // remove command 
+            MouseBinding RightClickMouseBinding = new MouseBinding();
+            RightClickMouseBinding.Gesture = new MouseGesture(MouseAction.RightClick);
+            RightClickMouseBinding.Command = componentVM.RemoveComponentCommand;
+            RightClickMouseBinding.CommandParameter = componentVM;
+
+            sampleBody.InputBindings.Add(RightClickMouseBinding);
+            sampleBody.MouseRightButtonUp += this.OnComponentRightClick;
+
             // Add the label
             string text = componentVM.Label;
 
@@ -559,6 +568,19 @@ namespace LogicDesigner
             this.ComponentWindow.Children.Add(newComponent);
         }
 
+        private void OnComponentRightClick(object sender, MouseButtonEventArgs e)
+        {
+            if (sender.GetType() == typeof(Grid))
+            {
+                this.ComponentWindow.Children.Remove((Grid)sender);
+            }
+
+            if (sender.GetType() == typeof(Button))
+            {
+                this.ComponentWindow.Children.Remove((Button)sender);
+            }
+        }
+
         // OnPinsDisconnected with ConnectionVM
         public void OnPinsDisconnected(object sender, PinVMConnectionChangedEventArgs e)
         {
@@ -588,7 +610,7 @@ namespace LogicDesigner
 
             Line line = new Line();
             line.Name = e.Connection.ConnectionId;
-            line.MouseLeftButtonUp += this.OnConnectionLineClicked;
+            line.MouseRightButtonUp += this.OnConnectionLineClicked;
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
             line.Stroke = Brushes.Black;
