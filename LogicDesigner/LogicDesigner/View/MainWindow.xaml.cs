@@ -8,6 +8,7 @@ namespace LogicDesigner
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.IO;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
@@ -137,7 +138,7 @@ namespace LogicDesigner
                     this.MainGrid.DataContext = history;
                     foreach (var component in history.NodesVMInField)
                     {
-                        DrawNewComponent(component);
+                        this.DrawNewComponent(component);
                     }
 
                     this.RedoHistory.Push(history);
@@ -145,28 +146,72 @@ namespace LogicDesigner
             }));
         }
 
-        /// <summary>
-        /// Gets the undo command.
-        /// </summary>
-        /// <value>
-        /// The undo command.
-        /// </value>
         public Command SaveCommand
         {
             get => new Command(new Action<object>((input) =>
             {
-                SaveFileDialog filepicker = new SaveFileDialog();
-                //filepicker.CheckFileExists = false;
-                filepicker.DefaultExt = ".ldf";
+                try
+                {
+                    SaveFileDialog filepicker = new SaveFileDialog();
+                    //filepicker.CheckFileExists = false;
+                    filepicker.Filter = "LogicDesigner files (*.ldf)|*.ldf|All files (*.*)|*.*";
+                    filepicker.DefaultExt = ".ldf";
+                    filepicker.ShowDialog();
 
-                filepicker.ShowDialog();
+                    string filename = filepicker.FileName;
 
-                string filename = filepicker.FileName;
-                var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
-                manager.SaveStatus(filename);
+                    if (Directory.Exists(System.IO.Path.GetDirectoryName(filename)))
+                    {
+                        var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                        manager.SaveStatus(filename);
+                    }
+                }
+                catch
+                { }
+            }));
+        }
 
-                manager.LoadStatus(filename);
+        public Command LoadCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                try
+                {
+                    OpenFileDialog filepicker = new OpenFileDialog();
+                    //filepicker.CheckFileExists = false;
+                    filepicker.Filter = "LogicDesigner files (*.ldf)|*.ldf|All files (*.*)|*.*";
+                    filepicker.DefaultExt = ".ldf";
+                    filepicker.ShowDialog();
 
+                    string filename = filepicker.FileName;
+                    if (File.Exists(filename))
+                    {
+                        var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+
+                        var loadResult = manager.LoadStatus(filename);
+
+                        App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                        {
+                            foreach (var existingComponent in manager.NodesVMInField)
+                            {
+                                manager.NodesVMInField.Remove(existingComponent);
+                            // Insert visual remove
+                        }
+                        });
+
+
+                        App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+                        {
+                            foreach (var loadedComponent in loadResult.Item2)
+                            {
+                                manager.NodesVMInField.Add(loadedComponent);
+                                this.DrawNewComponent(loadedComponent);
+                            }
+                        });
+                    }
+                }
+                catch
+                { }
             }));
         }
 
@@ -255,7 +300,7 @@ namespace LogicDesigner
                     this.MainGrid.DataContext = history;
                     foreach (var component in history.NodesVMInField)
                     {
-                        DrawNewComponent(component);
+                        this.DrawNewComponent(component);
                     }
 
                     this.UndoHistory.Push(history);
@@ -276,7 +321,7 @@ namespace LogicDesigner
             if (parentType == typeof(Grid))
             {
                 var parent = (Grid)VisualTreeHelper.GetParent(pressedComponent);
-                var temp = GetParentGridComponent(pressedComponent);
+                var temp = this.GetParentGridComponent(pressedComponent);
 
                 if (temp == null)
                 {
@@ -307,7 +352,7 @@ namespace LogicDesigner
         {
             if (this.isMoving)
             {
-                var componentToMove = GetParentGridComponent((UIElement)e.Source);
+                var componentToMove = this.GetParentGridComponent((UIElement)e.Source);
                 componentToMove.XCoord += this.CurrentMove.X;
                 componentToMove.YCoord += this.CurrentMove.Y;
             }
@@ -406,7 +451,7 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentChanged(object sender, FieldComponentEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            this.Dispatcher.Invoke(() =>
             {
                 var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
 
@@ -556,6 +601,21 @@ namespace LogicDesigner
                 newComponent.Children.Add(pinButton);
             }
 
+            if (componentVM.XCoord != 0 && componentVM.YCoord == 0)
+            {
+                newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, 0);
+            }
+
+            if (componentVM.YCoord != 0 && componentVM.XCoord == 0)
+            {
+                newComponent.RenderTransform = new TranslateTransform(0, componentVM.YCoord);
+            }
+
+            if (componentVM.YCoord != 0 && componentVM.XCoord != 0)
+            {
+                newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, componentVM.YCoord);
+            }
+
             this.ComponentWindow.Children.Add(newComponent);
         }
 
@@ -572,26 +632,26 @@ namespace LogicDesigner
             {
                 //try
                 //{
-                    //Grid grid = child as Grid;
+                //Grid grid = child as Grid;
 
-                    //foreach (var gridChild in grid.Children)
-                    //{
-                        try
-                        {
-                            Line l = (Line)child;
-                            //Line l = (Line)gridChild;
-                            if (l.Name == e.Connection.ConnectionId)
-                            {
-                            //this.connectionLines.Remove(connectionToRemove);
-                            //grid.Children.Remove((Line)gridChild);
-                                this.ComponentWindow.Children.Remove((Line)child);
-                            break;
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            continue;
-                        }
+                //foreach (var gridChild in grid.Children)
+                //{
+                try
+                {
+                    Line l = (Line)child;
+                    //Line l = (Line)gridChild;
+                    if (l.Name == e.Connection.ConnectionId)
+                    {
+                        //this.connectionLines.Remove(connectionToRemove);
+                        //grid.Children.Remove((Line)gridChild);
+                        this.ComponentWindow.Children.Remove((Line)child);
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
                 //    }
                 //}
                 //catch (Exception)

@@ -36,6 +36,11 @@ namespace LogicDesigner.ViewModel
             this.yposition = 0;
         }
 
+        public PinVM()
+        {
+
+        }
+
         public IPin Pin
         {
             get
