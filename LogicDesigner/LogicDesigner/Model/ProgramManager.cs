@@ -223,5 +223,17 @@ namespace LogicDesigner.Model
         {
             this.PinsDisconnected?.Invoke(source, e);
         }
+
+        public void RemoveConnection(IPin outputPin, IPin inputPin)
+        {
+            foreach(var conn in this.connectedOutputInputPairs)
+            {
+                if(conn.Item1 == outputPin && conn.Item2 == inputPin)
+                {
+                    this.connectedOutputInputPairs.Remove(conn);
+                    break;
+                }
+            }
+        }
     }
 }

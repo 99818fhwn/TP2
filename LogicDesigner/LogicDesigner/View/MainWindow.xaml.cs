@@ -608,7 +608,7 @@ namespace LogicDesigner
             if(sender.GetType() == typeof(Line))
             {
                 Line l = (Line)sender;
-                manager.RemoveConnectionLine(l.Name);
+                manager.RemoveConnectionVM(l.Name);
 
                 this.ComponentWindow.Children.Remove(l);
             }

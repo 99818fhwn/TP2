@@ -383,9 +383,18 @@ namespace LogicDesigner.ViewModel
             this.FieldComponentChanged?.Invoke(this, e);
         }
 
-        internal void RemoveConnectionLine(string name)
+        public void RemoveConnectionVM(string name)
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
+            foreach(var conn in this.connectionsVM)
+            {
+                if(conn.ConnectionId == name)
+                {
+                    this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
+                    this.connectionsVM.Remove(conn);
+                    break;
+                }
+            }
         }
     }
 }
