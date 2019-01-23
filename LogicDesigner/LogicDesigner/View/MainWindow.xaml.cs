@@ -305,15 +305,7 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (this.isMoving)
-            {
-                var componentToMove = GetParentGridComponent((UIElement)e.Source);
-                componentToMove.XCoord += this.CurrentMove.X;
-                componentToMove.YCoord += this.CurrentMove.Y;
-            }
-
             this.isMoving = false;
-            this.CurrentMove = new Point(0, 0);
             this.CurrentMouse = new Point(0, 0);
         }
 
@@ -344,24 +336,23 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="MouseEventArgs"/> instance containing the event data.</param>
         private void ComponentMouseMovePre(object sender, MouseEventArgs e)
         {
+            var componentToMove = GetParentGridComponent((UIElement)e.Source);
+            this.CurrentMove = new Point(0, 0);
             var pressedComponent = (UIElement)e.Source;
 
             var parent = (UIElement)VisualTreeHelper.GetParent(pressedComponent);
-            Point newPoint;
 
             if (parent.GetType() == typeof(Grid))
             {
                 var parentgrid = (Grid)parent;
                 var dataContext = (ProgramMngVM)this.MainGrid.DataContext;
-                var componentToMove = dataContext.NodesVMInField.FirstOrDefault(x => x.Name == parentgrid.Name);
+                componentToMove = dataContext.NodesVMInField.FirstOrDefault(x => x.Name == parentgrid.Name);
 
                 if (componentToMove == null)
                 {
                     return;
                 }
-
-                newPoint = new Point(componentToMove.XCoord, componentToMove.YCoord);
-
+                
                 if (!this.isMoving)
                 {
                     return;
@@ -377,6 +368,31 @@ namespace LogicDesigner
                         this.CurrentMove = new Point(this.CurrentMove.X + movepoint.X, this.CurrentMove.Y + movepoint.Y);
 
                         parent.RenderTransform = new TranslateTransform(this.CurrentMove.X + componentToMove.XCoord, this.CurrentMove.Y + componentToMove.YCoord);
+                        
+                        componentToMove.XCoord += this.CurrentMove.X;
+                        componentToMove.YCoord += this.CurrentMove.Y;
+                    }
+
+                    var currentDataContext = (ProgramMngVM)this.MainGrid.DataContext;
+
+                    // Check if connection exists, redraw it if it do
+                    foreach (var uiElement in this.ComponentWindow.Children)
+                    {
+                        if (uiElement.GetType() == typeof(Line))
+                        {
+                            var line = (Line)uiElement;
+                            var connectionVM = currentDataContext.ConnectionsVM.FirstOrDefault(cVM => cVM.ConnectionId == line.Name);
+
+                            if (connectionVM != null)
+                            {
+                                if (connectionVM.InputPin.Parent == componentToMove || connectionVM.OutputPin.Parent == componentToMove)
+                                {
+                                    this.OnPinsDisconnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
+                                    this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(connectionVM));
+                                    return;
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -493,7 +509,7 @@ namespace LogicDesigner
 
             newComponent.Height = sampleBody.Height + label.Height + 20;
             newComponent.Width = sampleBody.Width + label.Width + 20;
-            Panel.SetZIndex(sampleBody, 100);
+            Panel.SetZIndex(sampleBody, 0);
             newComponent.Children.Add(sampleBody);
             newComponent.Children.Add(label);
 
@@ -510,19 +526,21 @@ namespace LogicDesigner
             for (int i = 0; i < componentVM.InputPinsVM.Count; i++)
             {
                 Button pinButton = new Button();
-                pinButton.Width = 30;
+                pinButton.Width = 20;
                 pinButton.Height = 10;
                 pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
 
                 pinButton.CommandParameter = componentVM.InputPinsVM[i];
                 pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
 
-                pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2, yOffset);
+                pinButton.RenderTransform = new TranslateTransform(-componentVM.Picture.Width / 2 - 10, yOffset);
 
-                componentVM.InputPinsVM[i].XPosition = (newComponent.Width / 2) - (componentVM.Picture.Width / 2);
+                componentVM.InputPinsVM[i].XPosition = (newComponent.Width / 2) - (componentVM.Picture.Width / 2) - 10;
                 componentVM.InputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
 
                 yOffset += offsetStepValue;
+
+                Panel.SetZIndex(pinButton, 100);
 
                 newComponent.Children.Add(pinButton);
             }
@@ -540,18 +558,20 @@ namespace LogicDesigner
             for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
             {
                 Button pinButton = new Button();
-                pinButton.Width = 30;
+                pinButton.Width = 20;
                 pinButton.Height = 10;
                 pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
 
                 pinButton.CommandParameter = componentVM.OutputPinsVM[i];
                 pinButton.Command = componentVM.OutputPinsVM[i].SetPinCommand;
 
-                pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2, yOffset);
+                pinButton.RenderTransform = new TranslateTransform(componentVM.Picture.Width / 2 + 10, yOffset);
                 yOffset += offsetStepValue;
 
-                componentVM.OutputPinsVM[i].XPosition = (newComponent.Width / 2) + (componentVM.Picture.Width / 2);
+                componentVM.OutputPinsVM[i].XPosition = (newComponent.Width / 2) + (componentVM.Picture.Width / 2) + 10;
                 componentVM.OutputPinsVM[i].YPosition = (newComponent.Height / 2) + yOffset;
+
+                Panel.SetZIndex(pinButton, 100);
 
                 newComponent.Children.Add(pinButton);
             }
@@ -617,7 +637,7 @@ namespace LogicDesigner
             line.Y1 = inputPin.YPosition;
             line.Y2 = outputPin.YPosition;
 
-            Panel.SetZIndex(line, -100);
+            Panel.SetZIndex(line, 50);
 
             this.ComponentWindow.Children.Add(line);
         }
