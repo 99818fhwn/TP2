@@ -148,8 +148,8 @@ namespace LogicDesigner.ViewModel
                    this.redoHistoryStack.Push(history);
                }
            });
-                //this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
-                //});
+            //    this.OnFieldComponentCreated(this, new FieldComponentEventArgs(compVM));
+            //});
 
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(node,
                 this.CreateUniqueName(node), setPinCommand, this.removeCommand
@@ -367,11 +367,6 @@ namespace LogicDesigner.ViewModel
             this.FieldComponentAdded?.Invoke(this, new FieldComponentEventArgs(addedComponent));
         }
 
-        //public void OnFieldComponentCreated(object sender, FieldComponentEventArgs e)
-        //{
-        //    this.FieldComponentAdded?.Invoke(this, e);
-        //}
-
         public void OnFieldComponentRemoved(object sender, FieldComponentEventArgs e)
         {
             this.FieldComponentRemoved?.Invoke(this, e);
@@ -426,10 +421,12 @@ namespace LogicDesigner.ViewModel
         /// <param name="e">The <see cref="FileSystemEventArgs"/> instance containing the event data.</param>
         private void NewModuleAdded(object sender, FileSystemEventArgs e)
         {
+            //this.programManager = new ProgramManager();
+            //this.programManager.Watcher.Created += NewModuleAdded;
             this.programManager.InitializeNodesToChooseFrom();
 
-            var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
             //var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
+            var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
 
             // hässlich, aber konnte keinen besseren Weg finden
             //App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
