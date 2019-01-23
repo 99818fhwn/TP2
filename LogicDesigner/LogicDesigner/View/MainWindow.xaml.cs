@@ -56,7 +56,7 @@ namespace LogicDesigner
             this.RedoHistory = new Stack<ProgramMngVM>();
 
             this.DataContext = this;
-            ProgramMngVM programMngVM = new ProgramMngVM();
+            programMngVM = new ProgramMngVM();
             this.MainGrid.DataContext = programMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
@@ -79,6 +79,8 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
+
+        public ProgramMngVM programMngVM { get; set; }
 
         /// <summary>
         /// Gets the undo history.
@@ -120,29 +122,10 @@ namespace LogicDesigner
         /// </value>
         public Command UndoCommand
         {
-            get => new Command(new Action<object>((input) =>
+            get
             {
-                if (this.UndoHistory.Count > 0)
-                {
-                    ProgramMngVM history = this.UndoHistory.Pop();
-
-                    var current = (ProgramMngVM)this.MainGrid.DataContext;
-                    if (history.NodesVMInField == current.NodesVMInField)
-                    {
-                        this.RedoHistory.Push(history);
-                        history = this.UndoHistory.Pop();
-                    }
-
-                    this.ComponentWindow.Children.Clear();
-                    this.MainGrid.DataContext = history;
-                    foreach (var component in history.NodesVMInField)
-                    {
-                        DrawNewComponent(component);
-                    }
-
-                    this.RedoHistory.Push(history);
-                }
-            }));
+                return this.programMngVM.UndoCommand;
+            }
         }
 
         /// <summary>
@@ -255,7 +238,7 @@ namespace LogicDesigner
                     this.MainGrid.DataContext = history;
                     foreach (var component in history.NodesVMInField)
                     {
-                        DrawNewComponent(component);
+                        this.DrawNewComponent(component);
                     }
 
                     this.UndoHistory.Push(history);
@@ -394,9 +377,9 @@ namespace LogicDesigner
 
             this.DrawNewComponent(e.Component);
 
-            var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            this.RedoHistory.Clear();
-            this.RedoHistory.Push(updatedCurrentMan);
+            //var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
+            //this.RedoHistory.Clear();
+            //this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
@@ -406,7 +389,7 @@ namespace LogicDesigner
         /// <param name="e">The <see cref="FieldComponentEventArgs"/> instance containing the event data.</param>
         private void OnComponentChanged(object sender, FieldComponentEventArgs e)
         {
-            Dispatcher.Invoke(() =>
+            this.Dispatcher.Invoke(() =>
             {
                 var compOld = this.ComponentWindow.Children; // FindName(e.Component.Name);
 
@@ -572,26 +555,26 @@ namespace LogicDesigner
             {
                 //try
                 //{
-                    //Grid grid = child as Grid;
+                //Grid grid = child as Grid;
 
-                    //foreach (var gridChild in grid.Children)
-                    //{
-                        try
-                        {
-                            Line l = (Line)child;
-                            //Line l = (Line)gridChild;
-                            if (l.Name == e.Connection.ConnectionId)
-                            {
-                            //this.connectionLines.Remove(connectionToRemove);
-                            //grid.Children.Remove((Line)gridChild);
-                                this.ComponentWindow.Children.Remove((Line)child);
-                            break;
-                            }
-                        }
-                        catch (Exception)
-                        {
-                            continue;
-                        }
+                //foreach (var gridChild in grid.Children)
+                //{
+                try
+                {
+                    Line l = (Line)child;
+                    //Line l = (Line)gridChild;
+                    if (l.Name == e.Connection.ConnectionId)
+                    {
+                        //this.connectionLines.Remove(connectionToRemove);
+                        //grid.Children.Remove((Line)gridChild);
+                        this.ComponentWindow.Children.Remove((Line)child);
+                        break;
+                    }
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
                 //    }
                 //}
                 //catch (Exception)

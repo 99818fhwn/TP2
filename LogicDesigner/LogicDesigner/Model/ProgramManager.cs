@@ -22,15 +22,18 @@ namespace LogicDesigner.Model
         /// </summary>
         private ICollection<IDisplayableNode> fieldNodes;
         private List<Tuple<IPin, IPin>> connectedOutputInputPairs;
+        private readonly string logFileName;
 
         /// <summary>
         /// The possible nodes to choose from
         /// </summary>
-        private readonly ICollection<IDisplayableNode> possibleNodesToChooseFrom;
+        private ICollection<IDisplayableNode> possibleNodesToChooseFrom;
         private readonly string path;
         public event EventHandler<PinsConnectedEventArgs> PinsDisconnected;
 
         private readonly string componentDirectory;
+
+        private readonly string logDirectory;
 
         public FileSystemWatcher Watcher { get; set; }
 
@@ -41,27 +44,42 @@ namespace LogicDesigner.Model
             //this.path = path;
             //this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.componentDirectory = "Components";
+            this.logDirectory = "LogFiles";
             this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.Stop = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
-            this.possibleNodesToChooseFrom = this.InitializeNodesToChooseFrom();
+            this.InitializeNodesToChooseFrom();
 
-            if (!Directory.Exists(Path.GetDirectoryName(componentDirectory)))
+            if (!Directory.Exists(Path.GetDirectoryName(this.componentDirectory)))
             {
-                Directory.CreateDirectory(componentDirectory);
+                Directory.CreateDirectory(this.componentDirectory);
             }
-            this.Watcher = new FileSystemWatcher(componentDirectory);
-            Watcher.IncludeSubdirectories = true;
-            Watcher.EnableRaisingEvents = true;
-            Watcher.Filter = "";
+
+            if (!Directory.Exists(Path.GetDirectoryName(this.logDirectory)))
+            {
+                Directory.CreateDirectory(this.logDirectory);
+                this.logFileName = "Log_" + DateTime.Now.ToString("ddd d MMM yyyy HH mm ss").Replace(" ", "_") + ".txt";
+                if (!File.Exists(Path.Combine(this.logDirectory, this.logFileName)))
+                {
+                    using (File.Create(Path.Combine(this.logDirectory, this.logFileName)));
+                }
+
+                this.WriteToLog(new string[] { "Log initialized" });
+            }
+
+            this.Watcher = new FileSystemWatcher(this.componentDirectory);
+            this.Watcher.IncludeSubdirectories = true;
+            this.Watcher.EnableRaisingEvents = true;
+            this.Watcher.Filter = "";
         }
 
         public ProgramManager(ProgramManager old)
         {
             this.Delay = old.Delay;
             this.FieldNodes = old.FieldNodes;
-            possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
+            this.logFileName = old.logFileName;
+            this.possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
             this.Stop = old.Stop;
         }
 
@@ -95,6 +113,10 @@ namespace LogicDesigner.Model
             {
                 return this.possibleNodesToChooseFrom;
             }
+            private set
+            {
+                this.possibleNodesToChooseFrom = value;
+            }
         }
 
         public int Delay
@@ -109,9 +131,9 @@ namespace LogicDesigner.Model
             private set;
         }
 
-        private ICollection<IDisplayableNode> InitializeNodesToChooseFrom()
+        public void InitializeNodesToChooseFrom()
         {
-            return new NodesLoader().GetNodes(componentDirectory);
+            this.PossibleNodesToChooseFrom = new NodesLoader().GetNodes(this.componentDirectory);
         }
 
         public void Run()
@@ -120,34 +142,50 @@ namespace LogicDesigner.Model
             {
                 this.RunLoop(this.Delay);
             }
+
+            this.Stop = false;
         }
 
         public void RunLoop(int delay)
         {
-            foreach (var t in this.ConnectedOutputInputPairs)
+            try
             {
-                t.Item2.Value.Current = t.Item1.Value.Current;
-            }
-
-            foreach (INode node in this.fieldNodes)
-            {
-                if (!this.Stop)
+                foreach (var t in this.ConnectedOutputInputPairs)
                 {
-                    foreach (var t in this.ConnectedOutputInputPairs)
+                    t.Item2.Value.Current = t.Item1.Value.Current;
+                }
+
+                foreach (INode node in this.fieldNodes)
+                {
+                    if (!this.Stop)
                     {
-                        t.Item2.Value.Current = t.Item1.Value.Current;
+                        foreach (var t in this.ConnectedOutputInputPairs)
+                        {
+                            t.Item2.Value.Current = t.Item1.Value.Current;
+                        }
+
+                        node.Execute();
+                        Task.Delay(delay);
                     }
+                    else
+                    {
+                        break;
+                    }
+                }
 
-                    node.Execute();
-                    Task.Delay(delay);
-                }
-                else
-                {
-                    break;
-                }
+                this.FireOnStepFinished();
             }
+            catch (Exception e)
+            {
+                List<string> message = new List<string>() { "Error:" , "Time: " + DateTime.Now.ToString("H:mm:ss") 
+                    , "Source: " + e.Source, "ErrorType:" + e.GetType().ToString() , "ErrorMessage: " + e.Message, "" };
+                this.WriteToLog(message.ToArray());
+            }
+        }
 
-            this.FireOnStepFinished();
+        public void WriteToLog(string[] logMessage)
+        {
+            File.AppendAllLines(Path.Combine(this.logDirectory, this.logFileName), logMessage);
         }
 
         protected virtual void FireOnStepFinished()
