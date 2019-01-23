@@ -2,6 +2,7 @@
 using Shared;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace LogicDesigner.ViewModel
         private double xposition;
         private double yposition;
         private ComponentVM parent;
+        private Color color;
 
         public PinVM(IPin pin, bool isInputPin, Command setPinCommand, ComponentVM parent)
         {
@@ -25,6 +27,7 @@ namespace LogicDesigner.ViewModel
             this.setPinCommand = setPinCommand;
             this.xposition = 0;
             this.yposition = 0;
+            this.color = Color.Black;
         }
 
         public PinVM(IPin pin, bool isInputPin, Command setPinCommand)
@@ -97,6 +100,18 @@ namespace LogicDesigner.ViewModel
             get
             {
                 return this.parent;
+            }
+        }
+
+        public Color Color
+        {
+            get
+            {
+                return this.color;
+            }
+            set
+            {
+                this.color = value;
             }
         }
     }

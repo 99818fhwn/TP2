@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -257,6 +258,8 @@ namespace LogicDesigner.ViewModel
 
         public void SetSelectedPin(PinVM value)
         {
+            value.Color = Color.Red;
+
             if (this.selectedOutputPin == value || this.selectedInputPin == value)
             {
                 this.selectedInputPin = null;

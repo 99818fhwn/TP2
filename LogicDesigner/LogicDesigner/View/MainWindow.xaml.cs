@@ -540,7 +540,9 @@ namespace LogicDesigner
                 Button pinButton = new Button();
                 pinButton.Width = 20;
                 pinButton.Height = 10;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
+
+                var color = componentVM.InputPinsVM[i].Color;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
 
                 pinButton.CommandParameter = componentVM.InputPinsVM[i];
                 pinButton.Command = componentVM.InputPinsVM[i].SetPinCommand;
@@ -565,17 +567,26 @@ namespace LogicDesigner
             {
                 offsetStepValue = (componentVM.Picture.Height - 20) / (componentVM.OutputPinsVM.Count - 1);
             }
-
+            
             // Draw output pins
             for (int i = 0; i < componentVM.OutputPinsVM.Count; i++)
             {
                 Button pinButton = new Button();
                 pinButton.Width = 20;
                 pinButton.Height = 10;
-                pinButton.Background = new SolidColorBrush(Color.FromRgb(0, 0, 0));
 
-                pinButton.CommandParameter = componentVM.OutputPinsVM[i];
-                pinButton.Command = componentVM.OutputPinsVM[i].SetPinCommand;
+                var color = componentVM.OutputPinsVM[i].Color;
+                pinButton.Background = new SolidColorBrush(Color.FromRgb(color.R, color.G, color.B));
+
+                var pin = componentVM.OutputPinsVM[i];
+
+                //pinButton.CommandParameter = componentVM.OutputPinsVM[i];
+                pinButton.Command = new Command(x => {
+
+
+
+                    pin.SetPinCommand.Execute(pin);
+                });  
 
                 pinButton.RenderTransform = new TranslateTransform((componentVM.Picture.Width / 2) + 10, yOffset);
                 yOffset += offsetStepValue;
