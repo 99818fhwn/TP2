@@ -80,7 +80,6 @@ namespace LogicDesigner
         private void OnConnectionUpdated(object sender, PinVMConnectionChangedEventArgs e)
         {
             // find the line with name == id -> change its color
-
             this.Dispatcher.Invoke(() =>
             {
                 foreach (var child in this.ComponentWindow.Children)
