@@ -2,7 +2,7 @@
 // <copyright file="NodesLoader.cs" company="FHWN">    
 // Copyright (c) FHWN. All rights reserved.    
 // </copyright>    
-// <summary>Loads the noades.</summary>
+// <summary>Loads the nodes.</summary>
 // -----------------------------------------------------------------------
 namespace LogicDesigner.Model
 {

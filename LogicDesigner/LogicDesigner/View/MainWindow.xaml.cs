@@ -76,28 +76,7 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
-
-        private void OnConnectionUpdated(object sender, PinVMConnectionChangedEventArgs e)
-        {
-            // find the line with name == id -> change its color
-            this.Dispatcher.Invoke(() =>
-            {
-                foreach (var child in this.ComponentWindow.Children)
-                {
-                    if (child.GetType() == typeof(Line))
-                    {
-                        Line l = (Line)child;
-
-                        if (l.Name == e.Connection.ConnectionId)
-                        {
-                            l.Stroke = e.Connection.LineColor;
-                            break;
-                        }
-                    }
-                }
-            });
-        }
-
+        
         /// <summary>
         /// Gets or sets the program manager.
         /// </summary>
@@ -326,6 +305,32 @@ namespace LogicDesigner
             {
                 return this.ProgramMngVM.RedoCommand;
             }
+        }
+
+        /// <summary>
+        /// Called when connection gets updated.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The event arguments.</param>
+        private void OnConnectionUpdated(object sender, PinVMConnectionChangedEventArgs e)
+        {
+            // find the line with name == id -> change its color
+            this.Dispatcher.Invoke(() =>
+            {
+                foreach (var child in this.ComponentWindow.Children)
+                {
+                    if (child.GetType() == typeof(Line))
+                    {
+                        Line l = (Line)child;
+
+                        if (l.Name == e.Connection.ConnectionId)
+                        {
+                            l.Stroke = e.Connection.LineColor;
+                            break;
+                        }
+                    }
+                }
+            });
         }
 
         /// <summary>

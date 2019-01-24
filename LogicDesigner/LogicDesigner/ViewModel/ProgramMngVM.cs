@@ -97,7 +97,6 @@ namespace LogicDesigner.ViewModel
         private Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>> redoHistoryStack;
                 
         
-
         public event EventHandler<FieldComponentEventArgs> FieldComponentAdded;
         //public event EventHandler<EventArgs> PreFieldComponentAdded;
         public event EventHandler<FieldComponentEventArgs> FieldComponentRemoved;
@@ -1043,77 +1042,77 @@ namespace LogicDesigner.ViewModel
         /// </summary>
         /// <param name="selectedOutputPin">The selected output pin.</param>
         /// <param name="selectedInputPin">The selected input pin.</param>
-        //private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
-        //{
-        //    if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
-        //    {
-        //        var conn = new ConnectionVM(
-        //            selectedOutputPin,
-        //            selectedInputPin,
-        //            this.NewUniqueConnectionId());
-        //        this.connectionsVM.Add(conn);
-        //        this.UpdateUndoHistory(); // If connect successful update history
-        //        this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
-        //    }
-
-        //    this.selectedInputPin.Active = false;
-        //    this.selectedOutputPin.Active = false;
-
-        //    this.selectedInputPin = null;
-        //    this.selectedOutputPin = null;
-        //}
-
-        /// <summary>
-        /// Refreshes the view models, in case a step in program manager finished.
-        /// </summary>
-        /// <param name="sender">The sender of the event.</param>
-        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        //private void RefreshVM(object sender, EventArgs e)
-        //{
-        //    var oldTemp = this.SelectedFieldComponent;
-        //    this.SelectedFieldComponent = null;
-        //    this.SelectedFieldComponent = oldTemp;
-        //}
-
-        /// <summary>
-        /// Creates an unique name by adding a serial number to the label ending.
-        /// </summary>
-        /// <param name="node">The node.</param>
-        /// <returns>The identifier will be returned.</returns>
-        //private string CreateUniqueName(IDisplayableNode node)
-        //{
-        //    this.uniqueNodeId++;
-        //    return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
-        //}
-
-        /// <summary>
-        /// Triggers the the initialization process to refresh all selectable components in view.
-        /// </summary>
-        /// <param name="sender">The sender of the event, program manager.</param>
-        /// <param name="e">The <see cref="FileSystemEventArgs"/> instance containing the event data.</param>
-        //private void NewModuleAdded(object sender, FileSystemEventArgs e)
-        //{
-        //    // this.programManager = new ProgramManager();
-        //    // this.programManager.Watcher.Created += NewModuleAdded;
-        //    this.programManager.InitializeNodesToChooseFromVoid();
-
-        //    // var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
-        //    var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
-
-        //    // hässlich, aber konnte keinen besseren Weg finden
-        //    // App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
-        //    // {
-        //    //    this.SelectableComponents.Clear();
-        //    // });
-        //    // foreach (var item in nodesToChoose)
-        //    // {
-        //    //    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
-        //    //    {
-        //    //        this.SelectableComponents.Add(item);
-        //    //    });
-        //    // }
-        //    App.Current.Dispatcher.Invoke(() =>
-        //    this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose));
-        //}
+        // private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
+        // {
+        //     if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
+        //     {
+        //         var conn = new ConnectionVM(
+        //             selectedOutputPin,
+        //             selectedInputPin,
+        //             this.NewUniqueConnectionId());
+        //         this.connectionsVM.Add(conn);
+        //         this.UpdateUndoHistory(); // If connect successful update history
+        //         this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
+        //     }
+           
+        //     this.selectedInputPin.Active = false;
+        //     this.selectedOutputPin.Active = false;
+           
+        //     this.selectedInputPin = null;
+        //     this.selectedOutputPin = null;
+        // }
+           
+        // / <summary>
+        // / Refreshes the view models, in case a step in program manager finished.
+        // / </summary>
+        // / <param name="sender">The sender of the event.</param>
+        // / <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        // private void RefreshVM(object sender, EventArgs e)
+        // {
+        //     var oldTemp = this.SelectedFieldComponent;
+        //     this.SelectedFieldComponent = null;
+        //     this.SelectedFieldComponent = oldTemp;
+        // }
+           
+        // / <summary>
+        // / Creates an unique name by adding a serial number to the label ending.
+        // / </summary>
+        // / <param name="node">The node.</param>
+        // / <returns>The identifier will be returned.</returns>
+        // private string CreateUniqueName(IDisplayableNode node)
+        // {
+        //     this.uniqueNodeId++;
+        //     return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
+        // }
+           
+        // / <summary>
+        // / Triggers the the initialization process to refresh all selectable components in view.
+        // / </summary>
+        // / <param name="sender">The sender of the event, program manager.</param>
+        // / <param name="e">The <see cref="FileSystemEventArgs"/> instance containing the event data.</param>
+        // private void NewModuleAdded(object sender, FileSystemEventArgs e)
+        // {
+        //     // this.programManager = new ProgramManager();
+        //     // this.programManager.Watcher.Created += NewModuleAdded;
+        //     this.programManager.InitializeNodesToChooseFromVoid();
+           
+        //     // var nodesToChoose = this.programManager.PossibleNodesToChooseFrom.Select(node => new ComponentRepresentationVM(this.addCommand, node));
+        //     var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
+           
+        //     // hässlich, aber konnte keinen besseren Weg finden
+        //     // App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+        //     // {
+        //     //    this.SelectableComponents.Clear();
+        //     // });
+        //     // foreach (var item in nodesToChoose)
+        //     // {
+        //     //    App.Current.Dispatcher.BeginInvoke((Action)delegate // <--- HERE
+        //     //    {
+        //     //        this.SelectableComponents.Add(item);
+        //     //    });
+        //     // }
+        //     App.Current.Dispatcher.Invoke(() =>
+        //     this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose));
+        // }
     }
 }
