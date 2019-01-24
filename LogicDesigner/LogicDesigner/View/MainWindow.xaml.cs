@@ -56,6 +56,7 @@ namespace LogicDesigner
 
             this.DataContext = this;
             this.ProgramMngVM = new ProgramMngVM();
+            this.MainDocPanel.DataContext = this;
             this.MainGrid.DataContext = this.ProgramMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
@@ -71,7 +72,6 @@ namespace LogicDesigner
             this.ProgramMngVM.PinsDisconnected += this.OnPinsDisconnected;
             this.ProgramMngVM.ConnectionVMUpdated += this.OnConnectionUpdated;
 
-            // programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
