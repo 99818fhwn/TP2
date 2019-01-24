@@ -35,7 +35,7 @@ namespace SharedClasses
         /// <summary>
         /// Initializes a new instance of the <see cref="GenericValue{T}"/> class.
         /// </summary>
-        /// <param name="info"> Serialization info used for parameterisation. </param>
+        /// <param name="info"> Serialization info. </param>
         /// <param name="context"> StreamingContext of serialization stream. </param>
         internal GenericValue(SerializationInfo info, StreamingContext context)
         {
@@ -76,7 +76,7 @@ namespace SharedClasses
         /// <summary>
         /// Manages the serialization procedure for <see cref="GenericValue{T}"/>.
         /// </summary>
-        /// <param name="info"> Serialization info used for parameterisation. </param>
+        /// <param name="info"> Serialization info. </param>
         /// <param name="context"> StreamingContext of serialization stream. </param>
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
