@@ -96,6 +96,8 @@ namespace LogicDesigner.ViewModel
         /// </summary>
         private int uniqueNodeId;
 
+        private int uniquePinId;
+
         /// <summary>
         /// The selected output pin.
         /// </summary>
@@ -143,6 +145,8 @@ namespace LogicDesigner.ViewModel
             this.StartCommand = new Command(obj =>
             {
                 this.isProgramRunning = true;
+                this.StartButtonPath = @"\ButtonPictures\start_pressed.png";
+
                 Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
                 {
                     if (!this.programManager.RunActive)
@@ -166,6 +170,8 @@ namespace LogicDesigner.ViewModel
             this.StopCommand = new Command(obj =>
             {
                 this.isProgramRunning = false;
+                this.StartButtonPath = @"\ButtonPictures\start.png";
+
                 this.programManager.StopActive();
                 this.programManager.ClearValues();
             });
@@ -242,7 +248,7 @@ namespace LogicDesigner.ViewModel
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
 
-                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), this.setPinCommand, this.removeCommand, this.config);
+                var compVM = new ComponentVM(newGenerateComp, this.CreateUniqueName(realComponent), this.GetUniqueNumber(), this.setPinCommand, this.removeCommand, this.config);
                 this.nodesVMInField.Add(compVM);
                 this.FireOnFieldComponentAdded(compVM);
                 this.UpdateUndoHistory();
@@ -295,8 +301,6 @@ namespace LogicDesigner.ViewModel
                         }
                     }
 
-                    // var differencesConnects = new List<ConnectionVM>(this.ConnectionsVM.Except(history.Item1));
-                    // differencesConnects.AddRange(new List<ConnectionVM>(history.Item1.Except(this.ConnectionsVM)));
                     foreach (var item in differencesConnects)
                     {
                         if (!history.Item1.Contains(item))
@@ -392,6 +396,7 @@ namespace LogicDesigner.ViewModel
             var nodesInField = this.programManager.FieldNodes.Select(node => new ComponentVM(
                 node,
                 this.CreateUniqueName(node),
+                this.GetUniqueNumber(),
                 this.setPinCommand,
                 this.removeCommand,
                 this.config));
@@ -406,9 +411,10 @@ namespace LogicDesigner.ViewModel
             var connections = this.programManager.ConnectedOutputInputPairs.Select(conn => new ConnectionVM(
                 new PinVM(
                     conn.Item1,
+                    this.GetUniqueNumberFromEnumerator(),
                     false,
                     this.setPinCommand),
-                new PinVM(conn.Item2, true, this.setPinCommand),
+                new PinVM(conn.Item2, this.GetUniqueNumberFromEnumerator(), true, this.setPinCommand),
                 this.NewUniqueConnectionId(),
                 this.config.LinePassiveColor));
 
@@ -418,6 +424,12 @@ namespace LogicDesigner.ViewModel
             this.UpdateUndoHistory();
             this.programManager.PinsDisconnected += this.OnPinsDisconnected;
             this.programManager.ConnectionUpdated += this.OnConnectionUpdated;
+        }
+
+        private int GetUniqueNumberFromEnumerator()
+        {
+            this.GetUniqueNumber().MoveNext();
+            return this.GetUniqueNumber().Current;
         }
 
         /// <summary>
@@ -785,13 +797,17 @@ namespace LogicDesigner.ViewModel
         public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
         {
             var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
-            this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
 
             var type = conn.InputPin.Pin.Value.Current.GetType();
             conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-            this.programManager.RunLoop(0);
+
+            type = conn.OutputPin.Pin.Value.Current.GetType();
+            conn.OutputPin.Pin.Value.Current = Activator.CreateInstance(type);
+
+            //this.programManager.RunLoop(0);
 
             this.connectionsVM.Remove(conn);
+            this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
         }
 
         /// <summary>
@@ -833,49 +849,50 @@ namespace LogicDesigner.ViewModel
             List<ComponentVM> reconstructedCompVMs = new List<ComponentVM>();
             foreach (var result in testResult.Components)
             {
-                if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
+                foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
                 {
-                    foreach (var component in NodesLoader.LoadSingleAssembly(Path.Combine(config.ModulePath, result.AssemblyPath)))
-                    {
-                        loadedNodes.Add(component);
-                        var tempVM = new ComponentVM(component.Item1, this.CreateUniqueName(component.Item1), this.setPinCommand, this.removeCommand, this.config);
-                        tempVM.XCoord = result.XPos;
-                        tempVM.YCoord = result.YPos;
-                        reconstructedCompVMs.Add(tempVM);
-                    }
+                    loadedNodes.Add(component);
+                    var tempVM = new ComponentVM(component.Item1, result.UniqueName, this.ExtraxtIDsFromCompVM(result.InputPutputIDs), this.setPinCommand, this.removeCommand, this.config);
+                    tempVM.XCoord = result.XPos;
+                    tempVM.YCoord = result.YPos;
+                    reconstructedCompVMs.Add(tempVM);
                 }
             }
 
             List<ConnectionVM> reconstructedConns = new List<ConnectionVM>();
             foreach (var connection in testResult.Connections)
             {
-                var inparent = loadedNodes.Find(node => node.Item1.Label == connection.InputParentID);
-                var outparent = loadedNodes.Find(node => node.Item1.Label == connection.OutputParentID);
+                var inparent = reconstructedCompVMs.Find(node => node.Name == connection.InputParentID);
+                var outparent = reconstructedCompVMs.Find(node => node.Name == connection.OutputParentID);
+                var tempConnection = new ConnectionVM(outparent.OutputPinsVM.First(x => connection.IdNumberOutPin == x.IDNumber), inparent.InputPinsVM.First(x => connection.IdNumberInPin == x.IDNumber), connection.ConnectionID, this.config.LinePassiveColor);
+                
+                tempConnection.InputPin.XPosition = connection.InputX;
+                tempConnection.InputPin.YPosition = connection.InputY;
 
-                // Labelvergleich wirkt ziemlich ranzig
-                if (inparent != null && outparent != null)
-                {
-                    var inPin = inparent.Item1.Inputs.ToList().Find(pin => pin.Label == connection.InputPinID);
-                    var outPin = outparent.Item1.Outputs.ToList().Find(pin => pin.Label == connection.OutputPinID);
-
-                    var inCompVM = new ComponentVM(inparent.Item1, connection.ConnectionID, this.setPinCommand, this.removeCommand, this.config);
-                    var outCompVM = new ComponentVM(outparent.Item1, connection.ConnectionID, this.setPinCommand, this.removeCommand, this.config);
-
-                    var tempIn = new PinVM(inPin, true, this.setPinCommand, inCompVM, this.config.PinActiveColor, this.config.PinPassiveColor);
-                    var tempOut = new PinVM(outPin, false, this.setPinCommand, outCompVM, this.config.PinActiveColor, this.config.PinPassiveColor);
-
-                    var tempConnection = new ConnectionVM(tempOut, tempIn, this.NewUniqueConnectionId(), this.config.LinePassiveColor);
-                    tempConnection.InputPin.XPosition = connection.InputX;
-                    tempConnection.InputPin.YPosition = connection.InputY;
-
-                    tempConnection.OutputPin.XPosition = connection.OutputX;
-                    tempConnection.OutputPin.YPosition = connection.OutputY;
-                    reconstructedConns.Add(tempConnection);
-                }
+                tempConnection.OutputPin.XPosition = connection.OutputX;
+                tempConnection.OutputPin.YPosition = connection.OutputY;
+                reconstructedConns.Add(tempConnection);
             }
 
             App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
             {
+                //uniqueNodeId;
+
+                // uniquePinId; newUniqueConnectionId
+                this.newUniqueConnectionId = reconstructedConns.Count > 0 ? reconstructedConns.Select(x => int.Parse(Regex.Replace(x.ConnectionId, @"[^\d*]", string.Empty))).Max() + 1 : 0;
+                this.uniqueNodeId = reconstructedConns.Count > 0 ? reconstructedCompVMs.Select(x => int.Parse(Regex.Replace(x.Name, @"[^\d*]", string.Empty))).Max() + 1 : 0;
+                var tempOutpuPinIDMax = reconstructedCompVMs.Select(x => x.OutputPinsVM.Count > 0 ? x.OutputPinsVM.Select(y => y.IDNumber)?.ToList().Max() : 0).Max();
+                var tempInoutPinIDMax = reconstructedCompVMs.Select(x => x.InputPinsVM.Count > 0 ? x.InputPinsVM.Select(y => y.IDNumber)?.ToList().Max() : 0).Max();
+                var actual = tempInoutPinIDMax >= tempOutpuPinIDMax ? tempInoutPinIDMax : tempOutpuPinIDMax;
+                if (actual == null)
+                {
+                    this.uniquePinId = 0;
+                }
+                else
+                {
+                    this.uniquePinId = (int)actual + 1;
+                }
+
                 this.programManager.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
                 this.ConnectionsVM = new ObservableCollection<ConnectionVM>();
                 var tempCopy = new ObservableCollection<ComponentVM>(this.NodesVMInField);
@@ -889,6 +906,14 @@ namespace LogicDesigner.ViewModel
             });
 
             return new Tuple<List<ConnectionVM>, List<ComponentVM>>(reconstructedConns, reconstructedCompVMs);
+        }
+
+        private IEnumerator<int> ExtraxtIDsFromCompVM(int[] pinIDs)
+        {
+            foreach (var id in pinIDs)
+            {
+                yield return id;
+            }
         }
 
         /// <summary>
@@ -925,11 +950,15 @@ namespace LogicDesigner.ViewModel
                 {
                     var type = conn.InputPin.Pin.Value.Current.GetType();
                     conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-                    this.programManager.RunLoop(0);
+
+                    type = conn.OutputPin.Pin.Value.Current.GetType();
+                    conn.OutputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                    // this.programManager.RunLoop(0);
 
                     this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                     this.connectionsVM.Remove(conn);
- 
+
+                    this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
                     break;
                 }
             }
@@ -990,12 +1019,13 @@ namespace LogicDesigner.ViewModel
         /// <param name="removedComponentVM">The removed component view model.</param>
         private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
         {
-            foreach (var pinVM in removedComponentVM.OutputPinsVM)
+            foreach (var outputPinVM in removedComponentVM.OutputPinsVM)
             {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                for (int i = this.connectionsVM.Count() - 1; i >= 0; i--)
                 {
                     var conn = this.connectionsVM[i];
-                    if (pinVM == conn.OutputPin)
+                    
+                    if (outputPinVM == conn.OutputPin)
                     {
                         var type = conn.InputPin.Pin.Value.Current.GetType();
                         conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
@@ -1010,7 +1040,7 @@ namespace LogicDesigner.ViewModel
 
             foreach (var pinVM in removedComponentVM.InputPinsVM)
             {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                for (int i = this.connectionsVM.Count() - 1; i >= 0; i--)
                 {
                     var conn = this.connectionsVM[i];
                     if (pinVM == conn.InputPin)
@@ -1074,6 +1104,14 @@ namespace LogicDesigner.ViewModel
         {
             this.uniqueNodeId++;
             return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
+        }
+
+        private IEnumerator<int> GetUniqueNumber()
+        {
+            for (int i = 0; i < int.MaxValue; i++)
+            {
+                yield return this.uniquePinId++;
+            }
         }
 
         /// <summary>

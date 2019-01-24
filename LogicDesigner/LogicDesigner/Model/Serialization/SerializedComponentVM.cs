@@ -7,6 +7,8 @@
 namespace LogicDesigner.Model.Serialization
 {
     using LogicDesigner.ViewModel;
+    using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// The serialization component view model.
@@ -27,7 +29,7 @@ namespace LogicDesigner.Model.Serialization
         /// <param name="ypos">The y position.</param>
         /// <param name="path">The path.</param>
         /// <param name="id">The identifier.</param>
-        public SerializedComponentVM(double xpos, double ypos, string path, string id)
+        public SerializedComponentVM(double xpos, double ypos, string path, string id, int[] ipuntIDs, int[] outputIDs)
         {
             this.XPos = xpos;
             this.YPos = ypos;
@@ -46,6 +48,10 @@ namespace LogicDesigner.Model.Serialization
             this.YPos = baseVm.YCoord;
             this.AssemblyPath = assemblyPath;
             this.UniqueName = baseVm.Identifier;
+            var temp = new List<int>(baseVm.InputPinsVM.ToList().Select(x => x.IDNumber).ToList());
+            var temp2 = new List<int>(baseVm.OutputPinsVM.ToList().Select(x => x.IDNumber).ToList());
+            temp2.AddRange(temp);
+            this.InputPutputIDs = temp2.ToArray();
         }
 
         /// <summary>
@@ -79,5 +85,7 @@ namespace LogicDesigner.Model.Serialization
         /// The name of the unique.
         /// </value>
         public string UniqueName { get; set; }
+
+        public int[] InputPutputIDs { get; set; }
     }
 }
