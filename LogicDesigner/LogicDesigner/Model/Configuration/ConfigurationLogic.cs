@@ -37,7 +37,7 @@ namespace LogicDesigner.Model.Configuration
         /// <summary>
         /// The module path.
         /// </summary>
-        private string modulPath;
+        private string modulePath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfigurationLogic"/> class.
@@ -55,7 +55,18 @@ namespace LogicDesigner.Model.Configuration
                 this.PinPassiveColor = Color.FromName(conf.GetSection("Config")["PinPassive"]);
                 this.LineActiveColor = Color.FromName(conf.GetSection("Config")["LineActive"]);
                 this.LinePassiveColor = Color.FromName(conf.GetSection("Config")["LinePassive"]);
-                this.modulPath = conf.GetSection("Config")["Path"];
+
+                this.modulePath = conf.GetSection("Config")["ModulePath"].ToString();
+                if (this.modulePath == null)
+                {
+                    this.modulePath = "Components";
+                }
+
+                this.LogPath = conf.GetSection("Config")["LogPath"].ToString();
+                if (this.LogPath == null)
+                {
+                    this.LogPath = "LogFiles";
+                }
             }
         }
 
@@ -90,5 +101,10 @@ namespace LogicDesigner.Model.Configuration
         /// The color of the line active.
         /// </value>
         public Color LineActiveColor { get => this.lineActiveColor; set => this.lineActiveColor = value; }
+
+        public string ModulePath { get => this.modulePath; set => this.modulePath = value; }
+
+        public string LogPath { get; set; }
+
     }
 }

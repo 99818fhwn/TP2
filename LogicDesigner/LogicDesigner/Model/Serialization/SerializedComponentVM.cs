@@ -13,6 +13,11 @@ namespace LogicDesigner.Model.Serialization
     /// </summary>
     public class SerializedComponentVM
     {
+        public SerializedComponentVM()
+        {
+
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializedComponentVM"/> class.
         /// </summary>
