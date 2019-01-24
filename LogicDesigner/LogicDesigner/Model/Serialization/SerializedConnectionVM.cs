@@ -23,8 +23,16 @@ namespace LogicDesigner.Model.Serialization
         /// <param name="outputX">The output x.</param>
         /// <param name="outputY">The output y.</param>
         /// <param name="connectionID">The connection identifier.</param>
-        public SerializedConnectionVM(string input, string output, string inputParentID, string outputParentID, 
-            double inputX, double inputY, double outputX, double outputY, string connectionID)
+        public SerializedConnectionVM(
+            string input,
+            string output,
+            string inputParentID,
+            string outputParentID, 
+            double inputX,
+            double inputY,
+            double outputX,
+            double outputY,
+            string connectionID)
         {
             this.InputPinID = input;
             this.OutputPinID = output;
@@ -46,6 +54,7 @@ namespace LogicDesigner.Model.Serialization
         public SerializedConnectionVM()
         {
         }
+
         /// <summary>
         /// Gets or sets the input pin identifier.
         /// </summary>
@@ -117,6 +126,5 @@ namespace LogicDesigner.Model.Serialization
         /// The output y.
         /// </value>
         public double OutputY { get; set; }
-
     }
 }
