@@ -143,6 +143,8 @@ namespace LogicDesigner.ViewModel
             this.StartCommand = new Command(obj =>
             {
                 this.isProgramRunning = true;
+                this.StartButtonPath = @"\ButtonPictures\start_pressed.png";
+
                 Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
                 {
                     if (!this.programManager.RunActive)
@@ -155,19 +157,27 @@ namespace LogicDesigner.ViewModel
 
             this.StepCommand = new Command(obj =>
             {
+                //this.StepButtonPath = @"\ButtonPictures\step_pressed.png";
                 if (!this.programManager.RunActive)
                 {
                     this.programManager.SetActive();
                     this.programManager.RunLoop(0); // step
                     this.programManager.StopActive();
                 }
+
+                //this.StepButtonPath = @"\ButtonPictures\step.png";
             });
 
             this.StopCommand = new Command(obj =>
             {
                 this.isProgramRunning = false;
+                this.StartButtonPath = @"\ButtonPictures\start.png";
+                //this.stopButtonPath = @"\ButtonPictures\stop_pressed.png";
+
                 this.programManager.StopActive();
                 this.programManager.ClearValues();
+
+               // this.stopButtonPath = @"\ButtonPictures\stop.png";
             });
             
             this.setPinCommand = new Command(obj =>
