@@ -604,6 +604,9 @@ namespace LogicDesigner
             // Component Body
             Button sampleBody = new Button();
 
+            Style style = this.FindResource("btnComponent") as Style;
+            sampleBody.Style = style;
+
             newComponent.Name = componentVM.Name;
             newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, componentVM.YCoord);
             sampleBody.Name = componentVM.Name + "Body";

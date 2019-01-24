@@ -52,6 +52,21 @@ namespace LogicDesigner.ViewModel
         private readonly ConfigurationLogic config;
 
         /// <summary>
+        /// The start button path.
+        /// </summary>
+        private string startButtonPath;
+
+        /// <summary>
+        /// The step button path.
+        /// </summary>
+        private string stepButtonPath;
+
+        /// <summary>
+        /// The stop button path.
+        /// </summary>
+        private string stopButtonPath;
+
+        /// <summary>
         /// The program manager.
         /// </summary>
         private ProgramManager programManager;
@@ -116,6 +131,9 @@ namespace LogicDesigner.ViewModel
             this.programManager.StepFinished += this.RefreshVM;
 
             this.config = new ConfigurationLogic();
+            this.StartButtonPath = @"\ButtonPictures\start.png";
+            this.StepButtonPath = @"\ButtonPictures\step.png";
+            this.StopButtonPath = @"\ButtonPictures\stop.png";
 
             this.StartCommand = new Command(obj =>
             {
@@ -363,6 +381,66 @@ namespace LogicDesigner.ViewModel
         /// Occurs when a property value changes.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets the start button string.
+        /// </summary>
+        /// <value>
+        /// The start button string.
+        /// </value>
+        public string StartButtonPath
+        {
+            get
+            {
+                return this.startButtonPath;
+            }
+
+            set
+            {
+                this.startButtonPath = value;
+                this.FireOnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the start button string.
+        /// </summary>
+        /// <value>
+        /// The start button string.
+        /// </value>
+        public string StepButtonPath
+        {
+            get
+            {
+                return this.stepButtonPath;
+            }
+
+            set
+            {
+                this.stepButtonPath = value;
+                this.FireOnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets the start button string.
+        /// </summary>
+        /// <value>
+        /// The start button string.
+        /// </value>
+        public string StopButtonPath
+        {
+            get
+            {
+                return this.stopButtonPath;
+            }
+
+            set
+            {
+                this.stopButtonPath = value;
+                this.FireOnPropertyChanged();
+            }
+        }
 
         /// <summary>
         /// Gets the start command.
@@ -921,7 +999,7 @@ namespace LogicDesigner.ViewModel
             this.programManager.InitializeNodesToChooseFromVoid();
 
             var nodesToChoose = this.programManager.SerializationPathInfo.Select(node => new ComponentRepresentationVM(this.addCommand, node.Item1, node.Item2));
-            
+
             App.Current.Dispatcher.Invoke(() =>
             this.SelectableComponents = new ObservableCollection<ComponentRepresentationVM>(nodesToChoose));
         }
