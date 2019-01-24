@@ -304,6 +304,11 @@ namespace LogicDesigner.Model
                         this.OnConnectionUpdated(t.Item1, t.Item2);
                     }
 
+                    if (!this.RunActive)
+                    {
+                        return;
+                    }
+
                     node.Execute();
                     Task.Delay(delay);
                 }
@@ -331,7 +336,14 @@ namespace LogicDesigner.Model
         /// <param name="logMessage">The log message.</param>
         public void WriteToLog(string[] logMessage)
         {
-            File.AppendAllLines(Path.Combine(this.logDirectory, this.logFileName), logMessage);
+            try
+            {
+                File.AppendAllLines(Path.Combine(this.logDirectory, this.logFileName), logMessage);
+            }
+            catch(IOException)
+            {
+                // 
+            }
         }
         
         /// <summary>
@@ -356,11 +368,36 @@ namespace LogicDesigner.Model
         }
 
         /// <summary>
+        /// Clears the pin values.
+        /// </summary>
+        public void ClearValues()
+        {
+            foreach (var t in this.ConnectedOutputInputPairs)
+            {
+                var type = t.Item2.Value.Current.GetType();
+                t.Item2.Value.Current = Activator.CreateInstance(type);
+
+                type = t.Item1.Value.Current.GetType();
+                t.Item1.Value.Current = Activator.CreateInstance(type);
+
+                this.OnConnectionUpdated(t.Item1, t.Item2);
+            }
+
+            foreach (INode node in this.fieldNodes)
+            {
+                node.Execute();
+            }
+
+            this.FireOnStepFinished();
+        }
+
+        /// <summary>
         /// Stops the active.
         /// </summary>
         public void StopActive()
         {
             this.RunActive = false;
+            Task.Delay(1000);
         }
 
         /// <summary>

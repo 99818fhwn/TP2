@@ -52,6 +52,11 @@ namespace LogicDesigner.ViewModel
         private readonly ConfigurationLogic config;
 
         /// <summary>
+        /// Is program running or not.
+        /// </summary>
+        private bool isProgramRunning;
+
+        /// <summary>
         /// The start button path.
         /// </summary>
         private string startButtonPath;
@@ -137,6 +142,7 @@ namespace LogicDesigner.ViewModel
 
             this.StartCommand = new Command(obj =>
             {
+                this.isProgramRunning = true;
                 Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
                 {
                     if (!this.programManager.RunActive)
@@ -159,17 +165,41 @@ namespace LogicDesigner.ViewModel
 
             this.StopCommand = new Command(obj =>
             {
+                this.isProgramRunning = false;
                 this.programManager.StopActive();
+                this.programManager.ClearValues();
             });
 
             this.setPinCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 var pin = obj as PinVM;
                 this.SetSelectedPin(pin);
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.programManager.SetActive();
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.removeCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 var nodeInFieldVM = obj as ComponentVM;
 
                 // Warum das foreach?
@@ -189,10 +219,23 @@ namespace LogicDesigner.ViewModel
                 ////Or i just place it here ... but then the model isnt synced
                 this.FireOnComponentVMRemoved(nodeInFieldVM);
                 this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.addCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 var representationNode = obj as ComponentRepresentationVM;
 
                 // this.PreFieldComponentAdded(this, new EventArgs());
@@ -204,10 +247,23 @@ namespace LogicDesigner.ViewModel
                 this.nodesVMInField.Add(compVM);
                 this.FireOnFieldComponentAdded(compVM);
                 this.UpdateUndoHistory();
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.UndoCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 if (this.undoHistoryStack.Count > 0)
                 {
                     var history = this.undoHistoryStack.Pop();
@@ -259,10 +315,23 @@ namespace LogicDesigner.ViewModel
                     this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.InputPin.Pin, x.OutputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
                 }
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.RedoCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 if (this.redoHistoryStack.Count > 0)
                 {
                     var futureHistory = this.redoHistoryStack.Pop();
@@ -313,6 +382,11 @@ namespace LogicDesigner.ViewModel
                     ////Das ist sehr wahrscheinlich nicht optimal...
                     this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.OutputPin.Pin, x.InputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
+                }
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
                 }
             });
 
