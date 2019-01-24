@@ -157,27 +157,21 @@ namespace LogicDesigner.ViewModel
 
             this.StepCommand = new Command(obj =>
             {
-                //this.StepButtonPath = @"\ButtonPictures\step_pressed.png";
                 if (!this.programManager.RunActive)
                 {
                     this.programManager.SetActive();
                     this.programManager.RunLoop(0); // step
                     this.programManager.StopActive();
                 }
-
-                //this.StepButtonPath = @"\ButtonPictures\step.png";
             });
 
             this.StopCommand = new Command(obj =>
             {
                 this.isProgramRunning = false;
                 this.StartButtonPath = @"\ButtonPictures\start.png";
-                //this.stopButtonPath = @"\ButtonPictures\stop_pressed.png";
 
                 this.programManager.StopActive();
                 this.programManager.ClearValues();
-
-               // this.stopButtonPath = @"\ButtonPictures\stop.png";
             });
             
             this.setPinCommand = new Command(obj =>
@@ -795,13 +789,17 @@ namespace LogicDesigner.ViewModel
         public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
         {
             var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
-            this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
 
             var type = conn.InputPin.Pin.Value.Current.GetType();
             conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-            this.programManager.RunLoop(0);
+
+            type = conn.OutputPin.Pin.Value.Current.GetType();
+            conn.OutputPin.Pin.Value.Current = Activator.CreateInstance(type);
+
+            //this.programManager.RunLoop(0);
 
             this.connectionsVM.Remove(conn);
+            this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
         }
 
         /// <summary>
@@ -935,11 +933,15 @@ namespace LogicDesigner.ViewModel
                 {
                     var type = conn.InputPin.Pin.Value.Current.GetType();
                     conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-                    this.programManager.RunLoop(0);
+
+                    type = conn.OutputPin.Pin.Value.Current.GetType();
+                    conn.OutputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                    // this.programManager.RunLoop(0);
 
                     this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                     this.connectionsVM.Remove(conn);
- 
+
+                    this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
                     break;
                 }
             }
@@ -1000,12 +1002,13 @@ namespace LogicDesigner.ViewModel
         /// <param name="removedComponentVM">The removed component view model.</param>
         private void RemoveDeletedComponentConnections(ComponentVM removedComponentVM)
         {
-            foreach (var pinVM in removedComponentVM.OutputPinsVM)
+            foreach (var outputPinVM in removedComponentVM.OutputPinsVM)
             {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                for (int i = this.connectionsVM.Count() - 1; i >= 0; i--)
                 {
                     var conn = this.connectionsVM[i];
-                    if (pinVM == conn.OutputPin)
+                    
+                    if (outputPinVM == conn.OutputPin)
                     {
                         var type = conn.InputPin.Pin.Value.Current.GetType();
                         conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
@@ -1020,7 +1023,7 @@ namespace LogicDesigner.ViewModel
 
             foreach (var pinVM in removedComponentVM.InputPinsVM)
             {
-                for (int i = 0; i < this.connectionsVM.Count(); i++)
+                for (int i = this.connectionsVM.Count() - 1; i >= 0; i--)
                 {
                     var conn = this.connectionsVM[i];
                     if (pinVM == conn.InputPin)
