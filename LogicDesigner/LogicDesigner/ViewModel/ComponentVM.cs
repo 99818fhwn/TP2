@@ -42,12 +42,12 @@ namespace LogicDesigner.ViewModel
         private readonly string uniqueName;
 
         /// <summary>
-        /// The configuration
+        /// The configuration.
         /// </summary>
         private readonly ConfigurationLogic config;
 
         /// <summary>
-        /// The node.
+        /// The node that is represented by this view model.
         /// </summary>
         [NonSerialized]
         private IDisplayableNode node;
@@ -61,12 +61,13 @@ namespace LogicDesigner.ViewModel
         /// The y coordinate.
         /// </summary>
         private double yCoord;
-        
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ComponentVM"/> class.
+        /// Initializes a new instance of the <see cref="ComponentVM" /> class.
         /// </summary>
         /// <param name="realComponent">The real component.</param>
-        /// <param name="uniqueName">Name of the unique.</param>
+        /// <param name="uniqueName">The unique name of the component.</param>
+        /// <param name="pindIdAtion">The pin identifier action.</param>
         /// <param name="setPinCommand">The set pin command.</param>
         /// <param name="removeCommand">The remove command.</param>
         /// <param name="configurationLogic">The configuration logic.</param>
@@ -93,7 +94,7 @@ namespace LogicDesigner.ViewModel
                 if (pin != null)
                 {
                     pindIdAtion.MoveNext();
-                    this.OutputPinsVM.Add(new PinVM(pin, pindIdAtion.Current ,false, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
+                    this.OutputPinsVM.Add(new PinVM(pin, pindIdAtion.Current, false, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
                     
                     // this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand));
                 }
@@ -161,7 +162,7 @@ namespace LogicDesigner.ViewModel
         /// Gets the name.
         /// </summary>
         /// <value>
-        /// The name.
+        /// The unique name that is used in the view to identify the user interface element.
         /// </value>
         public string Name
         {
@@ -282,7 +283,7 @@ namespace LogicDesigner.ViewModel
         /// Gets the node.
         /// </summary>
         /// <value>
-        /// The node.
+        /// The node tat is represented by the component view model.
         /// </value>
         public IDisplayableNode Node
         {
@@ -382,7 +383,7 @@ namespace LogicDesigner.ViewModel
         /// <summary>
         /// Fires the on property changed.
         /// </summary>
-        /// <param name="name">The name.</param>
+        /// <param name="name">The name of the calling property.</param>
         protected void FireOnPropertyChanged([CallerMemberName]string name = null)
         {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));

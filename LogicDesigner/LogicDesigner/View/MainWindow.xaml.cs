@@ -29,7 +29,7 @@ namespace LogicDesigner
     using Microsoft.Win32;
 
     /// <summary>
-    /// WPF Logic
+    /// WPF Logic for the main window.
     /// </summary>
     /// <seealso cref="System.Windows.Window" />
     /// <seealso cref="System.Windows.Markup.IComponentConnector" />
@@ -77,19 +77,16 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
 
-            // change button icons on click
+            //// change button icons on click
 
-            foreach(var child in this.ButtonsGrid.Children)
+            foreach (var child in this.ButtonsGrid.Children)
             {
-                if(child.GetType() == typeof(Button))
+                if (child.GetType() == typeof(Button))
                 {
                     var button = (Button)child;
 
-                    if(button.Name == "StopButton")
+                    if (button.Name == "StopButton")
                     {
-                        //button.MouseDown += this.SetPressedStopPicture;
-                        //button.MouseUp += this.SetDefaultStopPicture;
-
                         button.Command = new Command(obj =>
                         {
                             this.SetPressedStopPicture(button, null);
@@ -100,9 +97,6 @@ namespace LogicDesigner
 
                     if (button.Name == "StepButton")
                     {
-                        //button.MouseDown += this.SetPressedStepPicture;
-                        //button.MouseUp += this.SetDefaultStepPicture;
-
                         button.Command = new Command(obj =>
                         {
                             this.SetPressedStepPicture(button, null);
@@ -111,61 +105,15 @@ namespace LogicDesigner
                         });
                     }
                 }
-            }
-            
+            }       
         }
 
         /// <summary>
-        /// Sets the default step picture.
+        /// Gets or sets the program manager view model.
         /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void SetDefaultStepPicture(object sender, MouseButtonEventArgs e)
-        {
-            Task.Run(() =>
-            {
-                Task.Delay(30000);
-                this.ProgramMngVM.StepButtonPath = @"\ButtonPictures\step.png";
-            });
-        }
-
-        /// <summary>
-        /// Sets the default stop picture.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void SetDefaultStopPicture(object sender, MouseButtonEventArgs e)
-        {
-            Task.Run(() => 
-            {
-                Task.Delay(30000);
-                this.ProgramMngVM.StopButtonPath = @"\ButtonPictures\stop.png";
-            });
-        }
-
-        /// <summary>
-        /// Sets the pressed stop picture.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void SetPressedStopPicture(object sender, MouseButtonEventArgs e)
-        {
-            this.ProgramMngVM.StopButtonPath = @"\ButtonPictures\stop_pressed.png";
-        }
-
-        /// <summary>
-        /// Sets the pressed step picture.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
-        private void SetPressedStepPicture(object sender, MouseButtonEventArgs e)
-        {
-            this.ProgramMngVM.StepButtonPath = @"\ButtonPictures\step_pressed.png";
-        }
-
-        /// <summary>
-        /// Gets or sets the program manager.
-        /// </summary>
+        /// <value>
+        /// The program manager view model.
+        /// </value>
         public ProgramMngVM ProgramMngVM { get; set; }
 
         /// <summary>
@@ -217,6 +165,9 @@ namespace LogicDesigner
         /// <summary>
         /// Gets the save command.
         /// </summary>
+        /// <value>
+        /// The save command that can be used to save the current state.
+        /// </value>
         public Command SaveCommand
         {
             // TODO: Make serialized path relative, so projects can be shared!!!
@@ -264,6 +215,9 @@ namespace LogicDesigner
         /// <summary>
         /// Gets a grid as the background.
         /// </summary>
+        /// <value>
+        /// The toggle grid command that is used to show the grid.
+        /// </value>
         public Command ToggleGridCommand
         {
             get => new Command(new Action<object>(param =>
@@ -295,6 +249,9 @@ namespace LogicDesigner
         /// <summary>
         /// Gets the load command.
         /// </summary>
+        /// <value>
+        /// The load command is used for loading an logic designer file into the work environment.
+        /// </value>
         public Command LoadCommand
         {
             get => new Command(new Action<object>((input) =>
@@ -423,6 +380,54 @@ namespace LogicDesigner
             {
                 return this.ProgramMngVM.RedoCommand;
             }
+        }
+
+        /// <summary>
+        /// Sets the default step picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetDefaultStepPicture(object sender, MouseButtonEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                Task.Delay(30000);
+                this.ProgramMngVM.StepButtonPath = @"\ButtonPictures\step.png";
+            });
+        }
+
+        /// <summary>
+        /// Sets the default stop picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetDefaultStopPicture(object sender, MouseButtonEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                Task.Delay(30000);
+                this.ProgramMngVM.StopButtonPath = @"\ButtonPictures\stop.png";
+            });
+        }
+
+        /// <summary>
+        /// Sets the pressed stop picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetPressedStopPicture(object sender, MouseButtonEventArgs e)
+        {
+            this.ProgramMngVM.StopButtonPath = @"\ButtonPictures\stop_pressed.png";
+        }
+
+        /// <summary>
+        /// Sets the pressed step picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetPressedStepPicture(object sender, MouseButtonEventArgs e)
+        {
+            this.ProgramMngVM.StepButtonPath = @"\ButtonPictures\step_pressed.png";
         }
 
         /// <summary>

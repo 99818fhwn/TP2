@@ -84,7 +84,7 @@ namespace LogicDesigner.Model
         /// Gets the type.
         /// </summary>
         /// <value>
-        /// The type.
+        /// The type of the component.
         /// </value>
         public NodeType Type
         {

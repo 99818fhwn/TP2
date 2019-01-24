@@ -56,16 +56,19 @@ namespace LogicDesigner.Model.Configuration
                 {
                     this.PinActiveColor = Color.FromName("Green");
                 }
+
                 this.PinPassiveColor = Color.FromName(conf.GetSection("Config")["PinPassive"]);
                 if (this.PinPassiveColor == null)
                 {
                     this.PinPassiveColor = Color.FromName("Grey");
                 }
+
                 this.LineActiveColor = Color.FromName(conf.GetSection("Config")["LineActive"]);
                 if (this.PinActiveColor == null)
                 {
                     this.PinActiveColor = Color.FromName("Red");
                 }
+
                 this.LinePassiveColor = Color.FromName(conf.GetSection("Config")["LinePassive"]);
                 if (this.PinActiveColor == null)
                 {
