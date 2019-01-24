@@ -77,7 +77,7 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
         }
-        
+
         /// <summary>
         /// Gets or sets the program manager.
         /// </summary>
@@ -432,7 +432,7 @@ namespace LogicDesigner
 
             return null;
         }
-        
+
         /// <summary>
         /// Called when the button is moved.
         /// </summary>
@@ -536,6 +536,14 @@ namespace LogicDesigner
         }
 
         /// <summary>
+        /// Disposes bitmap correctly.
+        /// </summary>
+        /// <param name="hObject"> The bitmap reference. </param>
+        /// <returns> Nuffin'. </returns>
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+
+        /// <summary>
         /// Called when [component changed] and changes the visual of the component.
         /// </summary>
         /// <param name="sender">The sender.</param>
@@ -561,11 +569,14 @@ namespace LogicDesigner
                                     var compToChange = (Button)item;
                                     if (compToChange.Name == (e.Component.Name + "Body"))
                                     {
-                                        ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(e.Component.Picture.GetHbitmap(), IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
+                                        var map = e.Component.Picture.GetHbitmap();
+                                        ImageBrush imageBrush = new ImageBrush(Imaging.CreateBitmapSourceFromHBitmap(map, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions()));
 
                                         imageBrush.Stretch = Stretch.Fill;
                                         compToChange.Background = imageBrush;
                                         compToChange.UpdateLayout();
+                                        DeleteObject(map);
+
                                     }
                                 }
                             }
@@ -853,8 +864,8 @@ namespace LogicDesigner
             line.StrokeThickness = 4;
             line.Stroke = new SolidColorBrush(
                 Color.FromRgb(
-                    e.Connection.LineColor.R, 
-                    e.Connection.LineColor.G, 
+                    e.Connection.LineColor.R,
+                    e.Connection.LineColor.G,
                     e.Connection.LineColor.B));
             line.X1 = inputPin.XPosition;
             line.X2 = outputPin.XPosition;
@@ -883,6 +894,6 @@ namespace LogicDesigner
 
                 this.ComponentWindow.Children.Remove(l);
             }
-        }        
+        }
     }
 }

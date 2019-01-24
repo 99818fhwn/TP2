@@ -48,7 +48,7 @@ namespace LogicDesigner.Model
 
                                     if (ValidateNode(node))
                                     {
-                                        nodes.Add(new Tuple<IDisplayableNode, string>(node, filePath));
+                                        nodes.Add(new Tuple<IDisplayableNode, string>(node, Path.GetFileName(filePath)));
                                     }
                                 }
                                 catch (Exception)

@@ -835,7 +835,7 @@ namespace LogicDesigner.ViewModel
             {
                 if (!loadedNodes.Any(node => node.Item2 == result.AssemblyPath))
                 {
-                    foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
+                    foreach (var component in NodesLoader.LoadSingleAssembly(Path.Combine(config.ModulePath, result.AssemblyPath)))
                     {
                         loadedNodes.Add(component);
                         var tempVM = new ComponentVM(component.Item1, this.CreateUniqueName(component.Item1), this.setPinCommand, this.removeCommand, this.config);
