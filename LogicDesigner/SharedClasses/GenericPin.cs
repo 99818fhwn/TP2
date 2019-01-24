@@ -37,7 +37,7 @@ namespace SharedClasses
         /// <summary>
         /// Initializes a new instance of the <see cref="GenericPin{T}"/> class.
         /// </summary>
-        /// <param name="info"> Serialization info used for parameterisation. </param>
+        /// <param name="info"> Serialization info. </param>
         /// <param name="context"> StreamingContext of serialization stream. </param>
         internal GenericPin(SerializationInfo info, StreamingContext context)
         {
@@ -77,8 +77,6 @@ namespace SharedClasses
         /// </value>
         IValue IPin.Value
         {
-            // commented for testing
-
             get
             {
                 return this.Value;
@@ -87,16 +85,13 @@ namespace SharedClasses
             set
             {
                 this.Value.Current = (T)value;
-                //this.Value = value;
             }
-            //get;
-            //set;
         }
 
         /// <summary>
         /// Manages the serialization procedure for <see cref="GenericPin{T}"/>.
         /// </summary>
-        /// <param name="info"> Serialization info used for parameterisation. </param>
+        /// <param name="info"> Serialization info. </param>
         /// <param name="context"> StreamingContext of serialization stream. </param>
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {

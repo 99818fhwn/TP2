@@ -2,7 +2,7 @@
 // <copyright file="Component.cs" company="FHWN">    
 // Copyright (c) FHWN. All rights reserved.    
 // </copyright>    
-// <summary>The component view model.</summary>
+// <summary>The component.</summary>
 // -----------------------------------------------------------------------
 namespace LogicDesigner.Model
 {

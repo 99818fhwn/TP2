@@ -59,12 +59,6 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ComponentLibrary\ComponentLibrary.csproj">
-      <Project>{88D86433-5071-48F7-8073-5EC1F12DE4B0}</Project>
-      <Name>ComponentLibrary</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>mkdir  "$(SolutionDir)\LogicDesigner\bin\Debug\Components\$(ProjectName)"

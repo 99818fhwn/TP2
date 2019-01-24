@@ -1,26 +1,47 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿// -----------------------------------------------------------------------     
+// <copyright file="ConfigurationLogic.cs" company="FHWN">    
+// Copyright (c) FHWN. All rights reserved.    
+// </copyright>    
+// -----------------------------------------------------------------------
 namespace LogicDesigner.Model.Configuration
 {
+    using System.Drawing;
+    using System.IO;
+    using Microsoft.Extensions.Configuration;
+
+    /// <summary>
+    /// Class used for configuration.
+    /// </summary>
     public class ConfigurationLogic
     {
+        /// <summary>
+        /// The pin passive color.
+        /// </summary>
         private Color pinPassiveColor;
 
+        /// <summary>
+        /// The pin active color.
+        /// </summary>
         private Color pinActiveColor;
 
+        /// <summary>
+        /// The line passive color.
+        /// </summary>
         private Color linePassiveColor;
 
+        /// <summary>
+        /// The line active color.
+        /// </summary>
         private Color lineActiveColor;
 
+        /// <summary>
+        /// The module path.
+        /// </summary>
         private string modulPath;
-        
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ConfigurationLogic"/> class.
+        /// </summary>
         public ConfigurationLogic()
         {
             if (File.Exists("config.json"))
@@ -38,9 +59,36 @@ namespace LogicDesigner.Model.Configuration
             }
         }
 
-        public Color PinPassiveColor { get => pinPassiveColor; set => pinPassiveColor = value; }
-        public Color PinActiveColor { get => pinActiveColor; set => pinActiveColor = value; }
-        public Color LinePassiveColor { get => linePassiveColor; set => linePassiveColor = value; }
-        public Color LineActiveColor { get => lineActiveColor; set => lineActiveColor = value; }
+        /// <summary>
+        /// Gets or sets the color of the pin passive.
+        /// </summary>
+        /// <value>
+        /// The color of the pin passive.
+        /// </value>
+        public Color PinPassiveColor { get => this.pinPassiveColor; set => this.pinPassiveColor = value; }
+
+        /// <summary>
+        /// Gets or sets the color of the pin active.
+        /// </summary>
+        /// <value>
+        /// The color of the pin active.
+        /// </value>
+        public Color PinActiveColor { get => this.pinActiveColor; set => this.pinActiveColor = value; }
+
+        /// <summary>
+        /// Gets or sets the color of the line passive.
+        /// </summary>
+        /// <value>
+        /// The color of the line passive.
+        /// </value>
+        public Color LinePassiveColor { get => this.linePassiveColor; set => this.linePassiveColor = value; }
+
+        /// <summary>
+        /// Gets or sets the color of the line active.
+        /// </summary>
+        /// <value>
+        /// The color of the line active.
+        /// </value>
+        public Color LineActiveColor { get => this.lineActiveColor; set => this.lineActiveColor = value; }
     }
 }
