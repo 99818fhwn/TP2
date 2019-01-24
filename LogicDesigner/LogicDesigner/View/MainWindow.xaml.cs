@@ -81,19 +81,22 @@ namespace LogicDesigner
         {
             // find the line with name == id -> change its color
 
-            foreach (var child in this.ComponentWindow.Children)
+            this.Dispatcher.Invoke(() =>
             {
-                if (child.GetType() == typeof(Line))
+                foreach (var child in this.ComponentWindow.Children)
                 {
-                    Line l = (Line)child;
-
-                    if (l.Name == e.Connection.ConnectionId)
+                    if (child.GetType() == typeof(Line))
                     {
-                        l.Stroke = e.Connection.LineColor;
-                        break;
+                        Line l = (Line)child;
+
+                        if (l.Name == e.Connection.ConnectionId)
+                        {
+                            l.Stroke = e.Connection.LineColor;
+                            break;
+                        }
                     }
                 }
-            }
+            });
         }
 
         /// <summary>

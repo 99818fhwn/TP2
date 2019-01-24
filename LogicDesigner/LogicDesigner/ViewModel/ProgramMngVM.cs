@@ -134,21 +134,27 @@ namespace LogicDesigner.ViewModel
             {
                 Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
                 {
-                    this.programManager.Run();
+                    if (!this.programManager.RunActive)
+                    {
+                        this.programManager.SetActive();
+                        this.programManager.Run();
+                    }
                 }));
             });
 
             this.StepCommand = new Command(obj =>
             {
-                if (!this.programManager.Stop)
+                if (!this.programManager.RunActive)
                 {
+                    this.programManager.SetActive();
                     this.programManager.RunLoop(0); // step
+                    this.programManager.StopActive();
                 }
             });
 
             this.StopCommand = new Command(obj =>
             {
-                this.programManager.StopProgram();
+                this.programManager.StopActive();
             });
 
             this.setPinCommand = new Command(obj =>

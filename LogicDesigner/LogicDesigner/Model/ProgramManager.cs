@@ -49,11 +49,11 @@ namespace LogicDesigner.Model
             this.componentDirectory = "Components";
             this.logDirectory = "LogFiles";
             this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
-            this.Stop = false;
+            this.RunActive = false;
             this.Delay = 1000; // milli sec = 1 sec
             this.fieldNodes = new List<IDisplayableNode>();
             this.InitializeNodesToChooseFromVoid();
-             this.SerializationPathInfo = this.InitializeNodesToChooseFrom();
+            this.SerializationPathInfo = this.InitializeNodesToChooseFrom();
 
             if (!Directory.Exists(Path.GetDirectoryName(this.componentDirectory)))
             {
@@ -98,7 +98,7 @@ namespace LogicDesigner.Model
             this.FieldNodes = old.FieldNodes;
             this.logFileName = old.logFileName;
             this.possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
-            this.Stop = old.Stop;
+            this.RunActive = old.RunActive;
         }
 
         public List<Tuple<IPin, IPin>> ConnectedOutputInputPairs
@@ -143,7 +143,7 @@ namespace LogicDesigner.Model
             private set;
         }
 
-        public bool Stop
+        public bool RunActive
         {
             get;
             private set;
@@ -168,12 +168,10 @@ namespace LogicDesigner.Model
 
         public void Run()
         {
-            while (!this.Stop)
+            while (this.RunActive)
             {
                 this.RunLoop(this.Delay);
             }
-
-            this.Stop = false;
         }
 
         public void RunLoop(int delay)
@@ -187,47 +185,50 @@ namespace LogicDesigner.Model
 
                 foreach (INode node in this.fieldNodes)
                 {
-                    if (!this.Stop)
+                    if (!this.RunActive)
                     {
-                        foreach (var t in this.ConnectedOutputInputPairs)
+                        return;
+                    }
+
+                    foreach (var t in this.ConnectedOutputInputPairs)
+                    {
+                        if (!this.RunActive)
                         {
-                            t.Item2.Value.Current = t.Item1.Value.Current;
-
-                            this.OnConnectionUpdated(t.Item1, t.Item2);
-
-                            //if(t.Item2.Value.Current.GetType() == typeof(bool))
-                            //{
-                            //    if((bool)t.Item2.Value.Current == true)
-                            //    {
-                            //        // fire event on connection change color to VM
-                                    
-                            //    }
-                            //}
-                            //else if (t.Item2.Value.Current.GetType() == typeof(string))
-                            //{
-                            //    if (!string.IsNullOrEmpty((string)t.Item2.Value.Current))
-                            //    {
-                            //        // fire event on connection change color to VM
-                            //        this.OnConnectionUpdated(t.Item2, t.Item1);
-                            //    }
-                            //}
-                            //else if (t.Item2.Value.Current.GetType() == typeof(int))
-                            //{
-                            //    if ((int)t.Item2.Value.Current != 0)
-                            //    {
-                            //        // fire event on connection change color to VM
-                            //        this.OnConnectionUpdated(t.Item2, t.Item1);
-                            //    }
-                            //}
+                            return;
                         }
 
-                        node.Execute();
-                        Task.Delay(delay);
+                        t.Item2.Value.Current = t.Item1.Value.Current;
+
+                        this.OnConnectionUpdated(t.Item1, t.Item2);
+
+                        //if(t.Item2.Value.Current.GetType() == typeof(bool))
+                        //{
+                        //    if((bool)t.Item2.Value.Current == true)
+                        //    {
+                        //        // fire event on connection change color to VM
+
+                        //    }
+                        //}
+                        //else if (t.Item2.Value.Current.GetType() == typeof(string))
+                        //{
+                        //    if (!string.IsNullOrEmpty((string)t.Item2.Value.Current))
+                        //    {
+                        //        // fire event on connection change color to VM
+                        //        this.OnConnectionUpdated(t.Item2, t.Item1);
+                        //    }
+                        //}
+                        //else if (t.Item2.Value.Current.GetType() == typeof(int))
+                        //{
+                        //    if ((int)t.Item2.Value.Current != 0)
+                        //    {
+                        //        // fire event on connection change color to VM
+                        //        this.OnConnectionUpdated(t.Item2, t.Item1);
+                        //    }
+                        //}
                     }
-                    else
-                    {
-                        break;
-                    }
+
+                    node.Execute();
+                    Task.Delay(delay);
                 }
 
                 this.FireOnStepFinished();
@@ -247,7 +248,7 @@ namespace LogicDesigner.Model
 
         protected virtual void FireOnStepFinished()
         {
-            this.StepFinished?.Invoke(this, new EventArgs()); 
+            this.StepFinished?.Invoke(this, new EventArgs());
         }
 
         protected virtual void OnConnectionUpdated(IPin output, IPin input)
@@ -257,16 +258,21 @@ namespace LogicDesigner.Model
 
         public void Step(INode node)
         {
-            if (!this.Stop)
+            if (!this.RunActive)
             {
                 node.Execute();
                 Task.Delay(this.Delay);
             }
         }
 
-        public void StopProgram()
+        public void SetActive()
         {
-            this.Stop = true;
+            this.RunActive = true;
+        }
+
+        public void StopActive()
+        {
+            this.RunActive = false;
         }
 
         public bool ConnectPins(IPin output, IPin input)
