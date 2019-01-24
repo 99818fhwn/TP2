@@ -96,9 +96,9 @@
         <DockPanel Name="MainDocPanel" Grid.Row="0" Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_Load"/>
-                    <MenuItem Header="_Save"/>
-                    <MenuItem Header="_Open Config ..."/>
+                    <MenuItem Header="_Load" Command="{Binding LoadCommand}"/>
+                    <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
+                    <MenuItem Header="_Open Config ..." Command="{Binding OpenConfCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_Settings">
                     <MenuItem Header="_Activate Grid" Command="{Binding ToggleGridCommand}"></MenuItem>

@@ -7,6 +7,7 @@ namespace LogicDesigner
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -264,6 +265,23 @@ namespace LogicDesigner
                     this.ComponentWindow.RenderTransform = scaleTransform;
                 }
             }));
+        }
+
+        /// <summary>
+        /// Gets the open config command.
+        /// </summary>
+        /// <value>
+        /// The open config command.
+        /// </value>
+        public Command OpenConfCommand
+        {
+            get => new Command(new Action<object>((input) =>
+                {
+                    if (File.Exists("config.json"))
+                    {
+                        Process.Start("notepad.exe", "config.json");
+                    }
+                }));
         }
 
         /// <summary>

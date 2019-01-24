@@ -102,9 +102,20 @@ namespace LogicDesigner.Model.Configuration
         /// </value>
         public Color LineActiveColor { get => this.lineActiveColor; set => this.lineActiveColor = value; }
 
+        /// <summary>
+        /// Gets or sets the module path.
+        /// </summary>
+        /// <value>
+        /// The module path.
+        /// </value>
         public string ModulePath { get => this.modulePath; set => this.modulePath = value; }
 
+        /// <summary>
+        /// Gets or sets the log path.
+        /// </summary>
+        /// <value>
+        /// The log path.
+        /// </value>
         public string LogPath { get; set; }
-
     }
 }

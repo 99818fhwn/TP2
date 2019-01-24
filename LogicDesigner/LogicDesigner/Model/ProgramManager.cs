@@ -42,6 +42,9 @@ namespace LogicDesigner.Model
         /// </summary>
         private readonly string componentDirectory;
 
+        /// <summary>
+        /// The configuration.
+        /// </summary>
         private readonly ConfigurationLogic config;
 
         /// <summary>
@@ -72,8 +75,8 @@ namespace LogicDesigner.Model
             // this.path = path;
             // this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.config = new ConfigurationLogic();
-            this.componentDirectory = config.ModulePath;
-            this.logDirectory = config.LogPath;
+            this.componentDirectory = this.config.ModulePath;
+            this.logDirectory = this.config.LogPath;
             this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.RunActive = false;
             this.Delay = 1000; // milli sec = 1 sec
