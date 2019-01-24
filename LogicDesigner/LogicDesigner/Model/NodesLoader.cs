@@ -1,6 +1,11 @@
-﻿namespace LogicDesigner.Model
+﻿// -----------------------------------------------------------------------     
+// <copyright file="NodesLoader.cs" company="FHWN">    
+// Copyright (c) FHWN. All rights reserved.    
+// </copyright>    
+// <summary>Loads the noades.</summary>
+// -----------------------------------------------------------------------
+namespace LogicDesigner.Model
 {
-    using Shared;
     using System;
     using System.Collections.Generic;
     using System.IO;
@@ -8,19 +13,65 @@
     using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
+    using Shared;
 
-
+    /// <summary>
+    /// The nodes loader class.
+    /// </summary>
     public class NodesLoader
     {
-        // all nodes in components folder user to choose from
         /// <summary>
-        ///   Gets the nodes.
+        /// Loads the single assembly.
         /// </summary>
-        /// <param name="filePath">
-        ///   The file path.
-        /// </param>
-        /// <returns></returns>
-        public List<Tuple<IDisplayableNode,string>> GetNodes(string filePath)
+        /// <param name="filePath">The file path.</param>
+        /// <returns>List of nodes.</returns>
+        public static List<Tuple<IDisplayableNode, string>> LoadSingleAssembly(string filePath)
+        {
+            List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
+
+            if (File.Exists(filePath) && (Path.GetExtension(filePath) == ".dll" || Path.GetExtension(filePath) == ".exe"))
+            {
+                try
+                {
+                    Assembly ass = Assembly.LoadFrom(filePath);
+
+                    // Assembly ass = Assembly.Load(file.FullName);
+                    foreach (var type in ass.GetExportedTypes())
+                    {
+                        foreach (var interfc in type.GetInterfaces())
+                        {
+                            if (interfc == typeof(IDisplayableNode))
+                            {
+                                try
+                                {
+                                    IDisplayableNode node = (IDisplayableNode)Activator.CreateInstance(type);
+
+                                    if (ValidateNode(node))
+                                    {
+                                        nodes.Add(new Tuple<IDisplayableNode, string>(node, filePath));
+                                    }
+                                }
+                                catch (Exception)
+                                {
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            return nodes;
+        }
+
+        /// <summary>
+        /// Gets the nodes which are available.
+        /// </summary>
+        /// <param name="filePath">The file path.</param>
+        /// <returns>The available nodes.</returns>
+        public List<Tuple<IDisplayableNode, string>> GetNodes(string filePath)
         {
             List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
 
@@ -37,20 +88,20 @@
                     {
                         files.Add(f);
                     }
+
                     foreach (var f in dir.GetFiles("*.exe"))
                     {
                         files.Add(f);
                     }
                 }
 
-
                 foreach (var file in files)
                 {
                     try
                     {
                         Assembly ass = Assembly.LoadFrom(file.FullName);
-                        //Assembly ass = Assembly.Load(file.FullName);
 
+                        // Assembly ass = Assembly.Load(file.FullName);
                         foreach (var type in ass.GetExportedTypes())
                         {
                             foreach (var interfc in type.GetInterfaces())
@@ -68,7 +119,6 @@
                                     }
                                     catch (Exception)
                                     {
-
                                     }
                                 }
                             }
@@ -76,10 +126,8 @@
                     }
                     catch (Exception)
                     {
-
                     }
                 }
-
             }
             else
             {
@@ -90,59 +138,10 @@
         }
 
         /// <summary>
-        ///   Gets a single node.
-        /// </summary>
-        /// <param name="filePath">
-        ///   The file path.
-        /// </param>
-        /// <returns></returns>
-        public static List<Tuple<IDisplayableNode, string>> LoadSingleAssembly(string filePath)
-        {
-            List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
-
-            if (File.Exists(filePath) && (Path.GetExtension(filePath) == ".dll" || Path.GetExtension(filePath) == ".exe"))
-            {
-                    try
-                    {
-                        Assembly ass = Assembly.LoadFrom(filePath);
-                        //Assembly ass = Assembly.Load(file.FullName);
-
-                        foreach (var type in ass.GetExportedTypes())
-                        {
-                            foreach (var interfc in type.GetInterfaces())
-                            {
-                                if (interfc == typeof(IDisplayableNode))
-                                {
-                                    try
-                                    {
-                                        IDisplayableNode node = (IDisplayableNode)Activator.CreateInstance(type);
-
-                                        if (ValidateNode(node))
-                                        {
-                                            nodes.Add(new Tuple<IDisplayableNode, string>(node, filePath));
-                                        }
-                                    }
-                                    catch (Exception)
-                                    {
-
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                }
-            return nodes;
-        }
-
-        /// <summary>
         /// Validates the node content and checks for missing necessary properties.
         /// </summary>
-        /// <param name="node">The node that contiants the data of a electric component.</param>
-        /// <returns>Returns true wether the node is valid or retruns false if not.</returns>
+        /// <param name="node">The node that contains the data of a electric component.</param>
+        /// <returns>Returns true if the node is valid or returns false if not.</returns>
         private static bool ValidateNode(IDisplayableNode node)
         {
             if (node.Description == null || node.Description == string.Empty)
