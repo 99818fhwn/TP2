@@ -161,7 +161,7 @@ namespace LogicDesigner.ViewModel
             {
                 this.programManager.StopActive();
             });
-
+            
             this.setPinCommand = new Command(obj =>
             {
                 var pin = obj as PinVM;
@@ -171,8 +171,7 @@ namespace LogicDesigner.ViewModel
             this.removeCommand = new Command(obj =>
             {
                 var nodeInFieldVM = obj as ComponentVM;
-
-                // Warum das foreach?
+                
                 foreach (var n in this.programManager.FieldNodes)
                 {
                     if (nodeInFieldVM.Node == n)
@@ -383,10 +382,10 @@ namespace LogicDesigner.ViewModel
         public event PropertyChangedEventHandler PropertyChanged;
 
         /// <summary>
-        /// Gets the start button string.
+        /// Gets or sets the start button path.
         /// </summary>
         /// <value>
-        /// The start button string.
+        /// The start button path.
         /// </value>
         public string StartButtonPath
         {
@@ -403,10 +402,10 @@ namespace LogicDesigner.ViewModel
         }
 
         /// <summary>
-        /// Gets the start button string.
+        /// Gets or sets the step button path.
         /// </summary>
         /// <value>
-        /// The start button string.
+        /// The step button path.
         /// </value>
         public string StepButtonPath
         {
@@ -423,10 +422,10 @@ namespace LogicDesigner.ViewModel
         }
 
         /// <summary>
-        /// Gets the start button string.
+        /// Gets or sets the stop button path.
         /// </summary>
         /// <value>
-        /// The start button string.
+        /// The stop button path.
         /// </value>
         public string StopButtonPath
         {
@@ -648,6 +647,19 @@ namespace LogicDesigner.ViewModel
                 {
                     this.ConnectPins(this.selectedOutputPin, this.selectedInputPin);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Clears the field.
+        /// </summary>
+        public void ClearField()
+        {
+            this.programManager.StopActive();
+
+            for (int i = this.NodesVMInField.Count - 1; i >= 0; i--)
+            {
+                this.removeCommand.Execute(this.NodesVMInField[i]);
             }
         }
 

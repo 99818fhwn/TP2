@@ -96,10 +96,11 @@
                 <MenuItem Header="_File">
                     <MenuItem Header="_Load" Command="{Binding LoadCommand}"/>
                     <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
-                    <MenuItem Header="_Open Config ..." Command="{Binding OpenConfCommand}"/>
+                    <MenuItem Header="_Clear Workspace" Command="{Binding ClearCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_Settings">
                     <MenuItem Header="_Activate Grid" Command="{Binding ToggleGridCommand}"></MenuItem>
+                    <MenuItem Header="_Open Config ..." Command="{Binding OpenConfCommand}"/>
                 </MenuItem>
 
             </Menu>
