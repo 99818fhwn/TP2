@@ -836,7 +836,10 @@ namespace LogicDesigner
             line.MouseRightButtonUp += this.OnConnectionLineClicked;
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
-            line.Stroke = new SolidColorBrush(Color.FromRgb(e.Connection.LineColor.R, e.Connection.LineColor.G, e.Connection.LineColor.B));
+            line.Stroke = new SolidColorBrush(
+                Color.FromRgb(e.Connection.LineColor.R, 
+                e.Connection.LineColor.G, 
+                e.Connection.LineColor.B));
             line.X1 = inputPin.XPosition;
             line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;

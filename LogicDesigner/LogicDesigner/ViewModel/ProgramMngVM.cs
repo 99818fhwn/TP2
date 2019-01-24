@@ -700,6 +700,11 @@ namespace LogicDesigner.ViewModel
         {
             var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
             this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
+
+            var type = conn.InputPin.Pin.Value.Current.GetType();
+            conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+            this.programManager.RunLoop(0);
+
             this.connectionsVM.Remove(conn);
         }
 
@@ -832,8 +837,13 @@ namespace LogicDesigner.ViewModel
             {
                 if (conn.ConnectionId == id)
                 {
+                    var type = conn.InputPin.Pin.Value.Current.GetType();
+                    conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                    this.programManager.RunLoop(0);
+
                     this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                     this.connectionsVM.Remove(conn);
+ 
                     break;
                 }
             }
@@ -868,38 +878,21 @@ namespace LogicDesigner.ViewModel
             var conn = this.connectionsVM?.Where(
                 a => a.OutputPin.Pin == e.OutputPin && a.InputPin.Pin == e.InputPin).FirstOrDefault();
 
-            if (e.OutputPin.Value.Current.GetType() == typeof(bool))
+            var type = conn.OutputPin.Pin.Value.Current.GetType();
+
+            if (e.OutputPin.Value.Current.Equals(Activator.CreateInstance(type)))
             {
-                if ((bool)e.OutputPin.Value.Current == true)
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
-                }
-                else
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
-                }
+                conn.LineColor = Color.FromArgb(
+                    this.config.LinePassiveColor.R,
+                    this.config.LinePassiveColor.G,
+                    this.config.LinePassiveColor.B);
             }
-            else if (e.OutputPin.Value.Current.GetType() == typeof(string))
+            else 
             {
-                if (!string.IsNullOrEmpty((string)e.OutputPin.Value.Current))
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
-                }
-                else
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
-                }
-            }
-            else if (e.OutputPin.Value.Current.GetType() == typeof(int))
-            {
-                if ((int)e.OutputPin.Value.Current != 0)
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
-                }
-                else
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
-                }
+                conn.LineColor = Color.FromArgb(
+                    this.config.LineActiveColor.R,
+                    this.config.LineActiveColor.G,
+                    this.config.LineActiveColor.B);
             }
 
             this.ConnectionVMUpdated?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
@@ -918,6 +911,10 @@ namespace LogicDesigner.ViewModel
                     var conn = this.connectionsVM[i];
                     if (pinVM == conn.OutputPin)
                     {
+                        var type = conn.InputPin.Pin.Value.Current.GetType();
+                        conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                        this.programManager.RunLoop(0);
+
                         this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                         this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
                         this.connectionsVM.Remove(conn);
@@ -932,6 +929,10 @@ namespace LogicDesigner.ViewModel
                     var conn = this.connectionsVM[i];
                     if (pinVM == conn.InputPin)
                     {
+                        var type = conn.InputPin.Pin.Value.Current.GetType();
+                        conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                        this.programManager.RunLoop(0);
+
                         this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                         this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
                         this.connectionsVM.Remove(conn);

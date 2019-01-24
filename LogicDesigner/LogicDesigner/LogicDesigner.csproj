@@ -187,6 +187,9 @@
     <Resource Include="ButtonPictures\stop.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+    <None Include="ButtonPictures\start_pressed.png" />
+    <None Include="ButtonPictures\step_pressed.png" />
+    <None Include="ButtonPictures\stop_pressed.png" />
     <Content Include="Shared.dll" />
     <Content Include="SharedClasses.dll" />
   </ItemGroup>

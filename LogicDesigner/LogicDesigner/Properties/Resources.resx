@@ -124,10 +124,19 @@
   <data name="start" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ButtonPictures\start.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="start_pressed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ButtonPictures\start_pressed.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="step" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ButtonPictures\step.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="step_pressed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ButtonPictures\step_pressed.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\ButtonPictures\stop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="stop_pressed" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\ButtonPictures\stop_pressed.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>
