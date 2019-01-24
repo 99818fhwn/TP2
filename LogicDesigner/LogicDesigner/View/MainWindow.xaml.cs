@@ -7,6 +7,7 @@ namespace LogicDesigner
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -56,6 +57,7 @@ namespace LogicDesigner
 
             this.DataContext = this;
             this.ProgramMngVM = new ProgramMngVM();
+            this.MainDocPanel.DataContext = this;
             this.MainGrid.DataContext = this.ProgramMngVM;
             var selectBind = new Binding("SelectedFieldComponent");
             selectBind.Source = (ProgramMngVM)this.MainGrid.DataContext;
@@ -71,7 +73,6 @@ namespace LogicDesigner
             this.ProgramMngVM.PinsDisconnected += this.OnPinsDisconnected;
             this.ProgramMngVM.ConnectionVMUpdated += this.OnConnectionUpdated;
 
-            // programMngVM.PreFieldComponentAdded += this.PreComponentAdded;
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
@@ -264,6 +265,23 @@ namespace LogicDesigner
                     this.ComponentWindow.RenderTransform = scaleTransform;
                 }
             }));
+        }
+
+        /// <summary>
+        /// Gets the open config command.
+        /// </summary>
+        /// <value>
+        /// The open config command.
+        /// </value>
+        public Command OpenConfCommand
+        {
+            get => new Command(new Action<object>((input) =>
+                {
+                    if (File.Exists("config.json"))
+                    {
+                        Process.Start("notepad.exe", "config.json");
+                    }
+                }));
         }
 
         /// <summary>

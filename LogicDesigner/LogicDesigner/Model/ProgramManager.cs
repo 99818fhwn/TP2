@@ -17,6 +17,7 @@ namespace LogicDesigner.Model
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Threading;
+    using LogicDesigner.Model.Configuration;
     using LogicDesigner.ViewModel;
     using Shared;
     using SharedClasses;
@@ -40,6 +41,11 @@ namespace LogicDesigner.Model
         /// The component directory.
         /// </summary>
         private readonly string componentDirectory;
+
+        /// <summary>
+        /// The configuration.
+        /// </summary>
+        private readonly ConfigurationLogic config;
 
         /// <summary>
         /// The log directory
@@ -68,8 +74,9 @@ namespace LogicDesigner.Model
         {
             // this.path = path;
             // this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
-            this.componentDirectory = "Components";
-            this.logDirectory = "LogFiles";
+            this.config = new ConfigurationLogic();
+            this.componentDirectory = this.config.ModulePath;
+            this.logDirectory = this.config.LogPath;
             this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.RunActive = false;
             this.Delay = 1000; // milli sec = 1 sec

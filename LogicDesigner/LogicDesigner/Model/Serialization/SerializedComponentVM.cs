@@ -16,6 +16,13 @@ namespace LogicDesigner.Model.Serialization
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializedComponentVM"/> class.
         /// </summary>
+        public SerializedComponentVM()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SerializedComponentVM"/> class.
+        /// </summary>
         /// <param name="xpos">The x position.</param>
         /// <param name="ypos">The y position.</param>
         /// <param name="path">The path.</param>

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogicDesigner"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowState="Maximized" PreviewMouseWheel="MouseWheelZoom">
+        Title="Logic Designer Pro" Height="450" Width="800" WindowState="Maximized" PreviewMouseWheel="MouseWheelZoom">
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter  Property="Template">
@@ -93,12 +93,12 @@
             </ScrollViewer>
         </Grid>
         
-        <DockPanel Grid.Row="0" Grid.ColumnSpan="2">
+        <DockPanel Name="MainDocPanel" Grid.Row="0" Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_Load"/>
-                    <MenuItem Header="_Save"/>
-                    <MenuItem Header="_Open Config ..."/>
+                    <MenuItem Header="_Load" Command="{Binding LoadCommand}"/>
+                    <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
+                    <MenuItem Header="_Open Config ..." Command="{Binding OpenConfCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_Settings">
                     <MenuItem Header="_Activate Grid" Command="{Binding ToggleGridCommand}"></MenuItem>
