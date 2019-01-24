@@ -162,6 +162,21 @@ namespace LogicDesigner
         }
 
         /// <summary>
+        /// Gets the clear command.
+        /// </summary>
+        /// <value>
+        /// The clear command.
+        /// </value>
+        public Command ClearCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                manager.ClearField();
+            }));
+        }
+
+        /// <summary>
         /// Gets a grid as the background.
         /// </summary>
         public Command ToggleGridCommand
@@ -837,9 +852,10 @@ namespace LogicDesigner
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
             line.Stroke = new SolidColorBrush(
-                Color.FromRgb(e.Connection.LineColor.R, 
-                e.Connection.LineColor.G, 
-                e.Connection.LineColor.B));
+                Color.FromRgb(
+                    e.Connection.LineColor.R, 
+                    e.Connection.LineColor.G, 
+                    e.Connection.LineColor.B));
             line.X1 = inputPin.XPosition;
             line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;

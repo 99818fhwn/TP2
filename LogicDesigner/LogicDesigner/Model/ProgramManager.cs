@@ -235,10 +235,10 @@ namespace LogicDesigner.Model
         }
 
         /// <summary>
-        /// Gets a value indicating whether [run active].
+        /// Gets a value indicating whether run is active.
         /// </summary>
         /// <value>
-        /// <c>true</c> if [run active]; otherwise, <c>false</c>.
+        /// <c>true</c> if run is active; otherwise, <c>false</c>.
         /// </value>
         public bool RunActive
         {

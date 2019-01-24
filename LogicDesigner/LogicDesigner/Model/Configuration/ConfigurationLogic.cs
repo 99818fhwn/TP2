@@ -52,9 +52,32 @@ namespace LogicDesigner.Model.Configuration
                 .Build();
 
                 this.PinActiveColor = Color.FromName(conf.GetSection("Config")["PinActive"]);
+                if (this.PinActiveColor == null)
+                {
+                    this.PinActiveColor = Color.FromName("Green");
+                }
                 this.PinPassiveColor = Color.FromName(conf.GetSection("Config")["PinPassive"]);
+                if (this.PinPassiveColor == null)
+                {
+                    this.PinPassiveColor = Color.FromName("Grey");
+                }
                 this.LineActiveColor = Color.FromName(conf.GetSection("Config")["LineActive"]);
+                if (this.PinActiveColor == null)
+                {
+                    this.PinActiveColor = Color.FromName("Red");
+                }
                 this.LinePassiveColor = Color.FromName(conf.GetSection("Config")["LinePassive"]);
+                if (this.PinActiveColor == null)
+                {
+                    this.PinActiveColor = Color.FromName("Black");
+                }
+
+                var worked = int.TryParse(conf.GetSection("Config")["RunDelayInSeconds"], out int delay);
+                this.RunDelay = delay * 1000;
+                if (!worked)
+                {
+                    this.RunDelay = 5000;  
+                }
 
                 this.modulePath = conf.GetSection("Config")["ModulePath"].ToString();
                 if (this.modulePath == null)
@@ -117,5 +140,13 @@ namespace LogicDesigner.Model.Configuration
         /// The log path.
         /// </value>
         public string LogPath { get; set; }
+
+        /// <summary>
+        /// Gets or sets the delay.
+        /// </summary>
+        /// <value>
+        /// The delay.
+        /// </value>
+        public int RunDelay { get; set; }
     }
 }
