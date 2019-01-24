@@ -111,7 +111,6 @@
       <ExcludeFromStyleCop>False</ExcludeFromStyleCop>
     </Compile>
     <Compile Include="Model\Component.cs" />
-    <Compile Include="Model\ComponentLoader.cs" />
     <Compile Include="Model\Configuration\ConfigurationLogic.cs" />
     <Compile Include="Model\NodesLoader.cs" />
     <Compile Include="Model\ProgramManager.cs" />

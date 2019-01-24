@@ -318,7 +318,8 @@ namespace LogicDesigner.ViewModel
                     false,
                     this.setPinCommand),
                 new PinVM(conn.Item2, true, this.setPinCommand),
-                this.NewUniqueConnectionId()));
+                this.NewUniqueConnectionId(),
+                this.config.LinePassiveColor));
 
             this.connectionsVM = new ObservableCollection<ConnectionVM>(connections);
             this.undoHistoryStack = new Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>>();
@@ -694,7 +695,7 @@ namespace LogicDesigner.ViewModel
                     var tempIn = new PinVM(inPin, true, this.setPinCommand, inCompVM, this.config.PinActiveColor, this.config.PinPassiveColor);
                     var tempOut = new PinVM(outPin, false, this.setPinCommand, outCompVM, this.config.PinActiveColor, this.config.PinPassiveColor);
 
-                    var tempConnection = new ConnectionVM(tempOut, tempIn, this.NewUniqueConnectionId());
+                    var tempConnection = new ConnectionVM(tempOut, tempIn, this.NewUniqueConnectionId(), this.config.LinePassiveColor);
                     tempConnection.InputPin.XPosition = connection.InputX;
                     tempConnection.InputPin.YPosition = connection.InputY;
 
@@ -793,33 +794,33 @@ namespace LogicDesigner.ViewModel
             {
                 if ((bool)e.OutputPin.Value.Current == true)
                 {
-                    conn.LineColor = System.Windows.Media.Brushes.Red;
+                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
                 }
                 else
                 {
-                    conn.LineColor = System.Windows.Media.Brushes.Black;
+                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
                 }
             }
             else if (e.OutputPin.Value.Current.GetType() == typeof(string))
             {
                 if (!string.IsNullOrEmpty((string)e.OutputPin.Value.Current))
                 {
-                    conn.LineColor = System.Windows.Media.Brushes.Red;
+                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
                 }
                 else
                 {
-                    conn.LineColor = System.Windows.Media.Brushes.Black;
+                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
                 }
             }
             else if (e.OutputPin.Value.Current.GetType() == typeof(int))
             {
                 if ((int)e.OutputPin.Value.Current != 0)
                 {
-                    conn.LineColor = System.Windows.Media.Brushes.Red;
+                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
                 }
                 else
                 {
-                    conn.LineColor = System.Windows.Media.Brushes.Black;
+                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
                 }
             }
 
@@ -873,7 +874,8 @@ namespace LogicDesigner.ViewModel
                 var conn = new ConnectionVM(
                     selectedOutputPin,
                     selectedInputPin,
-                    this.NewUniqueConnectionId());
+                    this.NewUniqueConnectionId(),
+                this.config.LinePassiveColor);
                 this.connectionsVM.Add(conn);
                 this.UpdateUndoHistory(); ////If connect successful update history
                 this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
