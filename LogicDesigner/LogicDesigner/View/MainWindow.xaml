@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:LogicDesigner"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" WindowState="Maximized" PreviewMouseWheel="MouseWheelZoom">
+        Title="Logic Designer Pro" Height="450" Width="800" WindowState="Maximized" PreviewMouseWheel="MouseWheelZoom">
     <Window.Resources>
         <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter  Property="Template">
