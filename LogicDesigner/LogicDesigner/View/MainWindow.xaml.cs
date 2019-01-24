@@ -325,7 +325,7 @@ namespace LogicDesigner
 
                         if (l.Name == e.Connection.ConnectionId)
                         {
-                            l.Stroke = e.Connection.LineColor;
+                            l.Stroke = new SolidColorBrush(Color.FromRgb(e.Connection.LineColor.R, e.Connection.LineColor.G, e.Connection.LineColor.B));
                             break;
                         }
                     }

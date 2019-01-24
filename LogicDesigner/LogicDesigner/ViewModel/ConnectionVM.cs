@@ -6,6 +6,8 @@
 // -----------------------------------------------------------------------
 namespace LogicDesigner.ViewModel
 {
+    using System.Drawing;
+
     /// <summary>
     /// Connection view model class.
     /// </summary>
@@ -17,10 +19,11 @@ namespace LogicDesigner.ViewModel
         /// <param name="output">The output.</param>
         /// <param name="input">The input.</param>
         /// <param name="connectionId">The connection identifier.</param>
-        public ConnectionVM(PinVM output, PinVM input, string connectionId)
+        /// <param name="lineColor">Color of the line.</param>
+        public ConnectionVM(PinVM output, PinVM input, string connectionId, Color lineColor)
         {
             this.ConnectionId = connectionId;
-            this.LineColor = System.Windows.Media.Brushes.Black;
+            this.LineColor = lineColor;
             this.OutputPin = output;
             this.InputPin = input;
         }
@@ -74,7 +77,7 @@ namespace LogicDesigner.ViewModel
         /// <value>
         /// The color of the line.
         /// </value>
-        public System.Windows.Media.Brush LineColor
+        public Color LineColor
         {
             get;
             set;

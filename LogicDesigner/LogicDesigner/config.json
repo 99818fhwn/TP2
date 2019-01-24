@@ -3,7 +3,7 @@
     "PinPassive": "Black",
     "PinActive": "Cyan",
     "LinePassive": "Black",
-    "LineActive": "Cyan",
+    "LineActive": "Red",
     "Path": "./Components"
   }
 }
