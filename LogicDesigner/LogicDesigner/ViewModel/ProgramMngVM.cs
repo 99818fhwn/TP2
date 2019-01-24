@@ -52,6 +52,26 @@ namespace LogicDesigner.ViewModel
         private readonly ConfigurationLogic config;
 
         /// <summary>
+        /// Is program running or not.
+        /// </summary>
+        private bool isProgramRunning;
+
+        /// <summary>
+        /// The start button path.
+        /// </summary>
+        private string startButtonPath;
+
+        /// <summary>
+        /// The step button path.
+        /// </summary>
+        private string stepButtonPath;
+
+        /// <summary>
+        /// The stop button path.
+        /// </summary>
+        private string stopButtonPath;
+
+        /// <summary>
         /// The program manager.
         /// </summary>
         private ProgramManager programManager;
@@ -118,9 +138,15 @@ namespace LogicDesigner.ViewModel
             this.programManager.StepFinished += this.RefreshVM;
 
             this.config = new ConfigurationLogic();
+            this.StartButtonPath = @"\ButtonPictures\start.png";
+            this.StepButtonPath = @"\ButtonPictures\step.png";
+            this.StopButtonPath = @"\ButtonPictures\stop.png";
 
             this.StartCommand = new Command(obj =>
             {
+                this.isProgramRunning = true;
+                this.StartButtonPath = @"\ButtonPictures\start_pressed.png";
+
                 Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
                 {
                     if (!this.programManager.RunActive)
@@ -133,30 +159,61 @@ namespace LogicDesigner.ViewModel
 
             this.StepCommand = new Command(obj =>
             {
+                //this.StepButtonPath = @"\ButtonPictures\step_pressed.png";
                 if (!this.programManager.RunActive)
                 {
                     this.programManager.SetActive();
                     this.programManager.RunLoop(0); // step
                     this.programManager.StopActive();
                 }
+
+                //this.StepButtonPath = @"\ButtonPictures\step.png";
             });
 
             this.StopCommand = new Command(obj =>
             {
-                this.programManager.StopActive();
-            });
+                this.isProgramRunning = false;
+                this.StartButtonPath = @"\ButtonPictures\start.png";
+                //this.stopButtonPath = @"\ButtonPictures\stop_pressed.png";
 
+                this.programManager.StopActive();
+                this.programManager.ClearValues();
+
+               // this.stopButtonPath = @"\ButtonPictures\stop.png";
+            });
+            
             this.setPinCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 var pin = obj as PinVM;
                 this.SetSelectedPin(pin);
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.programManager.SetActive();
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.removeCommand = new Command(obj =>
             {
-                var nodeInFieldVM = obj as ComponentVM;
+                bool restart = false;
 
-                // Warum das foreach?
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
+                var nodeInFieldVM = obj as ComponentVM;
+                
                 foreach (var n in this.programManager.FieldNodes)
                 {
                     if (nodeInFieldVM.Node == n)
@@ -173,10 +230,23 @@ namespace LogicDesigner.ViewModel
                 ////Or i just place it here ... but then the model isnt synced
                 this.FireOnComponentVMRemoved(nodeInFieldVM);
                 this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.addCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 var representationNode = obj as ComponentRepresentationVM;
 
                 // this.PreFieldComponentAdded(this, new EventArgs());
@@ -188,10 +258,23 @@ namespace LogicDesigner.ViewModel
                 this.nodesVMInField.Add(compVM);
                 this.FireOnFieldComponentAdded(compVM);
                 this.UpdateUndoHistory();
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.UndoCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 if (this.undoHistoryStack.Count > 0)
                 {
                     var history = this.undoHistoryStack.Pop();
@@ -241,10 +324,23 @@ namespace LogicDesigner.ViewModel
                     this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.InputPin.Pin, x.OutputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
                 }
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
+                }
             });
 
             this.RedoCommand = new Command(obj =>
             {
+                bool restart = false;
+
+                if (this.isProgramRunning)
+                {
+                    restart = true;
+                    this.StopCommand.Execute(null);
+                }
+
                 if (this.redoHistoryStack.Count > 0)
                 {
                     var futureHistory = this.redoHistoryStack.Pop();
@@ -295,6 +391,11 @@ namespace LogicDesigner.ViewModel
                     ////Das ist sehr wahrscheinlich nicht optimal...
                     this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.OutputPin.Pin, x.InputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
+                }
+
+                if (!this.isProgramRunning && restart)
+                {
+                    this.StartCommand.Execute(null);
                 }
             });
 
@@ -371,6 +472,66 @@ namespace LogicDesigner.ViewModel
         /// Occurs when a property value changes.
         /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Gets or sets the start button path.
+        /// </summary>
+        /// <value>
+        /// The start button path.
+        /// </value>
+        public string StartButtonPath
+        {
+            get
+            {
+                return this.startButtonPath;
+            }
+
+            set
+            {
+                this.startButtonPath = value;
+                this.FireOnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the step button path.
+        /// </summary>
+        /// <value>
+        /// The step button path.
+        /// </value>
+        public string StepButtonPath
+        {
+            get
+            {
+                return this.stepButtonPath;
+            }
+
+            set
+            {
+                this.stepButtonPath = value;
+                this.FireOnPropertyChanged();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the stop button path.
+        /// </summary>
+        /// <value>
+        /// The stop button path.
+        /// </value>
+        public string StopButtonPath
+        {
+            get
+            {
+                return this.stopButtonPath;
+            }
+
+            set
+            {
+                this.stopButtonPath = value;
+                this.FireOnPropertyChanged();
+            }
+        }
 
         /// <summary>
         /// Gets the start command.
@@ -582,6 +743,19 @@ namespace LogicDesigner.ViewModel
         }
 
         /// <summary>
+        /// Clears the field.
+        /// </summary>
+        public void ClearField()
+        {
+            this.programManager.StopActive();
+
+            for (int i = this.NodesVMInField.Count - 1; i >= 0; i--)
+            {
+                this.removeCommand.Execute(this.NodesVMInField[i]);
+            }
+        }
+
+        /// <summary>
         /// Fires the on field component added event.
         /// </summary>
         /// <param name="addedComponent">The added component.</param>
@@ -630,6 +804,11 @@ namespace LogicDesigner.ViewModel
         {
             var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
             this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
+
+            var type = conn.InputPin.Pin.Value.Current.GetType();
+            conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+            this.programManager.RunLoop(0);
+
             this.connectionsVM.Remove(conn);
         }
 
@@ -771,8 +950,13 @@ namespace LogicDesigner.ViewModel
             {
                 if (conn.ConnectionId == id)
                 {
+                    var type = conn.InputPin.Pin.Value.Current.GetType();
+                    conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                    this.programManager.RunLoop(0);
+
                     this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                     this.connectionsVM.Remove(conn);
+ 
                     break;
                 }
             }
@@ -807,38 +991,21 @@ namespace LogicDesigner.ViewModel
             var conn = this.connectionsVM?.Where(
                 a => a.OutputPin.Pin == e.OutputPin && a.InputPin.Pin == e.InputPin).FirstOrDefault();
 
-            if (e.OutputPin.Value.Current.GetType() == typeof(bool))
+            var type = conn.OutputPin.Pin.Value.Current.GetType();
+
+            if (e.OutputPin.Value.Current.Equals(Activator.CreateInstance(type)))
             {
-                if ((bool)e.OutputPin.Value.Current == true)
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
-                }
-                else
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
-                }
+                conn.LineColor = Color.FromArgb(
+                    this.config.LinePassiveColor.R,
+                    this.config.LinePassiveColor.G,
+                    this.config.LinePassiveColor.B);
             }
-            else if (e.OutputPin.Value.Current.GetType() == typeof(string))
+            else 
             {
-                if (!string.IsNullOrEmpty((string)e.OutputPin.Value.Current))
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
-                }
-                else
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
-                }
-            }
-            else if (e.OutputPin.Value.Current.GetType() == typeof(int))
-            {
-                if ((int)e.OutputPin.Value.Current != 0)
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LineActiveColor.R, this.config.LineActiveColor.G, this.config.LineActiveColor.B);
-                }
-                else
-                {
-                    conn.LineColor = Color.FromArgb(this.config.LinePassiveColor.R, this.config.LinePassiveColor.G, this.config.LinePassiveColor.B);
-                }
+                conn.LineColor = Color.FromArgb(
+                    this.config.LineActiveColor.R,
+                    this.config.LineActiveColor.G,
+                    this.config.LineActiveColor.B);
             }
 
             this.ConnectionVMUpdated?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
@@ -857,6 +1024,10 @@ namespace LogicDesigner.ViewModel
                     var conn = this.connectionsVM[i];
                     if (pinVM == conn.OutputPin)
                     {
+                        var type = conn.InputPin.Pin.Value.Current.GetType();
+                        conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                        this.programManager.RunLoop(0);
+
                         this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                         this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
                         this.connectionsVM.Remove(conn);
@@ -871,6 +1042,10 @@ namespace LogicDesigner.ViewModel
                     var conn = this.connectionsVM[i];
                     if (pinVM == conn.InputPin)
                     {
+                        var type = conn.InputPin.Pin.Value.Current.GetType();
+                        conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
+                        this.programManager.RunLoop(0);
+
                         this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                         this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
                         this.connectionsVM.Remove(conn);

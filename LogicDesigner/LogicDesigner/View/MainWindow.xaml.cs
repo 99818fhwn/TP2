@@ -7,6 +7,7 @@ namespace LogicDesigner
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -75,8 +76,93 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseDown += new MouseButtonEventHandler(this.ComponentMouseDown);
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
+
+            // change button icons on click
+
+            foreach(var child in this.ButtonsGrid.Children)
+            {
+                if(child.GetType() == typeof(Button))
+                {
+                    var button = (Button)child;
+
+                    if(button.Name == "StopButton")
+                    {
+                        //button.MouseDown += this.SetPressedStopPicture;
+                        //button.MouseUp += this.SetDefaultStopPicture;
+
+                        button.Command = new Command(obj =>
+                        {
+                            this.SetPressedStopPicture(button, null);
+                            this.ProgramMngVM.StopCommand.Execute(obj);
+                            this.SetDefaultStopPicture(button, null);
+                        });
+                    }
+
+                    if (button.Name == "StepButton")
+                    {
+                        //button.MouseDown += this.SetPressedStepPicture;
+                        //button.MouseUp += this.SetDefaultStepPicture;
+
+                        button.Command = new Command(obj =>
+                        {
+                            this.SetPressedStepPicture(button, null);
+                            this.ProgramMngVM.StepCommand.Execute(obj);
+                            this.SetDefaultStepPicture(button, null);
+                        });
+                    }
+                }
+            }
+            
         }
-        
+
+        /// <summary>
+        /// Sets the default step picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetDefaultStepPicture(object sender, MouseButtonEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                Task.Delay(30000);
+                this.ProgramMngVM.StepButtonPath = @"\ButtonPictures\step.png";
+            });
+        }
+
+        /// <summary>
+        /// Sets the default stop picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetDefaultStopPicture(object sender, MouseButtonEventArgs e)
+        {
+            Task.Run(() => 
+            {
+                Task.Delay(30000);
+                this.ProgramMngVM.StopButtonPath = @"\ButtonPictures\stop.png";
+            });
+        }
+
+        /// <summary>
+        /// Sets the pressed stop picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetPressedStopPicture(object sender, MouseButtonEventArgs e)
+        {
+            this.ProgramMngVM.StopButtonPath = @"\ButtonPictures\stop_pressed.png";
+        }
+
+        /// <summary>
+        /// Sets the pressed step picture.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
+        private void SetPressedStepPicture(object sender, MouseButtonEventArgs e)
+        {
+            this.ProgramMngVM.StepButtonPath = @"\ButtonPictures\step_pressed.png";
+        }
+
         /// <summary>
         /// Gets or sets the program manager.
         /// </summary>
@@ -157,6 +243,21 @@ namespace LogicDesigner
                 {
                     MessageBox.Show($"File could not be saved, please try again. \r{e.Message}");
                 }
+            }));
+        }
+
+        /// <summary>
+        /// Gets the clear command.
+        /// </summary>
+        /// <value>
+        /// The clear command.
+        /// </value>
+        public Command ClearCommand
+        {
+            get => new Command(new Action<object>((input) =>
+            {
+                var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                manager.ClearField();
             }));
         }
 
@@ -264,6 +365,23 @@ namespace LogicDesigner
                     this.ComponentWindow.RenderTransform = scaleTransform;
                 }
             }));
+        }
+
+        /// <summary>
+        /// Gets the open config command.
+        /// </summary>
+        /// <value>
+        /// The open config command.
+        /// </value>
+        public Command OpenConfCommand
+        {
+            get => new Command(new Action<object>((input) =>
+                {
+                    if (File.Exists("config.json"))
+                    {
+                        Process.Start("notepad.exe", "config.json");
+                    }
+                }));
         }
 
         /// <summary>
@@ -586,6 +704,9 @@ namespace LogicDesigner
             // Component Body
             Button sampleBody = new Button();
 
+            Style style = this.FindResource("btnComponent") as Style;
+            sampleBody.Style = style;
+
             newComponent.Name = componentVM.Name;
             newComponent.RenderTransform = new TranslateTransform(componentVM.XCoord, componentVM.YCoord);
             sampleBody.Name = componentVM.Name + "Body";
@@ -815,7 +936,11 @@ namespace LogicDesigner
             line.MouseRightButtonUp += this.OnConnectionLineClicked;
             line.Visibility = Visibility.Visible;
             line.StrokeThickness = 4;
-            line.Stroke = new SolidColorBrush(Color.FromRgb(e.Connection.LineColor.R, e.Connection.LineColor.G, e.Connection.LineColor.B));
+            line.Stroke = new SolidColorBrush(
+                Color.FromRgb(
+                    e.Connection.LineColor.R, 
+                    e.Connection.LineColor.G, 
+                    e.Connection.LineColor.B));
             line.X1 = inputPin.XPosition;
             line.X2 = outputPin.XPosition;
             line.Y1 = inputPin.YPosition;

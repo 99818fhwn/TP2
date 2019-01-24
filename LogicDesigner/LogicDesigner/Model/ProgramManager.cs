@@ -42,6 +42,9 @@ namespace LogicDesigner.Model
         /// </summary>
         private readonly string componentDirectory;
 
+        /// <summary>
+        /// The configuration.
+        /// </summary>
         private readonly ConfigurationLogic config;
 
         /// <summary>
@@ -72,8 +75,8 @@ namespace LogicDesigner.Model
             // this.path = path;
             // this.connectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.config = new ConfigurationLogic();
-            this.componentDirectory = config.ModulePath;
-            this.logDirectory = config.LogPath;
+            this.componentDirectory = this.config.ModulePath;
+            this.logDirectory = this.config.LogPath;
             this.ConnectedOutputInputPairs = new List<Tuple<IPin, IPin>>();
             this.RunActive = false;
             this.Delay = 1000; // milli sec = 1 sec
@@ -232,10 +235,10 @@ namespace LogicDesigner.Model
         }
 
         /// <summary>
-        /// Gets a value indicating whether [run active].
+        /// Gets a value indicating whether run is active.
         /// </summary>
         /// <value>
-        /// <c>true</c> if [run active]; otherwise, <c>false</c>.
+        /// <c>true</c> if run is active; otherwise, <c>false</c>.
         /// </value>
         public bool RunActive
         {
@@ -301,6 +304,11 @@ namespace LogicDesigner.Model
                         this.OnConnectionUpdated(t.Item1, t.Item2);
                     }
 
+                    if (!this.RunActive)
+                    {
+                        return;
+                    }
+
                     node.Execute();
                     Task.Delay(delay);
                 }
@@ -328,7 +336,14 @@ namespace LogicDesigner.Model
         /// <param name="logMessage">The log message.</param>
         public void WriteToLog(string[] logMessage)
         {
-            File.AppendAllLines(Path.Combine(this.logDirectory, this.logFileName), logMessage);
+            try
+            {
+                File.AppendAllLines(Path.Combine(this.logDirectory, this.logFileName), logMessage);
+            }
+            catch(IOException)
+            {
+                // 
+            }
         }
         
         /// <summary>
@@ -353,11 +368,36 @@ namespace LogicDesigner.Model
         }
 
         /// <summary>
+        /// Clears the pin values.
+        /// </summary>
+        public void ClearValues()
+        {
+            foreach (var t in this.ConnectedOutputInputPairs)
+            {
+                var type = t.Item2.Value.Current.GetType();
+                t.Item2.Value.Current = Activator.CreateInstance(type);
+
+                type = t.Item1.Value.Current.GetType();
+                t.Item1.Value.Current = Activator.CreateInstance(type);
+
+                this.OnConnectionUpdated(t.Item1, t.Item2);
+            }
+
+            foreach (INode node in this.fieldNodes)
+            {
+                node.Execute();
+            }
+
+            this.FireOnStepFinished();
+        }
+
+        /// <summary>
         /// Stops the active.
         /// </summary>
         public void StopActive()
         {
             this.RunActive = false;
+            Task.Delay(1000);
         }
 
         /// <summary>

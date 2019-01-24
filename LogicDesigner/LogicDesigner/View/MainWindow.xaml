@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Logic Designer Pro" Height="450" Width="800" WindowState="Maximized" PreviewMouseWheel="MouseWheelZoom">
     <Window.Resources>
-        <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+        <Style x:Key="btnComponent" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter  Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
@@ -25,8 +25,6 @@
             </Setter>
         </Style>
         <Image x:Key="StepIcon" Source="/ButtonPictures/step.png"/>
-
-
     </Window.Resources>
 
     <!--KeyboardShortcuts-->
@@ -84,7 +82,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition></RowDefinition>
-            <RowDefinition Height="80"/>
+            <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
         <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Name="LogicWindow" Height="Auto" Width="Auto">
             <ScrollViewer CanContentScroll="True" HorizontalScrollBarVisibility="Visible">
@@ -96,20 +94,21 @@
         <DockPanel Name="MainDocPanel" Grid.Row="0" Grid.ColumnSpan="2">
             <Menu DockPanel.Dock="Top">
                 <MenuItem Header="_File">
-                    <MenuItem Header="_Load"/>
-                    <MenuItem Header="_Save"/>
-                    <MenuItem Header="_Open Config ..."/>
+                    <MenuItem Header="_Load" Command="{Binding LoadCommand}"/>
+                    <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
+                    <MenuItem Header="_Clear Workspace" Command="{Binding ClearCommand}"/>
                 </MenuItem>
                 <MenuItem Header="_Settings">
                     <MenuItem Header="_Activate Grid" Command="{Binding ToggleGridCommand}"></MenuItem>
+                    <MenuItem Header="_Open Config ..." Command="{Binding OpenConfCommand}"/>
                 </MenuItem>
 
             </Menu>
             <StackPanel></StackPanel>
         </DockPanel>
 
-        <Grid Grid.Column ="1" Grid.Row ="2" 
-              Background="White" Margin="0, 0, 0, 16">
+        <Grid Name="ButtonsGrid" Grid.Column ="1" Grid.Row ="2" 
+              Background="White" Margin="0, 0, 17, 16">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -118,35 +117,49 @@
                 <ColumnDefinition Width="150"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Background="Transparent" Grid.Column="1" Margin="2" 
+            <Grid.RowDefinitions>
+                <RowDefinition Height="5"></RowDefinition>
+                <RowDefinition Height ="*"></RowDefinition>
+            </Grid.RowDefinitions>
+            <Rectangle HorizontalAlignment="Stretch" Fill="Black" 
+                       Height="1" Grid.ColumnSpan="5" 
+                       Margin="0, 0, 0, 0"/>
+            <Button Background="Transparent" 
+                    Grid.Row="1"
+                    Grid.Column="1" 
+                    Margin="0, 20, 0, 16" 
                     Height="40" VerticalAlignment="Top"
                     HorizontalAlignment="Left"
                     Width="100"
-                    Command="{Binding StartCommand}"
-                    
+                    Command="{Binding StartCommand}"                    
                     >
                 <StackPanel>
-                    <Image Panel.ZIndex="100" Source="\ButtonPictures\start.png" 
+                    <Image Panel.ZIndex="100" Source="{Binding StartButtonPath}" 
                           VerticalAlignment="Center" Height="28"></Image>
                 </StackPanel>
             </Button>
-            <Button Background="White" Grid.Column="2" Margin="2"
+            <Button Name="StepButton" Background="White" 
+                    Grid.Row="1"
+                    Grid.Column="2" 
+                    Margin="0, 20, 0, 16"
                     Height="40" VerticalAlignment="Top"
                     HorizontalAlignment="Center"
-                    Width="100"
-                    Command="{Binding StepCommand}">
+                    Width="100">
                 <StackPanel>
-                    <Image Panel.ZIndex="100" Source="\ButtonPictures\step.png" 
+                    <Image Panel.ZIndex="100" Source="{Binding StepButtonPath}" 
                            VerticalAlignment="Center" Height="35"></Image>
                 </StackPanel>
             </Button>
-            <Button Background="White" Grid.Column="3" Margin="2"
+            <Button Name="StopButton" Background="White" 
+                    Grid.Row="1"
+                    Grid.Column="3" 
+                    Margin="0, 20, 0, 16"
                     Height="40" VerticalAlignment="Top"
                     HorizontalAlignment="Right"
-                    Width="100"
-                    Command="{Binding StopCommand}">
+                    Width="100">
+
                 <StackPanel>
-                    <Image Panel.ZIndex="100" Source="\ButtonPictures\stop.png" 
+                    <Image Panel.ZIndex="100" Source="{Binding StopButtonPath}" 
                            VerticalAlignment="Center" Height="30"></Image>
                 </StackPanel>
             </Button>

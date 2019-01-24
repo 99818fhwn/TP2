@@ -83,6 +83,16 @@ namespace LogicDesigner.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap start_pressed {
+            get {
+                object obj = ResourceManager.GetObject("start_pressed", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap step {
             get {
                 object obj = ResourceManager.GetObject("step", resourceCulture);
@@ -93,9 +103,29 @@ namespace LogicDesigner.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap step_pressed {
+            get {
+                object obj = ResourceManager.GetObject("step_pressed", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap stop {
             get {
                 object obj = ResourceManager.GetObject("stop", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap stop_pressed {
+            get {
+                object obj = ResourceManager.GetObject("stop_pressed", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
