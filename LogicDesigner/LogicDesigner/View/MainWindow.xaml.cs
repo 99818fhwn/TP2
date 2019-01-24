@@ -330,29 +330,6 @@ namespace LogicDesigner
         }
 
         /// <summary>
-        /// Called when connection gets updated.
-        /// </summary>
-        /// <param name="sender">The sender.</param>
-        /// <param name="e">The <see cref="PinVMConnectionChangedEventArgs"/> instance containing the event data.</param>
-        private void OnConnectionUpdated(object sender, PinVMConnectionChangedEventArgs e)
-        {
-            // find the line with name == id -> change its color
-            foreach (var child in this.ComponentWindow.Children)
-            {
-                if (child.GetType() == typeof(Line))
-                {
-                    Line l = (Line)child;
-
-                    if (l.Name == e.Connection.ConnectionId)
-                    {
-                        l.Stroke = e.Connection.LineColor;
-                        break;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
         /// Called when the button is pressed down.
         /// </summary>
         /// <param name="sender">The sender.</param>
