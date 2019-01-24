@@ -96,6 +96,9 @@ namespace LogicDesigner.ViewModel
         /// </summary>
         private int uniqueNodeId;
 
+        /// <summary>
+        /// The unique pin identifier set by the Component and given by the program manager view model.
+        /// </summary>
         private int uniquePinId;
 
         /// <summary>
@@ -109,12 +112,12 @@ namespace LogicDesigner.ViewModel
         private PinVM selectedInputPin;
 
         /// <summary>
-        /// The selected field component
+        /// The selected component in the work field.
         /// </summary>
         private ComponentVM selectedFieldComponent;
 
         /// <summary>
-        /// The new unique connection identifier
+        /// The new unique connection identifier.
         /// </summary>
         private int newUniqueConnectionId;
 
@@ -159,7 +162,7 @@ namespace LogicDesigner.ViewModel
 
             this.StepCommand = new Command(obj =>
             {
-                //this.StepButtonPath = @"\ButtonPictures\step_pressed.png";
+                ////this.StepButtonPath = @"\ButtonPictures\step_pressed.png";
                 if (!this.programManager.RunActive)
                 {
                     this.programManager.SetActive();
@@ -167,21 +170,21 @@ namespace LogicDesigner.ViewModel
                     this.programManager.StopActive();
                 }
 
-                //this.StepButtonPath = @"\ButtonPictures\step.png";
+                ////this.StepButtonPath = @"\ButtonPictures\step.png";
             });
 
             this.StopCommand = new Command(obj =>
             {
                 this.isProgramRunning = false;
                 this.StartButtonPath = @"\ButtonPictures\start.png";
-                //this.stopButtonPath = @"\ButtonPictures\stop_pressed.png";
+                ////this.stopButtonPath = @"\ButtonPictures\stop_pressed.png";
 
                 this.programManager.StopActive();
                 this.programManager.ClearValues();
 
-               // this.stopButtonPath = @"\ButtonPictures\stop.png";
+                ////this.stopButtonPath = @"\ButtonPictures\stop.png";
             });
-            
+
             this.setPinCommand = new Command(obj =>
             {
                 bool restart = false;
@@ -213,7 +216,7 @@ namespace LogicDesigner.ViewModel
                 }
 
                 var nodeInFieldVM = obj as ComponentVM;
-                
+
                 foreach (var n in this.programManager.FieldNodes)
                 {
                     if (nodeInFieldVM.Node == n)
@@ -430,12 +433,6 @@ namespace LogicDesigner.ViewModel
             this.UpdateUndoHistory();
             this.programManager.PinsDisconnected += this.OnPinsDisconnected;
             this.programManager.ConnectionUpdated += this.OnConnectionUpdated;
-        }
-
-        private int GetUniqueNumberFromEnumerator()
-        {
-            this.GetUniqueNumber().MoveNext();
-            return this.GetUniqueNumber().Current;
         }
 
         /// <summary>
@@ -779,7 +776,7 @@ namespace LogicDesigner.ViewModel
         /// </summary>
         /// <param name="preName">Name of the element.</param>
         /// <param name="additional">The additional string ending.</param>
-        /// <returns>The tag.</returns>
+        /// <returns>The nametag of the component.</returns>
         public string CreateNameTag(string preName, string additional)
         {
             return Regex.Replace(preName, "[^A-Za-z]", string.Empty) + additional;
@@ -815,7 +812,7 @@ namespace LogicDesigner.ViewModel
         /// <summary>
         /// Saves the status.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="path">The path where the save file will be stored.</param>
         public void SaveStatus(string path)
         {
             SerializationLogic serializer = new SerializationLogic();
@@ -840,7 +837,7 @@ namespace LogicDesigner.ViewModel
         /// <summary>
         /// Loads the status.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="path">The path from where the save file is loaded.</param>
         /// <returns>The tuple.</returns>
         public Tuple<List<ConnectionVM>, List<ComponentVM>> LoadStatus(string path)
         {
@@ -867,7 +864,7 @@ namespace LogicDesigner.ViewModel
                 var inparent = reconstructedCompVMs.Find(node => node.Name == connection.InputParentID);
                 var outparent = reconstructedCompVMs.Find(node => node.Name == connection.OutputParentID);
                 var tempConnection = new ConnectionVM(outparent.OutputPinsVM.First(x => connection.IdNumberOutPin == x.IDNumber), inparent.InputPinsVM.First(x => connection.IdNumberInPin == x.IDNumber), connection.ConnectionID, this.config.LinePassiveColor);
-                
+
                 tempConnection.InputPin.XPosition = connection.InputX;
                 tempConnection.InputPin.YPosition = connection.InputY;
 
@@ -876,11 +873,8 @@ namespace LogicDesigner.ViewModel
                 reconstructedConns.Add(tempConnection);
             }
 
-            App.Current.Dispatcher.Invoke((Action)delegate // <--- HERE
+            App.Current.Dispatcher.Invoke(() => // <--- HERE
             {
-                //uniqueNodeId;
-
-                // uniquePinId; newUniqueConnectionId
                 this.newUniqueConnectionId = reconstructedConns.Count > 0 ? reconstructedConns.Select(x => int.Parse(Regex.Replace(x.ConnectionId, @"[^\d*]", string.Empty))).Max() + 1 : 0;
                 this.uniqueNodeId = reconstructedConns.Count > 0 ? reconstructedCompVMs.Select(x => int.Parse(Regex.Replace(x.Name, @"[^\d*]", string.Empty))).Max() + 1 : 0;
                 var tempOutpuPinIDMax = reconstructedCompVMs.Select(x => x.OutputPinsVM.Count > 0 ? x.OutputPinsVM.Select(y => y.IDNumber)?.ToList().Max() : 0).Max();
@@ -908,14 +902,6 @@ namespace LogicDesigner.ViewModel
             });
 
             return new Tuple<List<ConnectionVM>, List<ComponentVM>>(reconstructedConns, reconstructedCompVMs);
-        }
-
-        private IEnumerator<int> ExtraxtIDsFromCompVM(int[] pinIDs)
-        {
-            foreach (var id in pinIDs)
-            {
-                yield return id;
-            }
         }
 
         /// <summary>
@@ -956,10 +942,19 @@ namespace LogicDesigner.ViewModel
 
                     this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                     this.connectionsVM.Remove(conn);
- 
+
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Fires the on component removed event.
+        /// </summary>
+        /// <param name="item">The component that was removed.</param>
+        protected virtual void FireOnComponentVMRemoved(ComponentVM item)
+        {
+            this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(item));
         }
 
         /// <summary>
@@ -982,6 +977,29 @@ namespace LogicDesigner.ViewModel
         }
 
         /// <summary>
+        /// Gets the unique number from by calling the enumerator next move.
+        /// </summary>
+        /// <returns>Returns the current value of the enumeration.</returns>
+        private int GetUniqueNumberFromEnumerator()
+        {
+            this.GetUniqueNumber().MoveNext();
+            return this.GetUniqueNumber().Current;
+        }
+
+        /// <summary>
+        /// Extracts the identifiers from a serialized component view model.
+        /// </summary>
+        /// <param name="pinIDs">The pin id's.</param>
+        /// <returns>The next integer identifier from the array.</returns>
+        private IEnumerator<int> ExtraxtIDsFromCompVM(int[] pinIDs)
+        {
+            foreach (var id in pinIDs)
+            {
+                yield return id;
+            }
+        }
+
+        /// <summary>
         /// Called when connection is updated.
         /// </summary>
         /// <param name="sender">The sender.</param>
@@ -1000,7 +1018,7 @@ namespace LogicDesigner.ViewModel
                     this.config.LinePassiveColor.G,
                     this.config.LinePassiveColor.B);
             }
-            else 
+            else
             {
                 conn.LineColor = Color.FromArgb(
                     this.config.LineActiveColor.R,
@@ -1095,7 +1113,7 @@ namespace LogicDesigner.ViewModel
         /// <summary>
         /// Creates an unique name by adding a serial number to the label ending.
         /// </summary>
-        /// <param name="node">The node.</param>
+        /// <param name="node">The node that will contain the identifier.</param>
         /// <returns>The identifier will be returned.</returns>
         private string CreateUniqueName(IDisplayableNode node)
         {
@@ -1103,6 +1121,10 @@ namespace LogicDesigner.ViewModel
             return this.CreateNameTag(node.Label, this.uniqueNodeId.ToString());
         }
 
+        /// <summary>
+        /// Gets the unique next number.
+        /// </summary>
+        /// <returns>The next integer.</returns>
         private IEnumerator<int> GetUniqueNumber()
         {
             for (int i = 0; i < int.MaxValue; i++)
@@ -1129,21 +1151,12 @@ namespace LogicDesigner.ViewModel
         /// <summary>
         /// Occurs when pins are connected.
         /// </summary>
-        /// <returns>returns a new id.</returns>    
+        /// <returns>Returns a new id.</returns>    
         private string NewUniqueConnectionId()
         {
             string s = "Connection" + this.newUniqueConnectionId.ToString();
             this.newUniqueConnectionId++;
             return s;
-        }
-
-        /// <summary>
-        /// Fires the on component removed event.
-        /// </summary>
-        /// <param name="item">The item.</param>
-        private void FireOnComponentVMRemoved(ComponentVM item)
-        {
-            this.FieldComponentRemoved?.Invoke(this, new FieldComponentEventArgs(item));
         }
     }
 }

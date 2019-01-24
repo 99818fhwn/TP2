@@ -31,11 +31,6 @@ namespace LogicDesigner.Model
         /// The log file name.
         /// </summary>
         private readonly string logFileName;
-        
-        /// <summary>
-        /// The path.
-        /// </summary>
-        private readonly string path;
 
         /// <summary>
         /// The component directory.
@@ -48,12 +43,12 @@ namespace LogicDesigner.Model
         private readonly ConfigurationLogic config;
 
         /// <summary>
-        /// The log directory
+        /// The log directory path.
         /// </summary>
         private readonly string logDirectory;
 
         /// <summary>
-        /// The field nodes
+        /// The components (nodes) in the design field.
         /// </summary>
         private ICollection<IDisplayableNode> fieldNodes;
 
@@ -119,19 +114,6 @@ namespace LogicDesigner.Model
             this.Watcher.IncludeSubdirectories = true;
             this.Watcher.EnableRaisingEvents = true;
             this.Watcher.Filter = string.Empty;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProgramManager"/> class.
-        /// </summary>
-        /// <param name="old">The old.</param>
-        public ProgramManager(ProgramManager old)
-        {
-            this.Delay = old.Delay;
-            this.FieldNodes = old.FieldNodes;
-            this.logFileName = old.logFileName;
-            this.possibleNodesToChooseFrom = old.PossibleNodesToChooseFrom;
-            this.RunActive = old.RunActive;
         }
         
         /// <summary>
@@ -340,22 +322,8 @@ namespace LogicDesigner.Model
             {
                 File.AppendAllLines(Path.Combine(this.logDirectory, this.logFileName), logMessage);
             }
-            catch(IOException)
-            {
-                // 
-            }
-        }
-        
-        /// <summary>
-        /// Steps the specified node.
-        /// </summary>
-        /// <param name="node">The node.</param>
-        public void Step(INode node)
-        {
-            if (!this.RunActive)
-            {
-                node.Execute();
-                Task.Delay(this.Delay);
+            catch (IOException)
+            {    
             }
         }
 

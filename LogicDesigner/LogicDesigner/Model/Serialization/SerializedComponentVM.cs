@@ -6,9 +6,9 @@
 // -----------------------------------------------------------------------
 namespace LogicDesigner.Model.Serialization
 {
-    using LogicDesigner.ViewModel;
     using System.Collections.Generic;
     using System.Linq;
+    using LogicDesigner.ViewModel;
 
     /// <summary>
     /// The serialization component view model.
@@ -22,20 +22,22 @@ namespace LogicDesigner.Model.Serialization
         {
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SerializedComponentVM"/> class.
-        /// </summary>
-        /// <param name="xpos">The x position.</param>
-        /// <param name="ypos">The y position.</param>
-        /// <param name="path">The path.</param>
-        /// <param name="id">The identifier.</param>
-        public SerializedComponentVM(double xpos, double ypos, string path, string id, int[] ipuntIDs, int[] outputIDs)
-        {
-            this.XPos = xpos;
-            this.YPos = ypos;
-            this.AssemblyPath = path;
-            this.UniqueName = id;
-        }
+        /////// <summary>
+        /////// Initializes a new instance of the <see cref="SerializedComponentVM" /> class.
+        /////// </summary>
+        /////// <param name="xpos">The x position.</param>
+        /////// <param name="ypos">The y position.</param>
+        /////// <param name="path">The path .</param>
+        /////// <param name="id">The identifier.</param>
+        /////// <param name="inputIDs">The input pin id's.</param>
+        /////// <param name="outputIDs">The output pin id's.</param>
+        ////public SerializedComponentVM(double xpos, double ypos, string path, string id, int[] inputIDs, int[] outputIDs)
+        ////{
+        ////    this.XPos = xpos;
+        ////    this.YPos = ypos;
+        ////    this.AssemblyPath = path;
+        ////    this.UniqueName = id;
+        ////}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializedComponentVM"/> class.
@@ -86,6 +88,12 @@ namespace LogicDesigner.Model.Serialization
         /// </value>
         public string UniqueName { get; set; }
 
+        /// <summary>
+        /// Gets or sets the input output i ds.
+        /// </summary>
+        /// <value>
+        /// The input and output pin id values.
+        /// </value>
         public int[] InputPutputIDs { get; set; }
     }
 }

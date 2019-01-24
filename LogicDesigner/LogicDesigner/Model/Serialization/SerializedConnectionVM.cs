@@ -12,10 +12,12 @@ namespace LogicDesigner.Model.Serialization
     public class SerializedConnectionVM
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="SerializedConnectionVM"/> class.
+        /// Initializes a new instance of the <see cref="SerializedConnectionVM" /> class.
         /// </summary>
         /// <param name="input">The input.</param>
+        /// <param name="idNumberInPin">The identifier number of the input pin.</param>
         /// <param name="output">The output.</param>
+        /// <param name="idNumberOutPin">The identifier number of the output pin.</param>
         /// <param name="inputParentID">The input parent identifier.</param>
         /// <param name="outputParentID">The output parent identifier.</param>
         /// <param name="inputX">The input x.</param>
@@ -74,7 +76,21 @@ namespace LogicDesigner.Model.Serialization
         /// The output pin identifier.
         /// </value>
         public string OutputPinID { get; set; }
+
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier number of the input pin.
+        /// </value>
         public int IdNumberInPin { get; set; }
+
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        /// <value>
+        /// The identifier number of the output pin.
+        /// </value>
         public int IdNumberOutPin { get; set; }
 
         /// <summary>

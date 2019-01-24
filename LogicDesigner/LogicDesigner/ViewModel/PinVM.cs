@@ -21,7 +21,7 @@ namespace LogicDesigner.ViewModel
     public class PinVM
     {
         /// <summary>
-        /// The pin.
+        /// The pin that is represented by this view model.
         /// </summary>
         private readonly IPin pin;
 
@@ -65,18 +65,22 @@ namespace LogicDesigner.ViewModel
         /// </summary>
         private bool isActive;
 
+        /// <summary>
+        /// The unique number which is used to identify every <see cref="PinVM"/>.
+        /// </summary>
         private int uniqueNumber;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PinVM"/> class.
+        /// Initializes a new instance of the <see cref="PinVM" /> class.
         /// </summary>
-        /// <param name="pin">The pin.</param>
-        /// <param name="isInputPin">if set to <c>true</c> [is input pin].</param>
+        /// <param name="pin">The pin that is represented.</param>
+        /// <param name="idNumber">The identifier number of the pin.</param>
+        /// <param name="isInputPin">If set to <c>true</c> [is input pin].</param>
         /// <param name="setPinCommand">The set pin command.</param>
-        /// <param name="parent">The parent.</param>
+        /// <param name="parent">The parent of pin.</param>
         /// <param name="activeColor">Color of the active.</param>
         /// <param name="passiveColor">Color of the passive.</param>
-        public PinVM(IPin pin, int IDnumber,bool isInputPin, Command setPinCommand, ComponentVM parent, Color activeColor, Color passiveColor)
+        public PinVM(IPin pin, int idNumber, bool isInputPin, Command setPinCommand, ComponentVM parent, Color activeColor, Color passiveColor)
         {
             this.parent = parent;
             this.pin = pin;
@@ -87,23 +91,24 @@ namespace LogicDesigner.ViewModel
             this.activeColor = activeColor;
             this.passiveColor = passiveColor;
             this.isActive = false;
-            this.uniqueNumber = IDnumber;
+            this.uniqueNumber = idNumber;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PinVM"/> class.
+        /// Initializes a new instance of the <see cref="PinVM" /> class.
         /// </summary>
-        /// <param name="pin">The pin.</param>
-        /// <param name="isInputPin">if set to <c>true</c> [is input pin].</param>
+        /// <param name="pin">The pin that is represented.</param>
+        /// <param name="idNumber">The identifier number of the pin.</param>
+        /// <param name="isInputPin">If set to <c>true</c> [is input pin].</param>
         /// <param name="setPinCommand">The set pin command.</param>
-        public PinVM(IPin pin, int IDnumber ,bool isInputPin, Command setPinCommand)
+        public PinVM(IPin pin, int idNumber, bool isInputPin, Command setPinCommand)
         {
             this.pin = pin;
             this.isInputPin = isInputPin;
             this.setPinCommand = setPinCommand;
             this.xposition = 0;
             this.yposition = 0;
-            this.uniqueNumber = IDnumber;
+            this.uniqueNumber = idNumber;
         }
 
         /// <summary>
@@ -117,7 +122,7 @@ namespace LogicDesigner.ViewModel
         /// Gets the pin.
         /// </summary>
         /// <value>
-        /// The pin.
+        /// The pin that is represented by the pin view model.
         /// </value>
         public IPin Pin
         {
@@ -141,6 +146,12 @@ namespace LogicDesigner.ViewModel
             }
         }
 
+        /// <summary>
+        /// Gets the identifier number.
+        /// </summary>
+        /// <value>
+        /// The identifier number of the pin.
+        /// </value>
         public int IDNumber
         {
             get

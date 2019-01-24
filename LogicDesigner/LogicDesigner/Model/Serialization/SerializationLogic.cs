@@ -21,7 +21,6 @@ namespace LogicDesigner.Model.Serialization
     /// </summary>
     public class SerializationLogic
     {
-        #region Declarations
         /// <summary>
         /// The formatter that handles serialization/deserialization.
         /// </summary>
@@ -34,18 +33,16 @@ namespace LogicDesigner.Model.Serialization
         {
             this.formatter = new XmlSerializer(typeof(SerializedObject));
         }
-        #endregion
 
-        #region Serialization        
         /// <summary>
         /// Serializes the component.
         /// </summary>
-        /// <param name="path">The path.</param>
+        /// <param name="path">The path where the save file will saved.</param>
         /// <param name="serializableObject">The serializable object.</param>
         /// <param name="connections">The connections.</param>
         /// <exception cref="ArgumentNullException">Object must not be null.</exception>
         /// <exception cref="ArgumentException">Path not found.</exception>
-        /// <exception cref="SerializationException">Object could not be serialized</exception>
+        /// <exception cref="SerializationException">Object could not be serialized.</exception>
         public void SerializeComponent(string path, ICollection<Tuple<ComponentVM, string>> serializableObject, ICollection<ConnectionVM> connections)
         {
             if (serializableObject == null)
@@ -86,7 +83,7 @@ namespace LogicDesigner.Model.Serialization
 
                     foreach (var connection in connections)
                     {
-                        sconnections.Add(new SerializedConnectionVM(connection.InputPin.Pin.Label,connection.InputPin.IDNumber, connection.OutputPin.Pin.Label, connection.OutputPin.IDNumber, connection.InputPin.Parent.Name, connection.OutputPin.Parent.Name, connection.InputPin.XPosition, connection.InputPin.YPosition, connection.OutputPin.XPosition, connection.OutputPin.YPosition, connection.ConnectionId));
+                        sconnections.Add(new SerializedConnectionVM(connection.InputPin.Pin.Label, connection.InputPin.IDNumber, connection.OutputPin.Pin.Label, connection.OutputPin.IDNumber, connection.InputPin.Parent.Name, connection.OutputPin.Parent.Name, connection.InputPin.XPosition, connection.InputPin.YPosition, connection.OutputPin.XPosition, connection.OutputPin.YPosition, connection.ConnectionId));
                     }
 
                     var serializableElement = new SerializedObject(components, sconnections);
@@ -98,9 +95,7 @@ namespace LogicDesigner.Model.Serialization
                 }
             }
         }
-        #endregion
 
-        #region Deserialization
         /// <summary>
         /// Deserializes the given file.
         /// </summary>
@@ -133,6 +128,5 @@ namespace LogicDesigner.Model.Serialization
                 return obj;
             }
         }
-        #endregion
     }
 }
