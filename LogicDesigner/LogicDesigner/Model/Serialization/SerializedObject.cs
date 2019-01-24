@@ -18,9 +18,6 @@ namespace LogicDesigner.Model.Serialization
     /// </summary>
     public class SerializedObject
     {
-        // public List<string> AssemblyPaths { get; set; }
-        // public SerializedComponent(ICollection<SerializedComponentVM> vms, ICollection<string> paths, ICollection<ConnectionVM> connections)
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializedObject"/> class.
         /// </summary>
@@ -30,8 +27,6 @@ namespace LogicDesigner.Model.Serialization
         {
             this.Components = new List<SerializedComponentVM>(vms);
             this.Connections = new List<SerializedConnectionVM>(connections);
-
-            // this.AssemblyPaths = new List<string>(paths);
         }
 
         /// <summary>
@@ -41,8 +36,6 @@ namespace LogicDesigner.Model.Serialization
         {
             this.Components = new List<SerializedComponentVM>();
             this.Connections = new List<SerializedConnectionVM>();
-
-            // this.AssemblyPaths = new List<string>();
         }
 
         /// <summary>

@@ -500,10 +500,6 @@ namespace LogicDesigner
             e.Component.ComponentPropertyChanged += this.OnComponentChanged;
 
             this.DrawNewComponent(e.Component);
-
-            // var updatedCurrentMan = new ProgramMngVM((ProgramMngVM)this.ComponentWindow.DataContext);
-            // this.RedoHistory.Clear();
-            // this.RedoHistory.Push(updatedCurrentMan);
         }
 
         /// <summary>
