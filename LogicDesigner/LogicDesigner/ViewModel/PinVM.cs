@@ -65,6 +65,8 @@ namespace LogicDesigner.ViewModel
         /// </summary>
         private bool isActive;
 
+        private int uniqueNumber;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="PinVM"/> class.
         /// </summary>
@@ -74,7 +76,7 @@ namespace LogicDesigner.ViewModel
         /// <param name="parent">The parent.</param>
         /// <param name="activeColor">Color of the active.</param>
         /// <param name="passiveColor">Color of the passive.</param>
-        public PinVM(IPin pin, bool isInputPin, Command setPinCommand, ComponentVM parent, Color activeColor, Color passiveColor)
+        public PinVM(IPin pin, int IDnumber,bool isInputPin, Command setPinCommand, ComponentVM parent, Color activeColor, Color passiveColor)
         {
             this.parent = parent;
             this.pin = pin;
@@ -85,6 +87,7 @@ namespace LogicDesigner.ViewModel
             this.activeColor = activeColor;
             this.passiveColor = passiveColor;
             this.isActive = false;
+            this.uniqueNumber = IDnumber;
         }
 
         /// <summary>
@@ -93,13 +96,14 @@ namespace LogicDesigner.ViewModel
         /// <param name="pin">The pin.</param>
         /// <param name="isInputPin">if set to <c>true</c> [is input pin].</param>
         /// <param name="setPinCommand">The set pin command.</param>
-        public PinVM(IPin pin, bool isInputPin, Command setPinCommand)
+        public PinVM(IPin pin, int IDnumber ,bool isInputPin, Command setPinCommand)
         {
             this.pin = pin;
             this.isInputPin = isInputPin;
             this.setPinCommand = setPinCommand;
             this.xposition = 0;
             this.yposition = 0;
+            this.uniqueNumber = IDnumber;
         }
 
         /// <summary>
@@ -134,6 +138,14 @@ namespace LogicDesigner.ViewModel
             get
             {
                 return this.pin.Value.Current?.GetType();
+            }
+        }
+
+        public int IDNumber
+        {
+            get
+            {
+                return this.uniqueNumber;
             }
         }
 

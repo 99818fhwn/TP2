@@ -73,6 +73,7 @@ namespace LogicDesigner.ViewModel
         public ComponentVM(
             IDisplayableNode realComponent,
             string uniqueName, 
+            IEnumerator<int> pindIdAtion,
             Command setPinCommand,
             Command removeCommand,
             ConfigurationLogic configurationLogic)
@@ -91,7 +92,8 @@ namespace LogicDesigner.ViewModel
             {
                 if (pin != null)
                 {
-                    this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
+                    pindIdAtion.MoveNext();
+                    this.OutputPinsVM.Add(new PinVM(pin, pindIdAtion.Current ,false, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
                     
                     // this.OutputPinsVM.Add(new PinVM(pin, false, setPinCommand));
                 }
@@ -101,7 +103,8 @@ namespace LogicDesigner.ViewModel
             {
                 if (pin != null)
                 {
-                    this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
+                    pindIdAtion.MoveNext();
+                    this.InputPinsVM.Add(new PinVM(pin, pindIdAtion.Current, true, setPinCommand, this, this.config.PinActiveColor, this.config.PinPassiveColor));
                     
                     // this.InputPinsVM.Add(new PinVM(pin, true, setPinCommand));
                 }

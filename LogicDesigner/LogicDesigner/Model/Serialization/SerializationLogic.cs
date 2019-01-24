@@ -86,7 +86,7 @@ namespace LogicDesigner.Model.Serialization
 
                     foreach (var connection in connections)
                     {
-                        sconnections.Add(new SerializedConnectionVM(connection.InputPin.Pin.Label, connection.OutputPin.Pin.Label, connection.InputPin.Parent.Label, connection.OutputPin.Parent.Label, connection.InputPin.XPosition, connection.InputPin.YPosition, connection.OutputPin.XPosition, connection.OutputPin.YPosition, connection.ConnectionId));
+                        sconnections.Add(new SerializedConnectionVM(connection.InputPin.Pin.Label,connection.InputPin.IDNumber, connection.OutputPin.Pin.Label, connection.OutputPin.IDNumber, connection.InputPin.Parent.Name, connection.OutputPin.Parent.Name, connection.InputPin.XPosition, connection.InputPin.YPosition, connection.OutputPin.XPosition, connection.OutputPin.YPosition, connection.ConnectionId));
                     }
 
                     var serializableElement = new SerializedObject(components, sconnections);
