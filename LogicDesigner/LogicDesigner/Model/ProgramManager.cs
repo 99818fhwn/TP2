@@ -365,7 +365,6 @@ namespace LogicDesigner.Model
         public void StopActive()
         {
             this.RunActive = false;
-            Task.Delay(1000);
         }
 
         /// <summary>
