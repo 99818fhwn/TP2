@@ -3,7 +3,8 @@
     "PinPassive": "Black",
     "PinActive": "Cyan",
     "LinePassive": "Black",
-    "LineActive": "Red",
-    "Path": "./Components"
+    "LineActive": "Cyan",
+    "ModulePath": "Components",
+	"LogPath": "LogFiles"
   }
 }
