@@ -789,6 +789,7 @@ namespace LogicDesigner
                 var activeColor = componentVM.InputPinsVM[i].ActiveColor;
 
                 pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                pinButton.ToolTip = "PinID: " + componentVM.InputPinsVM[i].Pin.Label;
 
                 var pinVM = componentVM.InputPinsVM[i];
 
@@ -843,6 +844,7 @@ namespace LogicDesigner
                 var activeColor = componentVM.OutputPinsVM[i].ActiveColor;
 
                 pinButton.Background = new SolidColorBrush(Color.FromRgb(passiveColor.R, passiveColor.G, passiveColor.B));
+                pinButton.ToolTip = "PinID: " + componentVM.OutputPinsVM[i].Pin.Label;
 
                 var pinVM = componentVM.OutputPinsVM[i];
 
