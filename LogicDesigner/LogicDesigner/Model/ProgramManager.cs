@@ -235,7 +235,7 @@ namespace LogicDesigner.Model
         {
             var moduleList = new List<IDisplayableNode>();
 
-            foreach (var module in new NodesLoader().GetNodes(this.componentDirectory))
+            foreach (var module in new NodesLoader().GetNodes(this.componentDirectory, config.ModulePath))
             {
                 moduleList.Add(module.Item1);
             }
@@ -463,7 +463,7 @@ namespace LogicDesigner.Model
         /// <returns>Possible nodes to chose from.</returns>
         private ICollection<Tuple<IDisplayableNode, string>> InitializeNodesToChooseFrom()
         {
-            return new NodesLoader().GetNodes(this.componentDirectory);
+            return new NodesLoader().GetNodes(this.componentDirectory, config.ModulePath);
         }
 
         /// <summary>

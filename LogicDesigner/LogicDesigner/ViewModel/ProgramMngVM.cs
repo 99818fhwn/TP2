@@ -794,7 +794,7 @@ namespace LogicDesigner.ViewModel
             List<ComponentVM> reconstructedCompVMs = new List<ComponentVM>();
             foreach (var result in testResult.Components)
             {
-                foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath))
+                foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath, config.ModulePath))
                 {
                     loadedNodes.Add(component);
                     var tempVM = new ComponentVM(component.Item1, result.UniqueName, this.ExtraxtIDsFromCompVM(result.InputPutputIDs), this.setPinCommand, this.removeCommand, this.config);
