@@ -25,15 +25,19 @@ namespace LogicDesigner.Model
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <returns>List of nodes.</returns>
-        public static List<Tuple<IDisplayableNode, string>> LoadSingleAssembly(string filePath)
+        public static List<Tuple<IDisplayableNode, string>> LoadSingleAssembly(string filePath, string configPath)
         {
             List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
+            //var splitPath = fullpath.Replace(Path.GetFullPath(configPath), "");
+            var fullConf = Path.GetFullPath(configPath);
 
-            if (File.Exists(filePath) && (Path.GetExtension(filePath) == ".dll" || Path.GetExtension(filePath) == ".exe"))
+            var combinedConf = fullConf + filePath;
+
+            if (File.Exists(combinedConf) && (Path.GetExtension(combinedConf) == ".dll" || Path.GetExtension(combinedConf) == ".exe"))
             {
                 try
                 {
-                    Assembly ass = Assembly.LoadFrom(filePath);
+                    Assembly ass = Assembly.LoadFrom(@combinedConf);
 
                     // Assembly ass = Assembly.Load(file.FullName);
                     foreach (var type in ass.GetExportedTypes())
@@ -48,7 +52,8 @@ namespace LogicDesigner.Model
 
                                     if (ValidateNode(node))
                                     {
-                                        nodes.Add(new Tuple<IDisplayableNode, string>(node, Path.GetFileName(filePath)));
+
+                                        nodes.Add(new Tuple<IDisplayableNode, string>(node, combinedConf));
                                     }
                                 }
                                 catch (Exception)
@@ -58,7 +63,7 @@ namespace LogicDesigner.Model
                         }
                     }
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
                 }
             }
@@ -71,7 +76,7 @@ namespace LogicDesigner.Model
         /// </summary>
         /// <param name="filePath">The file path.</param>
         /// <returns>The available nodes.</returns>
-        public List<Tuple<IDisplayableNode, string>> GetNodes(string filePath)
+        public List<Tuple<IDisplayableNode, string>> GetNodes(string filePath, string configPath)
         {
             List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
 
@@ -99,7 +104,13 @@ namespace LogicDesigner.Model
                 {
                     try
                     {
-                        Assembly ass = Assembly.LoadFrom(file.FullName);
+                        string fullpath = Path.GetFullPath(file.FullName);
+                        var splitPath = fullpath.Replace(Path.GetFullPath(configPath), "");
+                        var fullConf = Path.GetFullPath(configPath);
+
+                        var combinedConf = fullConf + splitPath;
+
+                        Assembly ass = Assembly.LoadFrom(@combinedConf);
 
                         // Assembly ass = Assembly.Load(file.FullName);
                         foreach (var type in ass.GetExportedTypes())
@@ -114,7 +125,7 @@ namespace LogicDesigner.Model
 
                                         if (ValidateNode(node))
                                         {
-                                            nodes.Add(new Tuple<IDisplayableNode, string>(node, file.FullName));
+                                            nodes.Add(new Tuple<IDisplayableNode, string>(node, splitPath));
                                         }
                                     }
                                     catch (Exception)
