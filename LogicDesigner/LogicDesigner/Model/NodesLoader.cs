@@ -24,7 +24,8 @@ namespace LogicDesigner.Model
         /// Loads the single assembly.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <returns>List of nodes.</returns>
+        /// <param name="configPath">The configuration path.</param>
+        /// <returns>Returns list of node tuples with relative path to assembly.</returns>
         public static List<Tuple<IDisplayableNode, string>> LoadSingleAssembly(string filePath, string configPath)
         {
             List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
@@ -52,7 +53,6 @@ namespace LogicDesigner.Model
 
                                     if (ValidateNode(node))
                                     {
-
                                         nodes.Add(new Tuple<IDisplayableNode, string>(node, combinedConf));
                                     }
                                 }
@@ -72,10 +72,11 @@ namespace LogicDesigner.Model
         }
 
         /// <summary>
-        /// Gets the nodes which are available.
+        /// Gets the nodes.
         /// </summary>
         /// <param name="filePath">The file path.</param>
-        /// <returns>The available nodes.</returns>
+        /// <param name="configPath">The configuration path.</param>
+        /// <returns>Returns a list with tuples node and path.</returns>
         public List<Tuple<IDisplayableNode, string>> GetNodes(string filePath, string configPath)
         {
             List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
@@ -105,7 +106,7 @@ namespace LogicDesigner.Model
                     try
                     {
                         string fullpath = Path.GetFullPath(file.FullName);
-                        var splitPath = fullpath.Replace(Path.GetFullPath(configPath), "");
+                        var splitPath = fullpath.Replace(Path.GetFullPath(configPath), string.Empty);
                         var fullConf = Path.GetFullPath(configPath);
 
                         var combinedConf = fullConf + splitPath;

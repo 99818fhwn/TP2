@@ -2,6 +2,7 @@
 // <copyright file="ProgramMngVM.cs" company="FH">
 //     Company copyright tag.
 // </copyright>
+// <summary>Contains the program manager view model class.</summary>
 //-----------------------------------------------------------------------
 namespace LogicDesigner.ViewModel
 {
@@ -158,10 +159,7 @@ namespace LogicDesigner.ViewModel
                             this.programManager.Run();
                             this.RestoreSaveState();
                         }
-                    }
-
-                ))
-                .Start();
+                    })).Start();
             });
 
             this.StepCommand = new Command(obj =>
@@ -794,7 +792,7 @@ namespace LogicDesigner.ViewModel
             List<ComponentVM> reconstructedCompVMs = new List<ComponentVM>();
             foreach (var result in testResult.Components)
             {
-                foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath, config.ModulePath))
+                foreach (var component in NodesLoader.LoadSingleAssembly(result.AssemblyPath, this.config.ModulePath))
                 {
                     loadedNodes.Add(component);
                     var tempVM = new ComponentVM(component.Item1, result.UniqueName, this.ExtraxtIDsFromCompVM(result.InputPutputIDs), this.setPinCommand, this.removeCommand, this.config);

@@ -2,6 +2,7 @@
 // <copyright file="ConfigurationLogic.cs" company="FHWN">    
 // Copyright (c) FHWN. All rights reserved.    
 // </copyright>    
+// <summary>Contains the class with the configuration logic.</summary>
 // -----------------------------------------------------------------------
 namespace LogicDesigner.Model.Configuration
 {

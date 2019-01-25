@@ -2,6 +2,7 @@
 // <copyright file="Command.cs" company="FH">
 //     Company copyright tag.
 // </copyright>
+// <summary>Contains the command class.</summary>
 //-----------------------------------------------------------------------
 namespace LogicDesigner.Commands
 {

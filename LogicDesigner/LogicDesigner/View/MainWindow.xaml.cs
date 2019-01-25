@@ -2,6 +2,7 @@
 // <copyright file="MainWindow.xaml.cs" company="FH">
 //     Company copyright tag.
 // </copyright>
+// <summary>Contais the xaml code behind.</summary>
 //-----------------------------------------------------------------------
 namespace LogicDesigner
 {
@@ -391,10 +392,10 @@ namespace LogicDesigner
         /// <summary>
         /// Disposes bitmap correctly.
         /// </summary>
-        /// <param name="hObject"> The bitmap reference. </param>
-        /// <returns> Nuffin'. </returns>
+        /// <param name="bitmap"> The bitmap reference. </param>
+        /// <returns> Returns nothing. </returns>
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
+        public static extern bool DeleteObject(IntPtr bitmap);
 
         /// <summary>
         /// Sets the default step picture.
