@@ -62,7 +62,7 @@ namespace LogicDesigner.Model
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                 }
             }

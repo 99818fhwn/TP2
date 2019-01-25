@@ -391,10 +391,10 @@ namespace LogicDesigner
         /// <summary>
         /// Disposes bitmap correctly.
         /// </summary>
-        /// <param name="bitmap"> The bitmap reference. </param>
+        /// <param name="hObject"> The bitmap reference. </param>
         /// <returns> Returns nothing. </returns>
         [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr bitmap);
+        public static extern bool DeleteObject(IntPtr hObject);
 
         /// <summary>
         /// Sets the default step picture.
