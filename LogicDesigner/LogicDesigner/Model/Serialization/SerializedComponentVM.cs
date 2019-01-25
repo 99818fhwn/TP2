@@ -22,23 +22,6 @@ namespace LogicDesigner.Model.Serialization
         {
         }
 
-        /////// <summary>
-        /////// Initializes a new instance of the <see cref="SerializedComponentVM" /> class.
-        /////// </summary>
-        /////// <param name="xpos">The x position.</param>
-        /////// <param name="ypos">The y position.</param>
-        /////// <param name="path">The path .</param>
-        /////// <param name="id">The identifier.</param>
-        /////// <param name="inputIDs">The input pin id's.</param>
-        /////// <param name="outputIDs">The output pin id's.</param>
-        ////public SerializedComponentVM(double xpos, double ypos, string path, string id, int[] inputIDs, int[] outputIDs)
-        ////{
-        ////    this.XPos = xpos;
-        ////    this.YPos = ypos;
-        ////    this.AssemblyPath = path;
-        ////    this.UniqueName = id;
-        ////}
-
         /// <summary>
         /// Initializes a new instance of the <see cref="SerializedComponentVM"/> class.
         /// </summary>

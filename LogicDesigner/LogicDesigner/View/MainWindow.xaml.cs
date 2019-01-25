@@ -78,8 +78,7 @@ namespace LogicDesigner
             this.ComponentWindow.PreviewMouseUp += new MouseButtonEventHandler(this.ComponentMouseUp);
             this.ComponentWindow.PreviewMouseMove += new MouseEventHandler(this.ComponentMouseMovePre);
 
-            //// change button icons on click
-
+            // Change button icons on click
             foreach (var child in this.ButtonsGrid.Children)
             {
                 if (child.GetType() == typeof(Button))

@@ -205,7 +205,6 @@ namespace LogicDesigner.ViewModel
                     }
                 }
 
-                ////Or i just place it here ... but then the model isnt synced
                 this.FireOnComponentVMRemoved(nodeInFieldVM);
                 this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);
             });
@@ -255,7 +254,6 @@ namespace LogicDesigner.ViewModel
                         if (!history.Item2.Contains(item))
                         {
                             this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(item));
-                            ////this.RemoveDeletedComponentConnections(item);
                         }
                         else
                         {
@@ -311,7 +309,6 @@ namespace LogicDesigner.ViewModel
                     {
                         if (!futureHistory.Item2.Contains(item))
                         {
-                            ////this.RemoveDeletedComponentConnections(item);
                             this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(item));
                         }
                         else
@@ -335,7 +332,6 @@ namespace LogicDesigner.ViewModel
 
                     this.ConnectionsVM = new ObservableCollection<ConnectionVM>(futureHistory.Item1);
                     this.NodesVMInField = new ObservableCollection<ComponentVM>(futureHistory.Item2);
-                    ////Das ist sehr wahrscheinlich nicht optimal...
                     this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.OutputPin.Pin, x.InputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
                     this.SetSaveState();
@@ -901,7 +897,6 @@ namespace LogicDesigner.ViewModel
             this.StartButtonPath = @"\ButtonPictures\start.png";
             if (this.loopTask?.Status == TaskStatus.Running)
             {
-                ////this.LoopTask.Wait();
             }
         }
 
@@ -1081,7 +1076,7 @@ namespace LogicDesigner.ViewModel
                     this.NewUniqueConnectionId(),
                 this.config.LinePassiveColor);
                 this.connectionsVM.Add(conn);
-                this.UpdateUndoHistory(); ////If connect successful update history
+                this.UpdateUndoHistory(); // If connect successful update history
                 this.SetSaveState();
                 this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
             }

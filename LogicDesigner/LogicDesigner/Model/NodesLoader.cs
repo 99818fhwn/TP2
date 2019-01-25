@@ -29,7 +29,6 @@ namespace LogicDesigner.Model
         public static List<Tuple<IDisplayableNode, string>> LoadSingleAssembly(string filePath, string configPath)
         {
             List<Tuple<IDisplayableNode, string>> nodes = new List<Tuple<IDisplayableNode, string>>();
-            ////var splitPath = fullpath.Replace(Path.GetFullPath(configPath), "");
             var fullConf = Path.GetFullPath(configPath);
 
             var combinedConf = fullConf + filePath;
