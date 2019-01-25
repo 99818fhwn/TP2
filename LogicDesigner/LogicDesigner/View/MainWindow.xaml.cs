@@ -187,6 +187,7 @@ namespace LogicDesigner
                     if (Directory.Exists(System.IO.Path.GetDirectoryName(filename)))
                     {
                         var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                        manager.StopWaitForTask();
                         manager.SaveStatus(filename);
                     }
                 }
@@ -208,6 +209,7 @@ namespace LogicDesigner
             get => new Command(new Action<object>((input) =>
             {
                 var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                manager.StopWaitForTask();
                 manager.ClearField();
             }));
         }
