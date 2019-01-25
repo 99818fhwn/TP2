@@ -105,7 +105,7 @@ namespace LogicDesigner
                         });
                     }
                 }
-            }       
+            }
         }
 
         /// <summary>
@@ -187,6 +187,7 @@ namespace LogicDesigner
                     if (Directory.Exists(System.IO.Path.GetDirectoryName(filename)))
                     {
                         var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                        manager.StopWaitForTask();
                         manager.SaveStatus(filename);
                     }
                 }
@@ -208,6 +209,7 @@ namespace LogicDesigner
             get => new Command(new Action<object>((input) =>
             {
                 var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+                manager.StopWaitForTask();
                 manager.ClearField();
             }));
         }
@@ -247,7 +249,8 @@ namespace LogicDesigner
         }
 
         /// <summary>
-        /// Gets the load command.
+        /// Gets the 
+        /// command.
         /// </summary>
         /// <value>
         /// The load command is used for loading an logic designer file into the work environment.
@@ -269,6 +272,8 @@ namespace LogicDesigner
                     if (File.Exists(filename))
                     {
                         var manager = (ProgramMngVM)this.ComponentWindow.DataContext;
+
+                        manager.StopWaitForTask();
 
                         MessageBoxResult messageBoxResult = MessageBoxResult.Yes;
                         if (this.ComponentWindow.Children.Count > 0)
@@ -297,6 +302,7 @@ namespace LogicDesigner
                     }
 
                     this.ProgramMngVM.UpdateUndoHistory();
+                    this.ProgramMngVM.SetSaveState();
                 }
                 catch (Exception e)
                 {
@@ -383,9 +389,17 @@ namespace LogicDesigner
         }
 
         /// <summary>
+        /// Disposes bitmap correctly.
+        /// </summary>
+        /// <param name="hObject"> The bitmap reference. </param>
+        /// <returns> Nuffin'. </returns>
+        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
+        public static extern bool DeleteObject(IntPtr hObject);
+
+        /// <summary>
         /// Sets the default step picture.
         /// </summary>
-        /// <param name="sender">The sender.</param>
+        /// <param name="sender">The sender of the event.</param>
         /// <param name="e">The <see cref="MouseButtonEventArgs"/> instance containing the event data.</param>
         private void SetDefaultStepPicture(object sender, MouseButtonEventArgs e)
         {
@@ -626,14 +640,6 @@ namespace LogicDesigner
         }
 
         /// <summary>
-        /// Disposes bitmap correctly.
-        /// </summary>
-        /// <param name="hObject"> The bitmap reference. </param>
-        /// <returns> Nuffin'. </returns>
-        [System.Runtime.InteropServices.DllImport("gdi32.dll")]
-        public static extern bool DeleteObject(IntPtr hObject);
-
-        /// <summary>
         /// Called when [component changed] and changes the visual of the component.
         /// </summary>
         /// <param name="sender">The sender.</param>
@@ -666,7 +672,6 @@ namespace LogicDesigner
                                         compToChange.Background = imageBrush;
                                         compToChange.UpdateLayout();
                                         DeleteObject(map);
-
                                     }
                                 }
                             }
@@ -700,9 +705,11 @@ namespace LogicDesigner
                         }
                     }
                 }
+
+                e.Component.ComponentPropertyChanged -= this.OnComponentChanged;
             });
 
-            e.Component.ComponentPropertyChanged -= this.OnComponentChanged; // Unsubscribes from the deleted component
+            // Unsubscribes from the deleted component
 
             // this.UndoHistory.Push(currentMan);
             // this.RedoHistory.Clear();

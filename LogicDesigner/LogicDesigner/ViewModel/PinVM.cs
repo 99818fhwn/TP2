@@ -14,7 +14,7 @@ namespace LogicDesigner.ViewModel
     using System.Threading.Tasks;
     using LogicDesigner.Commands;
     using Shared;
-    
+
     /// <summary>
     /// The pin view model class.
     /// </summary>
@@ -92,6 +92,14 @@ namespace LogicDesigner.ViewModel
             this.passiveColor = passiveColor;
             this.isActive = false;
             this.uniqueNumber = idNumber;
+            try
+            {
+                this.InitialValue = pin.Value.Current == null ? null : Activator.CreateInstance(pin.Value.Current.GetType());
+            }
+            catch (Exception)
+            {
+                this.InitialValue = pin.Value.Current;
+            }
         }
 
         /// <summary>
@@ -109,6 +117,14 @@ namespace LogicDesigner.ViewModel
             this.xposition = 0;
             this.yposition = 0;
             this.uniqueNumber = idNumber;
+            try
+            {
+                this.InitialValue = pin.Value.Current == null ? null : Activator.CreateInstance(pin.Value.Current.GetType());
+            }
+            catch (Exception)
+            {
+                this.InitialValue = pin.Value.Current;
+            }
         }
 
         /// <summary>
@@ -158,6 +174,17 @@ namespace LogicDesigner.ViewModel
             {
                 return this.uniqueNumber;
             }
+        }
+
+        /// <summary>
+        /// Gets the initial value.
+        /// </summary>
+        /// <value>
+        /// The initial value of the pin.
+        /// </value>
+        public object InitialValue
+        {
+            get;
         }
 
         /// <summary>

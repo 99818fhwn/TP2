@@ -52,11 +52,6 @@ namespace LogicDesigner.ViewModel
         private readonly ConfigurationLogic config;
 
         /// <summary>
-        /// Is program running or not.
-        /// </summary>
-        private bool isProgramRunning;
-
-        /// <summary>
         /// The start button path.
         /// </summary>
         private string startButtonPath;
@@ -132,6 +127,11 @@ namespace LogicDesigner.ViewModel
         private Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>> redoHistoryStack;
 
         /// <summary>
+        /// The loop task that runs the simulation.
+        /// </summary>
+        private Task loopTask;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ProgramMngVM"/> class.
         /// </summary>
         public ProgramMngVM()
@@ -147,17 +147,21 @@ namespace LogicDesigner.ViewModel
 
             this.StartCommand = new Command(obj =>
             {
-                this.isProgramRunning = true;
                 this.StartButtonPath = @"\ButtonPictures\start_pressed.png";
 
-                Dispatcher.CurrentDispatcher.Invoke(() => Task.Run(() =>
-                {
-                    if (!this.programManager.RunActive)
+                Dispatcher.CurrentDispatcher.Invoke(() =>
+                this.loopTask = new Task(() =>
                     {
-                        this.programManager.SetActive();
-                        this.programManager.Run();
+                        if (!this.programManager.RunActive)
+                        {
+                            this.programManager.SetActive();
+                            this.programManager.Run();
+                            this.RestoreSaveState();
+                        }
                     }
-                }));
+
+                ))
+                .Start();
             });
 
             this.StepCommand = new Command(obj =>
@@ -172,54 +176,33 @@ namespace LogicDesigner.ViewModel
 
             this.StopCommand = new Command(obj =>
             {
-                this.isProgramRunning = false;
                 this.StartButtonPath = @"\ButtonPictures\start.png";
 
-                this.programManager.StopActive();
-                this.programManager.ClearValues();
+                this.StopWaitForTask();
             });
 
             this.setPinCommand = new Command(obj =>
             {
-                bool restart = false;
-
-                if (this.isProgramRunning)
-                {
-                    restart = true;
-                    this.StopCommand.Execute(null);
-                }
-
                 var pin = obj as PinVM;
                 this.SetSelectedPin(pin);
-
-                if (!this.isProgramRunning && restart)
-                {
-                    this.programManager.SetActive();
-                    this.StartCommand.Execute(null);
-                }
             });
 
             this.removeCommand = new Command(obj =>
             {
-                bool restart = false;
-
-                if (this.isProgramRunning)
-                {
-                    restart = true;
-                    this.StopCommand.Execute(null);
-                }
-
+                this.StopWaitForTask();
                 var nodeInFieldVM = obj as ComponentVM;
 
                 foreach (var n in this.programManager.FieldNodes)
                 {
                     if (nodeInFieldVM.Node == n)
                     {
+                        this.RestoreSaveState();
                         this.programManager.FieldNodes.Remove(n);
                         this.nodesVMInField.Remove(nodeInFieldVM);
                         this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(nodeInFieldVM));
                         this.RemoveDeletedComponentConnections(nodeInFieldVM);
                         this.UpdateUndoHistory(); // Not sure if i have to update the program manager!
+                        this.SetSaveState();
                         break;
                     }
                 }
@@ -227,26 +210,13 @@ namespace LogicDesigner.ViewModel
                 ////Or i just place it here ... but then the model isnt synced
                 this.FireOnComponentVMRemoved(nodeInFieldVM);
                 this.programManager.FieldNodes.Remove(nodeInFieldVM.Node);
-
-                if (!this.isProgramRunning && restart)
-                {
-                    this.StartCommand.Execute(null);
-                }
             });
 
             this.addCommand = new Command(obj =>
             {
-                bool restart = false;
-
-                if (this.isProgramRunning)
-                {
-                    restart = true;
-                    this.StopCommand.Execute(null);
-                }
-
+                this.StopWaitForTask();
                 var representationNode = obj as ComponentRepresentationVM;
-
-                // this.PreFieldComponentAdded(this, new EventArgs());
+                this.RestoreSaveState();
                 var realComponent = representationNode.Node;
                 var newGenerateComp = (IDisplayableNode)Activator.CreateInstance(realComponent.GetType());
                 this.programManager.FieldNodes.Add(newGenerateComp);
@@ -255,25 +225,16 @@ namespace LogicDesigner.ViewModel
                 this.nodesVMInField.Add(compVM);
                 this.FireOnFieldComponentAdded(compVM);
                 this.UpdateUndoHistory();
-
-                if (!this.isProgramRunning && restart)
-                {
-                    this.StartCommand.Execute(null);
-                }
+                this.SetSaveState();
             });
 
             this.UndoCommand = new Command(obj =>
             {
-                bool restart = false;
-
-                if (this.isProgramRunning)
-                {
-                    restart = true;
-                    this.StopCommand.Execute(null);
-                }
-
+                this.StopWaitForTask();
                 if (this.undoHistoryStack.Count > 0)
                 {
+                    this.RestoreSaveState();
+
                     var history = this.undoHistoryStack.Pop();
                     this.redoHistoryStack.Push(history);
                     var differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(history.Item2));
@@ -296,7 +257,7 @@ namespace LogicDesigner.ViewModel
                         if (!history.Item2.Contains(item))
                         {
                             this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(item));
-                            this.RemoveDeletedComponentConnections(item);
+                            ////this.RemoveDeletedComponentConnections(item);
                         }
                         else
                         {
@@ -320,26 +281,17 @@ namespace LogicDesigner.ViewModel
                     this.NodesVMInField = new ObservableCollection<ComponentVM>(history.Item2);
                     this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.InputPin.Pin, x.OutputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
-                }
-
-                if (!this.isProgramRunning && restart)
-                {
-                    this.StartCommand.Execute(null);
+                    this.SetSaveState();
                 }
             });
 
             this.RedoCommand = new Command(obj =>
             {
-                bool restart = false;
-
-                if (this.isProgramRunning)
-                {
-                    restart = true;
-                    this.StopCommand.Execute(null);
-                }
-
+                this.StopWaitForTask();
                 if (this.redoHistoryStack.Count > 0)
                 {
+                    this.RestoreSaveState();
+
                     var futureHistory = this.redoHistoryStack.Pop();
                     this.undoHistoryStack.Push(futureHistory);
                     var differencesComps = new List<ComponentVM>(this.NodesVMInField.Except(futureHistory.Item2));
@@ -361,8 +313,8 @@ namespace LogicDesigner.ViewModel
                     {
                         if (!futureHistory.Item2.Contains(item))
                         {
+                            ////this.RemoveDeletedComponentConnections(item);
                             this.OnFieldComponentRemoved(this, new FieldComponentEventArgs(item));
-                            this.RemoveDeletedComponentConnections(item);
                         }
                         else
                         {
@@ -388,11 +340,7 @@ namespace LogicDesigner.ViewModel
                     ////Das ist sehr wahrscheinlich nicht optimal...
                     this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.OutputPin.Pin, x.InputPin.Pin)).ToList();
                     this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
-                }
-
-                if (!this.isProgramRunning && restart)
-                {
-                    this.StartCommand.Execute(null);
+                    this.SetSaveState();
                 }
             });
 
@@ -425,6 +373,7 @@ namespace LogicDesigner.ViewModel
             this.undoHistoryStack = new Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>>();
             this.redoHistoryStack = new Stack<Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>>();
             this.UpdateUndoHistory();
+            this.SetSaveState();
             this.programManager.PinsDisconnected += this.OnPinsDisconnected;
             this.programManager.ConnectionUpdated += this.OnConnectionUpdated;
         }
@@ -691,6 +640,14 @@ namespace LogicDesigner.ViewModel
         }
 
         /// <summary>
+        /// Gets or sets the save point.
+        /// </summary>
+        /// <value>
+        /// The save point to restore from.
+        /// </value>
+        public Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>> SavePoint { get; set; }
+
+        /// <summary>
         /// Updates the undo history.
         /// </summary>
         public void UpdateUndoHistory()
@@ -794,17 +751,8 @@ namespace LogicDesigner.ViewModel
         public void OnPinsDisconnected(object sender, PinsConnectedEventArgs e)
         {
             var conn = this.connectionsVM?.Where(c => c.OutputPin.Pin == e.OutputPin && c.InputPin.Pin == e.InputPin).FirstOrDefault();
-
-            var type = conn.InputPin.Pin.Value.Current.GetType();
-            conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-
-            type = conn.OutputPin.Pin.Value.Current.GetType();
-            conn.OutputPin.Pin.Value.Current = Activator.CreateInstance(type);
-
-            //this.programManager.RunLoop(0);
-
-            this.connectionsVM.Remove(conn);
             this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
+            this.connectionsVM.Remove(conn);
         }
 
         /// <summary>
@@ -930,24 +878,41 @@ namespace LogicDesigner.ViewModel
         /// <param name="id">The identifier.</param>
         public void RemoveConnectionVM(string id)
         {
+            this.StopWaitForTask();
             foreach (var conn in this.connectionsVM)
             {
                 if (conn.ConnectionId == id)
                 {
-                    var type = conn.InputPin.Pin.Value.Current.GetType();
-                    conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-
-                    type = conn.OutputPin.Pin.Value.Current.GetType();
-                    conn.OutputPin.Pin.Value.Current = Activator.CreateInstance(type);
-                    // this.programManager.RunLoop(0);
-
+                    this.RestoreSaveState();
                     this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                     this.connectionsVM.Remove(conn);
-
+                    this.UpdateUndoHistory();
                     this.PinsDisconnected?.Invoke(this, new PinVMConnectionChangedEventArgs(conn));
+                    this.SetSaveState();
                     break;
                 }
             }
+        }
+
+        /// <summary>
+        /// Stops the task and waits for it and sets the button picture.
+        /// </summary>
+        public void StopWaitForTask()
+        {
+            this.programManager.StopActive();
+            this.StartButtonPath = @"\ButtonPictures\start.png";
+            if (this.loopTask?.Status == TaskStatus.Running)
+            {
+                ////this.LoopTask.Wait();
+            }
+        }
+
+        /// <summary>
+        /// Sets the state of back to the save point.
+        /// </summary>
+        public void SetSaveState()
+        {
+            this.SavePoint = new Tuple<ObservableCollection<ConnectionVM>, ObservableCollection<ComponentVM>>(new ObservableCollection<ConnectionVM>(this.ConnectionsVM), new ObservableCollection<ComponentVM>(this.NodesVMInField));
         }
 
         /// <summary>
@@ -1002,6 +967,37 @@ namespace LogicDesigner.ViewModel
         }
 
         /// <summary>
+        /// Restores the state by loading all default values of the pins.
+        /// </summary>
+        private void RestoreSaveState()
+        {
+            foreach (var c in this.SavePoint.Item1)
+            {
+                c.InputPin.Pin.Value.Current = c.InputPin.InitialValue;
+                c.OutputPin.Pin.Value.Current = c.OutputPin.InitialValue;
+            }
+
+            this.ConnectionsVM = this.SavePoint.Item1;
+            foreach (var n in this.SavePoint.Item2)
+            {
+                foreach (var input in n.InputPinsVM)
+                {
+                    input.Pin.Value.Current = input.InitialValue;
+                }
+
+                foreach (var output in n.OutputPinsVM)
+                {
+                    output.Pin.Value.Current = output.InitialValue;
+                }
+            }
+
+            this.NodesVMInField = this.SavePoint.Item2;
+
+            this.programManager.ConnectedOutputInputPairs = this.ConnectionsVM.Select(x => new Tuple<IPin, IPin>(x.OutputPin.Pin, x.InputPin.Pin)).ToList();
+            this.programManager.FieldNodes = this.NodesVMInField.Select(x => x.Node).ToList();
+        }
+
+        /// <summary>
         /// Called when connection is updated.
         /// </summary>
         /// <param name="sender">The sender.</param>
@@ -1010,6 +1006,8 @@ namespace LogicDesigner.ViewModel
         {
             var conn = this.connectionsVM?.Where(
                 a => a.OutputPin.Pin == e.OutputPin && a.InputPin.Pin == e.InputPin).FirstOrDefault();
+
+            var hmm = conn;
 
             var type = conn.OutputPin.Pin.Value.Current.GetType();
 
@@ -1042,13 +1040,9 @@ namespace LogicDesigner.ViewModel
                 for (int i = this.connectionsVM.Count() - 1; i >= 0; i--)
                 {
                     var conn = this.connectionsVM[i];
-                    
+
                     if (outputPinVM == conn.OutputPin)
                     {
-                        var type = conn.InputPin.Pin.Value.Current.GetType();
-                        conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-                        this.programManager.RunLoop(0);
-
                         this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                         this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
                         this.connectionsVM.Remove(conn);
@@ -1063,10 +1057,6 @@ namespace LogicDesigner.ViewModel
                     var conn = this.connectionsVM[i];
                     if (pinVM == conn.InputPin)
                     {
-                        var type = conn.InputPin.Pin.Value.Current.GetType();
-                        conn.InputPin.Pin.Value.Current = Activator.CreateInstance(type);
-                        this.programManager.RunLoop(0);
-
                         this.programManager.RemoveConnection(conn.OutputPin.Pin, conn.InputPin.Pin);
                         this.OnPinsDisconnected(this, new PinsConnectedEventArgs(conn.OutputPin.Pin, conn.InputPin.Pin));
                         this.connectionsVM.Remove(conn);
@@ -1082,6 +1072,9 @@ namespace LogicDesigner.ViewModel
         /// <param name="selectedInputPin">The selected input pin.</param>
         private void ConnectPins(PinVM selectedOutputPin, PinVM selectedInputPin)
         {
+            this.StopWaitForTask();
+            this.RestoreSaveState();
+
             if (this.programManager.ConnectPins(selectedOutputPin.Pin, selectedInputPin.Pin))
             {
                 var conn = new ConnectionVM(
@@ -1091,6 +1084,7 @@ namespace LogicDesigner.ViewModel
                 this.config.LinePassiveColor);
                 this.connectionsVM.Add(conn);
                 this.UpdateUndoHistory(); ////If connect successful update history
+                this.SetSaveState();
                 this.OnPinsConnected(this, new PinVMConnectionChangedEventArgs(conn));
             }
 
